@@ -1,0 +1,146 @@
+/* ============================================================
+ * 主题：demo —— DSH 默认（出厂观感）
+ * ------------------------------------------------------------
+ * 【职责】覆盖插件能控制的全部样式，恢复 DSH 出厂默认观感。
+ * 【维护铁律】本文件必须随版本更新：
+ *   1) 13 个 token 取 DSH 出厂值（来源 dsh-client-ui-theme/
+ *      lib/styles/design-platform.css 的 --dsw-static-* 静态变量）
+ *   2) §C 元素目录必须与 plugin/src/client.core.js 的 TYPO_CSS
+ *      保持同步（每次骨架改动都要回来核对）
+ * 【挂载机制】与产品一致：浅色写 body，深色写 body[data-ds-dark-theme]
+ * （产品深色用属性选择器而非 prefers-color-scheme，必须沿用）
+ * ============================================================ */
+
+/* ---------- ① 浅色档：全局 token + 强调变量 ---------- */
+/* 控制：13 个全局 token（--dsw-alias-*）—— 整个应用配色（表面/文字/边框/语义色） */
+/* 控制：强调变量（--mdvr-*）—— 排版层全部色彩细节 */
+/* 值来源：dsh-client-ui-theme design-platform.css（body 浅色块） */
+body {
+  /* 表面分层（DSH 浅色全白） */
+  --dsw-alias-bg-base: #ffffff;              /* 应用底色 = static-neutral-bluish-00 */
+  --dsw-alias-bg-layer-1: #ffffff;           /* 抬升表面 = bluish-00 */
+  --dsw-alias-bg-layer-2: #ffffff;           /* 嵌套表面 = bluish-00 */
+  --dsw-alias-bg-overlay: #e9ecf2;           /* 浮层 = bluish-150 */
+  --dsw-alias-border-l1: rgba(0, 0, 0, 0.04);   /* 主边框 = 4% 黑 */
+  --dsw-alias-border-l2: rgba(0, 0, 0, 0.1);    /* 次边框 = 10% 黑 */
+  /* 品牌与文字 */
+  --dsw-alias-brand-primary: #0f1115;        /* 品牌主色 = bluish-1000（近黑，与 LobeUI 同思路） */
+  --dsw-alias-label-primary: #0f1115;        /* 主文字 = bluish-1000 */
+  --dsw-alias-label-secondary: #61666b;      /* 次文字 = bluish-700 */
+  /* 语义色（DSH 出厂值） */
+  --dsw-alias-state-error-primary: #ec1313;  /* 错误 = red-600 */
+  --dsw-alias-state-success-primary: #22c55e; /* 成功 = green-500 */
+  --dsw-alias-state-warn-primary: #f59e0b;   /* 警告 = amber-500 */
+  --dsw-specific-sidebar-fill: #f9fafb;      /* 侧栏底 = bluish-50 */
+  /* 强调变量（DSH 品牌蓝 deepseek-450 #5686fe 体系） */
+  --mdvr-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --mdvr-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --mdvr-mm: 2;                              /* 间距倍数（排版节奏基准） */
+  --mdvr-link: #2f56d9;                      /* 链接色（品牌蓝加深，AA） */
+  --mdvr-link-hover: #5686fe;                /* 链接 hover */
+  --mdvr-highlight: #b3541e;                 /* 琥珀高亮（与 warn 区分） */
+  --mdvr-highlight-soft: #fdf0dc;            /* 高亮 tint 底（mark） */
+  --mdvr-accent: #5686fe;                    /* 主强调色：边条/标条/列表符号 */
+  --mdvr-accent-text: #2f56d9;               /* tint 面上的强调文字（AA） */
+  --mdvr-accent-soft: #ebf0ff;               /* 强调 tint 底（行内代码/嵌套引用） */
+  --mdvr-accent-faint: #b3c9fe;              /* 45% 预混（h1 下划线） */
+  --mdvr-accent-fainter: #ccdbff;            /* 30% 预混（hr） */
+  --mdvr-code-border: #d9e3ff;               /* 行内代码描边 */
+  --mdvr-table-head-bg: #eef3ff;             /* 表头底 */
+  --mdvr-table-head-text: #2f56d9;           /* 表头字 */
+  --mdvr-quote-bg: #f2f6ff;                  /* 引用衬底 */
+  --mdvr-quote-border: #5686fe;              /* 引用边条 */
+}
+
+/* ---------- ② 深色档：全局 token + 强调变量 ---------- */
+/* 控制：与 ① 相同，仅深色取值（DSH 出厂：bluish-950/875/850 系） */
+body[data-ds-dark-theme] {
+  --dsw-alias-bg-base: #151517;              /* 应用底色 = bluish-950 */
+  --dsw-alias-bg-layer-1: #232324;           /* 抬升表面 = bluish-875 */
+  --dsw-alias-bg-layer-2: #2c2c2e;           /* 嵌套表面 = bluish-850 */
+  --dsw-alias-bg-overlay: #61666b;           /* 浮层 = bluish-700 */
+  --dsw-alias-border-l1: rgba(255, 255, 255, 0.06); /* 主边框 = 6% 白 */
+  --dsw-alias-border-l2: rgba(255, 255, 255, 0.12); /* 次边框 = 12% 白 */
+  --dsw-alias-brand-primary: #f9fafb;        /* 品牌主色 = bluish-50 */
+  --dsw-alias-label-primary: #f9fafb;        /* 主文字 = bluish-50 */
+  --dsw-alias-label-secondary: #cfd3d6;      /* 次文字 = bluish-300 */
+  --dsw-alias-state-error-primary: #f25a5a;  /* 错误 = red-400 */
+  --dsw-alias-state-success-primary: #22c55e; /* 成功 = green-500 */
+  --dsw-alias-state-warn-primary: #f59e0b;   /* 警告 = amber-500 */
+  --dsw-specific-sidebar-fill: #1b1b1c;      /* 侧栏底 = bluish-900 */
+  /* 强调变量（深色档提亮） */
+  --mdvr-link: #8fb0ff;                      /* 链接色 */
+  --mdvr-link-hover: #a8c4ff;                /* 链接 hover */
+  --mdvr-highlight: #ffb45e;                 /* 琥珀高亮 */
+  --mdvr-highlight-soft: #3a2f1e;            /* 高亮 tint 底 */
+  --mdvr-accent: #8fb0ff;                    /* 主强调色 */
+  --mdvr-accent-text: #a8c4ff;               /* tint 上强调文字 */
+  --mdvr-accent-soft: #262b37;               /* 强调 tint 底 */
+  --mdvr-accent-faint: #4c5b7f;              /* 45% 预混 */
+  --mdvr-accent-fainter: #3a445d;            /* 30% 预混 */
+  --mdvr-code-border: #39435c;               /* 行内代码描边 */
+  --mdvr-table-head-bg: #262b37;             /* 表头底 */
+  --mdvr-table-head-text: #a8c4ff;           /* 表头字 */
+  --mdvr-quote-bg: #20242e;                  /* 引用衬底 */
+  --mdvr-quote-border: #8fb0ff;              /* 引用边条 */
+}
+
+/* ---------- ③ 元素目录（覆盖全部可控元素；值 = 共享骨架 TYPO_CSS 默认） ----------
+ * 每个元素一条规则 + 注释说明控制哪个部分。
+ * 与 plugin/src/client.core.js 的 TYPO_CSS 一一对应，版本更新必须同步。
+ * 说明：demo 主题不覆盖骨架（值与骨架一致，重复声明无害），
+ *       未来若某元素要"恢复 DSH 原样"，把对应规则改回 DSH 默认值即可。 */
+
+/* 正文：中文友好行高 + 断字兜底 */
+:where(p, ul, ol, blockquote, pre, table, li) { line-height: 1.8; overflow-wrap: break-word; }
+/* 字体：Markdown 作用域套用 sans 栈 */
+:where(p, ul, ol, blockquote, pre, table, h1, h2, h3, h4, h5, h6, li, td, th, a) { font-family: var(--mdvr-sans); }
+/* 段落：首尾去空 + 段间 1em（倍数制节奏） */
+:where(p) { margin: 0; letter-spacing: 0.02em; }
+:where(p:not(:first-child)) { margin-top: 1em; }
+:where(p:not(:last-child)) { margin-bottom: 1em; }
+/* 标题：阶梯 2/1.6/1.3/1.15/1em、700、行高 1.25；h1 主题色下划线 */
+:where(h1, h2, h3, h4, h5, h6) { line-height: 1.25; font-weight: 700; margin: 1.1em 0 0.6em; }
+:where(h1) { font-size: 2em; padding-bottom: 0.35em; border-bottom: 1px solid var(--mdvr-accent-faint); }
+:where(h2) { font-size: 1.6em; }
+:where(h3) { font-size: 1.3em; }
+:where(h4) { font-size: 1.15em; }
+:where(h5) { font-size: 1em; }
+:where(h6) { font-size: 0.9em; color: var(--dsw-alias-label-secondary); }
+/* 列表：主题色 "-" 符号；任务列表 checkbox 对齐 */
+:where(ul, ol) { margin: 1em 0; margin-left: 1em; padding-left: 0; list-style-position: outside; }
+:where(ul) { list-style-type: none; }
+:where(ul > li::before) { content: "-"; margin-inline: -1em 0.5em; color: var(--mdvr-accent); opacity: 0.85; }
+:where(li) { margin: 0.4em 0; }
+:where(li p:first-child) { display: inline; }
+:where(li.task-list-item) { list-style: none; }
+:where(input[type="checkbox"]) { margin: 0 0.4em 0.2em 0; vertical-align: middle; }
+/* 行内代码：主题 tint 底 + 描边 + 强调字（一眼可辨代码） */
+:where(code, samp) { font-family: var(--mdvr-mono); font-size: 0.875em; line-height: 1; padding: 0.1em 0.4em; margin-inline: 0.15em; border: 1px solid var(--mdvr-code-border); border-radius: 0.25em; background: var(--mdvr-accent-soft); color: var(--mdvr-accent-text); white-space: break-spaces; overflow-wrap: break-word; }
+/* 代码块：中性底 + 左侧主题色标条 + 细描边 */
+:where(pre) { margin: 1em 0; background: var(--dsw-alias-bg-layer-2); border-radius: 8px; padding: 16px; box-shadow: inset 3px 0 0 0 var(--mdvr-accent), inset 0 0 0 1px var(--dsw-alias-border-l1); overflow-x: auto; font-size: 0.85em; line-height: 1.6; font-variant-ligatures: none; }
+:where(pre code) { background: transparent; border: none; padding: 0; margin: 0; font-size: inherit; line-height: inherit; white-space: pre; }
+/* 引用：主题色边条 + tint 底 + 正文提到主色（重点块） */
+:where(blockquote) { margin: 1em 0; padding: 0.5em 1em; border-left: 4px solid var(--mdvr-quote-border); border-radius: 0 8px 8px 0; background: var(--mdvr-quote-bg); color: var(--dsw-alias-label-primary); }
+:where(blockquote p:first-child) { margin-top: 0; }
+:where(blockquote p:last-child) { margin-bottom: 0; }
+:where(blockquote blockquote) { background: var(--mdvr-accent-soft); }
+/* 表格：表头 tint + 强调字 + 700；外框+横线式 */
+:where(table) { display: block; overflow-x: auto; width: max-content; max-width: 100%; border-collapse: collapse; border-spacing: 0; margin: 1em 0; border-radius: 8px; box-shadow: 0 0 0 1px var(--dsw-alias-border-l2); font-size: 0.92em; word-break: auto-phrase; }
+:where(th, td) { min-width: 120px; padding: 0.75em 1em; text-align: start; }
+:where(th) { background: var(--mdvr-table-head-bg); color: var(--mdvr-table-head-text); font-weight: 700; }
+:where(tr) { box-shadow: 0 1px 0 var(--dsw-alias-border-l1); }
+:where(tr:last-child) { box-shadow: none; }
+/* 分割线：主题色 30% 虚线 */
+:where(hr) { border: none; border-top: 1px dashed var(--mdvr-accent-fainter); margin: 1.8em 0; }
+/* 链接：信息蓝 + hover 过渡（尊重 reduced-motion） */
+:where(a) { color: var(--mdvr-link); text-decoration: none; }
+:where(a:hover) { color: var(--mdvr-link-hover); }
+@media (prefers-reduced-motion: no-preference) { :where(a) { transition: color 200ms cubic-bezier(0.05, 0.7, 0.1, 1); } }
+/* 强调/细节：strong 中性 700；mark 琥珀 tint；删除线次文字；上下标；kbd 中性；图片内描边 */
+:where(strong) { font-weight: 700; color: var(--dsw-alias-label-primary); }
+:where(mark) { background: var(--mdvr-highlight-soft); color: var(--dsw-alias-label-primary); padding: 0 0.2em; border-radius: 3px; }
+:where(del) { color: var(--dsw-alias-label-secondary); }
+:where(sup, sub) { font-size: 0.75em; line-height: 1; }
+:where(kbd) { font-family: var(--mdvr-mono); font-size: 0.85em; background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l2); border-radius: 4px; padding: 0.15em 0.45em; }
+:where(img) { max-width: 100%; border-radius: 8px; box-shadow: 0 0 0 1px var(--dsw-alias-border-l1); }

@@ -45,7 +45,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v0.5.0「主题系统」**：全部可定制 CSS 收敛为主题注册表（13 token + `--mdvr-*` 强调变量 + 每主题扩展 CSS），内置 3 主题（lobeui-emphasis 默认 / inkpaper 暖纸 / qingci 青瓷），设置页「主题设置」卡片式切换（会话级），代码全量分区注释。主题格式与能力边界见 [docs/themes.md](docs/themes.md)。
-- v0.4.0「强调增强」：靛蓝 accent 重点信息强调系统 + WCAG AA 修正（历史版本，主题已并入 v0.5.0 注册表）。
-- v0.3.0 / v0.2.0 / v0.1.0：历史版本（见台账）。
+- **v0.6.0「主题系统 · CSS 文件化」**：主题从 JS 代码迁出，每主题一个独立 CSS 文件（`themes/*.css`），构建脚本内联；新增 `demo.css`（DSH 默认主题，覆盖全部可控元素并注释，随版本同步）；约定记忆进 [AGENTS.md](AGENTS.md)。主题格式见 [docs/themes.md](docs/themes.md)。
+- v0.5.0「主题系统」：主题注册表 + 设置页切换（历史版本）。
+- v0.4.0 / v0.3.0 / v0.2.0 / v0.1.0：历史版本（见台账）。
 - 台账：[manifest/versions.json](manifest/versions.json)

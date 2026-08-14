@@ -1,0 +1,80 @@
+/* ============================================================
+ * 主题：qingci —— 青瓷
+ * ------------------------------------------------------------
+ * 釉色灵感：瓷白底 + 豆青绿 accent，整体更圆润（代码块/表格 12px 圆角）。
+ * 挂载机制：浅色 body / 深色 body[data-ds-dark-theme]（与产品一致）。
+ * ============================================================ */
+
+/* ---------- ① 浅色档：全局 token + 强调变量 ---------- */
+body {
+  /* 表面分层（青绿灰阶） */
+  --dsw-alias-bg-base: #f4f7f5;              /* 青白底 */
+  --dsw-alias-bg-layer-1: #fbfdfb;           /* 瓷白表面 */
+  --dsw-alias-bg-layer-2: #e9efea;           /* 嵌套表面（冷灰绿） */
+  --dsw-alias-bg-overlay: #ffffff;           /* 浮层 */
+  --dsw-alias-border-l1: #d7e0d8;            /* 主边框（青灰） */
+  --dsw-alias-border-l2: #c2d0c4;            /* 次边框 */
+  /* 品牌与文字 */
+  --dsw-alias-brand-primary: #2f6b52;        /* 青瓷绿 */
+  --dsw-alias-label-primary: #17231c;        /* 墨绿黑文字 */
+  --dsw-alias-label-secondary: #5c6f62;      /* 次文字 */
+  /* 语义色（沿用 WCAG AA 值） */
+  --dsw-alias-state-error-primary: #c74330;  /* 错误 */
+  --dsw-alias-state-success-primary: #287b38; /* 成功 */
+  --dsw-alias-state-warn-primary: #985d00;   /* 警告 */
+  --dsw-specific-sidebar-fill: #edf2ee;      /* 侧栏（冷灰绿） */
+  /* 强调变量（青瓷绿 accent 系：与成功绿同族但更深沉） */
+  --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "HarmonyOS Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --mdvr-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  --mdvr-mm: 2;                              /* 间距倍数 */
+  --mdvr-link: #005ae0;                      /* 链接色（保持信息蓝约定，AA） */
+  --mdvr-link-hover: #0072f5;                /* 链接 hover */
+  --mdvr-highlight: #b3541e;                 /* 琥珀高亮 */
+  --mdvr-highlight-soft: #fdf0dc;            /* 高亮 tint 底（mark） */
+  --mdvr-accent: #2f6b52;                    /* 青瓷绿：边条/标条/列表符号 */
+  --mdvr-accent-text: #1e4d3a;               /* 深绿字（tint 上 AA） */
+  --mdvr-accent-soft: #e4efe7;               /* 青绿 tint 底 */
+  --mdvr-accent-faint: #a1bcb1;              /* 45% 预混 */
+  --mdvr-accent-fainter: #c1d3cb;            /* 30% 预混 */
+  --mdvr-code-border: #cfdcd2;               /* 行内代码描边（青灰） */
+  --mdvr-table-head-bg: #e0ebe3;             /* 表头底 */
+  --mdvr-table-head-text: #1e4d3a;           /* 表头字 */
+  --mdvr-quote-bg: #eaf2ec;                  /* 引用衬底 */
+  --mdvr-quote-border: #2f6b52;              /* 引用边条 */
+}
+
+/* ---------- ② 深色档：全局 token + 强调变量 ---------- */
+body[data-ds-dark-theme] {
+  --dsw-alias-bg-base: #0e1210;              /* 墨绿黑 */
+  --dsw-alias-bg-layer-1: #141a16;           /* 抬升表面 */
+  --dsw-alias-bg-layer-2: #1b231d;           /* 嵌套表面 */
+  --dsw-alias-bg-overlay: #171d19;           /* 浮层 */
+  --dsw-alias-border-l1: #2a352d;            /* 主边框 */
+  --dsw-alias-border-l2: #37443b;            /* 次边框 */
+  --dsw-alias-brand-primary: #7fc4a0;        /* 青瓷绿（提亮） */
+  --dsw-alias-label-primary: #e8f0ea;        /* 墨绿白文字 */
+  --dsw-alias-label-secondary: #97a89c;      /* 次文字 */
+  --dsw-alias-state-error-primary: #f4416c;  /* 错误 */
+  --dsw-alias-state-success-primary: #62c473; /* 成功（青绿） */
+  --dsw-alias-state-warn-primary: #ee9e0b;   /* 警告（金） */
+  --dsw-specific-sidebar-fill: #111613;      /* 侧栏 */
+  /* 强调变量（深色档提亮） */
+  --mdvr-link: #60b1ff;                      /* 链接色 */
+  --mdvr-link-hover: #a7d3ff;                /* 链接 hover */
+  --mdvr-highlight: #ffb45e;                 /* 琥珀高亮 */
+  --mdvr-highlight-soft: #3a2f1e;            /* 高亮 tint 底 */
+  --mdvr-accent: #7fc4a0;                    /* 青瓷绿：主强调 */
+  --mdvr-accent-text: #9ed9b8;               /* 浅青绿字 */
+  --mdvr-accent-soft: #17241d;               /* 深绿 tint 底 */
+  --mdvr-accent-faint: #416251;              /* 45% 预混 */
+  --mdvr-accent-fainter: #30473b;            /* 30% 预混 */
+  --mdvr-code-border: #2e3d33;               /* 代码描边 */
+  --mdvr-table-head-bg: #18241d;             /* 表头底 */
+  --mdvr-table-head-text: #9ed9b8;           /* 表头字 */
+  --mdvr-quote-bg: #15201a;                  /* 引用衬底 */
+  --mdvr-quote-border: #7fc4a0;              /* 引用边条 */
+}
+
+/* ---------- ③ 元素级定制（可选） ---------- */
+/* 青瓷釉感：代码块/表格用更大圆角 */
+:where(pre), :where(table) { border-radius: 12px; }

@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "0.6.0",
+      "packageId": "pkg-5",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-14",
+      "changes": [
+        "主题改为独立 CSS 文件：themes/*.css（每主题一文件，含注释），构建脚本内联进 client.js",
+        "新增 demo.css：DSH 默认主题（body/body[data-ds-dark-theme] 原生挂载机制 + 出厂 token 值 + 全元素目录注释）",
+        "AGENTS.md 记录主题文件约定与构建流程"
+      ]
+    },
+    {
       "version": "0.5.0",
       "packageId": "pkg-4",
       "name": "LobeUI 风格 · 主题系统",

@@ -1,5 +1,5 @@
 // ============================================================
-// Host half v0.5.0 — 版本台账（镜像 mdvr-1/pkg-4，与 Harness 定义保持一致）
+// Host half v0.6.0 — 版本台账（镜像 mdvr-1/pkg-5，与 Harness 定义保持一致）
 //
 // 【职责】
 //   维护内存台账（按 packageId 去重、最新在前）
@@ -9,15 +9,14 @@
 // ============================================================
 
 const MANIFEST = {
-  version: '0.5.0',
+  version: '0.6.0',
   name: 'LobeUI 风格 · 主题系统',
-  palette: 'multi-theme',
+  palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '主题系统化：全部可定制 CSS 收敛为主题注册表（13 token + --mdvr-* 变量 + 每主题扩展 CSS），全量注释',
-    '内置 3 主题：lobeui-emphasis（默认）/ inkpaper（暖纸）/ qingci（青瓷）',
-    '设置页「主题设置」：卡片式切换（会话级内存态，默认 ACTIVE_THEME 可配置）',
-    '切换引擎：token 层整层替换 + 样式表重建，卸载自动清理',
+    '主题改为独立 CSS 文件：themes/*.css（每主题一文件，含注释），构建脚本内联进 client.js',
+    '新增 demo.css：DSH 默认主题（body/body[data-ds-dark-theme] 原生挂载机制 + 出厂 token 值 + 全元素目录注释）',
+    'AGENTS.md 记录主题文件约定与构建流程',
   ],
 }
 
