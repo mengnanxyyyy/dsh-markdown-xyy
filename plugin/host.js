@@ -1,15 +1,23 @@
-// Host half v0.4.0 — 版本台账（镜像 mdvr-1/pkg-3，与 Harness 定义保持一致）
-// v0.4.0：Markdown 重点信息强调色系统（靛蓝 accent + 琥珀 highlight）
+// ============================================================
+// Host half v0.5.0 — 版本台账（镜像 mdvr-1/pkg-4，与 Harness 定义保持一致）
+//
+// 【职责】
+//   维护内存台账（按 packageId 去重、最新在前）
+//   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
+//   versions.list —— 面板查询台账快照 { current, history }
+//   只传 JSON 标量，不序列化任何 Cordis/DSH 活对象
+// ============================================================
+
 const MANIFEST = {
-  version: '0.4.0',
-  name: 'LobeUI 风格',
-  palette: 'lobeui-emphasis',
+  version: '0.5.0',
+  name: 'LobeUI 风格 · 主题系统',
+  palette: 'multi-theme',
   date: '2026-08-14',
   changes: [
-    '强调色彩系统：靛蓝 accent + 琥珀 highlight（--mdvr-* 变量，浅/深双档）',
-    '元素强调：引用 tint 底+靛蓝边条、行内代码靛蓝 tint+描边+深蓝字、代码块左侧靛蓝标条、表头 tint+700、h1 靛蓝下划线、列表符号/分割线靛蓝',
-    'WCAG AA 实测修正：链接改 #005ae0/#60b1ff；浅档语义色加深 #c74330/#287b38/#985d00',
-    'strong 保持中性 700；代码块底色保持中性（为语法高亮留白）；kbd 不上色',
+    '主题系统化：全部可定制 CSS 收敛为主题注册表（13 token + --mdvr-* 变量 + 每主题扩展 CSS），全量注释',
+    '内置 3 主题：lobeui-emphasis（默认）/ inkpaper（暖纸）/ qingci（青瓷）',
+    '设置页「主题设置」：卡片式切换（会话级内存态，默认 ACTIVE_THEME 可配置）',
+    '切换引擎：token 层整层替换 + 样式表重建，卸载自动清理',
   ],
 }
 
