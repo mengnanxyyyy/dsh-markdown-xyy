@@ -47,7 +47,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-14）
 
-- 最新版本：v0.7.0（新增「原生」主题 + 面板变量回退）
+- 最新版本：v0.8.0（设置页新增外观三档切换：浅色/深色/跟随系统，走 `theme.setTheme` 持久化）
 - 主题：`native`（原生无插件样式）/ `demo`（DSH 默认）/ `lobeui-emphasis`（默认启用）/ `inkpaper` / `qingci`
-- 设置页：设置 → 主题设置（会话级切换，刷新恢复 `ACTIVE_THEME`）
+- 设置页：设置 → 主题设置（外观模式=持久，主题选择=会话级，刷新恢复 `ACTIVE_THEME`）
+- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`（v0.6.0 起 token 走 CSS）
 - 路线图：语法高亮 / gfm alert / 主题选择持久化 / 台账落盘

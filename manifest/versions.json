@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "0.8.0",
+      "packageId": "pkg-7",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-14",
+      "changes": [
+        "设置页新增「外观模式」三档切换：☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统（走产品 theme.setTheme 官方接口，实时生效、偏好持久化）",
+        "主题设置页布局：外观模式（持久） + 主题选择（会话级）分区展示"
+      ]
+    },
+    {
       "version": "0.7.0",
       "packageId": "pkg-6",
       "name": "LobeUI 风格 · 主题系统",

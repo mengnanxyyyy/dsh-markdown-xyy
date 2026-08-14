@@ -25,8 +25,9 @@
 | B6 | 设置页「主题设置」（`settings.section`）：卡片式切换（色板预览 + 会话级内存态，默认 `ACTIVE_THEME` 可配置） | ✅ v0.5.0 |
 | B7 | demo.css：DSH 默认主题（出厂 token 值 + 全元素目录注释，随版本同步） | ✅ v0.6.0 |
 | B8 | 「原生」主题（v0.7.0）：完全不注入插件样式（token/排版/变量全不覆盖），一键恢复 DSH 出厂观感；插件自有 UI 保留最小样式（变量带默认回退） | ✅ v0.7.0 |
-| B8 | 第三档 auto：监听 `prefers-color-scheme` 事件重算 token | 🔜 路线图 |
-| B9 | 跟随系统深浅色（`theme` 服务内置感知；v0.6.0 起用产品原生 `body[data-ds-dark-theme]` 机制） | ✅ 平台机制 |
+| B9 | 外观三档切换（v0.8.0）：设置页 ☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统（产品 `theme.setTheme` 官方接口，实时生效 + 偏好持久化） | ✅ v0.8.0 |
+| B9 | 第三档 auto：监听 `prefers-color-scheme` 事件重算 token | 🔜 路线图（v0.8.0 已提供产品级「跟随系统」档，此路线图项已基本覆盖） |
+| B10 | 跟随系统深浅色（`theme` 服务内置感知；v0.6.0 起用产品原生 `body[data-ds-dark-theme]` 机制） | ✅ 平台机制 |
 
 ## C. Markdown 排版
 

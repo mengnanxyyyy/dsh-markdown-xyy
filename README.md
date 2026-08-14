@@ -45,7 +45,8 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v0.7.0「原生主题」**：新增「原生」主题（`themes/native.css`）——完全不注入任何插件样式（不覆盖 token、不注入排版、不定义变量），一键恢复 DSH 出厂观感；插件自有 UI 保留最小样式（变量带回退值）。
+- **v0.8.0「外观三档切换」**：设置页新增 ☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统切换（产品 `theme.setTheme` 官方接口，实时生效 + 偏好持久化），与主题选择分区展示。
+- v0.7.0「原生主题」：`themes/native.css` 零插件样式，一键恢复 DSH 出厂观感。
 - v0.6.0「主题系统 · CSS 文件化」：主题迁出为 `themes/*.css` + 构建脚本 + `demo.css` 全元素目录 + [AGENTS.md](AGENTS.md) 约定。
 - v0.5.0 / v0.4.0 / v0.3.0 / v0.2.0 / v0.1.0：历史版本（见台账）。
 - 台账：[manifest/versions.json](manifest/versions.json)

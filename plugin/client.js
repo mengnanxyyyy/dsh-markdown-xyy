@@ -1,5 +1,5 @@
 // ============================================================
-// Client half v0.7.0 — 主题系统（CSS 文件驱动）+ Markdown 排版 + 版本面板
+// Client half v0.8.0 — 主题系统（CSS 文件驱动）+ Markdown 排版 + 版本面板
 //
 // ⚠️ 本文件由 scripts/build-client.js 生成 —— THEMES 部分禁止手改！
 //    主题定义在 themes/*.css（每主题一个 CSS 文件），修改后运行：
@@ -27,14 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '0.7.0',
+  version: '0.8.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '新增「原生」主题（themes/native.css）：完全不注入插件样式（不覆盖 token、不注入排版骨架、不定义变量），一键恢复 DSH 出厂观感',
-    '面板样式变量加回退值：原生模式下插件自有 UI（版本卡片/主题设置页）仍正常渲染',
-    '切换引擎支持原生分支：原生主题仅注入 PANEL_CSS，离开时自动卸载全部插件样式',
+    '设置页新增「外观模式」三档切换：☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统（走产品 theme.setTheme 官方接口，实时生效、偏好持久化）',
+    '主题设置页布局：外观模式（持久） + 主题选择（会话级）分区展示',
   ],
 }
 
@@ -561,6 +560,12 @@ const PANEL_CSS = [
   // 主题设置页
   '.mdvr-themes { display: flex; flex-direction: column; gap: 8px; }',
   '.mdvr-themes-title { font-size: 12px; color: var(--dsw-alias-label-secondary); }',
+  '.mdvr-themes-title-gap { margin-top: 6px; }',
+  // 外观模式三档按钮（浅色 / 深色 / 跟随系统）
+  '.mdvr-schemes { display: flex; gap: 6px; }',
+  '.mdvr-scheme-btn { flex: 1; padding: 6px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); }',
+  '.mdvr-scheme-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }',
+  '.mdvr-scheme-btn-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); font-weight: 650; }',
   '.mdvr-theme-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }',
   '.mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }',
   '.mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }',
@@ -576,6 +581,7 @@ const PANEL_CSS = [
 let rootCtx = null            // apply() 注入的 ctx 引用（供设置页切换时使用）
 let activeThemeId = ACTIVE_THEME  // 当前生效主题 id
 let themeDisposer = null      // 当前样式表清理函数
+let themeService = null       // 产品 theme 服务（外观模式三档切换用，可选）
 
 // 激活主题：注入 骨架 + 主题 CSS + 面板样式（先卸旧表再注入）
 // 原生模式（THEME_META[id].native）：只注入 PANEL_CSS，不碰产品 token 与排版
@@ -594,6 +600,25 @@ function activateTheme(ctx, id) {
     themeDisposer = styles.insert(TYPO_CSS + '\n' + entry.css + '\n' + PANEL_CSS)
   }
   activeThemeId = id
+}
+
+// 读取当前外观模式偏好（light / dark / system），读不到时按跟随系统处理
+function readScheme() {
+  try {
+    if (themeService) {
+      const snap = themeService.getTheme()
+      if (snap && snap.preference) return snap.preference
+    }
+  } catch (e) { /* 忽略：服务不可用时回退 */ }
+  return 'system'
+}
+
+// 切换外观模式：走产品 theme.setTheme 官方接口（实时生效 + 偏好持久化）
+// 主题 CSS 用 body / body[data-ds-dark-theme] 挂载，产品切档后自动跟随
+function applyScheme(mode) {
+  try {
+    if (themeService) themeService.setTheme(mode)
+  } catch (e) { /* 忽略：非法值或服务不可用 */ }
 }
 
 // ---------- §7 组件 ----------
@@ -649,13 +674,33 @@ function VersionCard(props) {
   )
 }
 
-// 主题设置页：主题卡片列表（色板预览 + 名称 + 描述），点击即切换（会话级内存态）
+// 主题设置页：外观模式（持久）+ 主题选择（会话级）
+// 外观三档：☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统 —— 走产品 theme.setTheme，跨刷新持久
 function ThemeSettings() {
   const [active, setActive] = React.useState(activeThemeId)
+  const [scheme, setSchemeState] = React.useState(readScheme())
   const entries = Object.keys(THEMES).map((id) => ({ id, meta: THEME_META[id] || { name: id, desc: '', swatches: [] } }))
+  const schemeOptions = [
+    ['light', '☀️ 浅色'],
+    ['dark', '🌙 深色'],
+    ['system', '🖥️ 跟随系统'],
+  ]
 
   return React.createElement('div', { className: 'mdvr-themes' },
-    React.createElement('div', { className: 'mdvr-themes-title' },
+    // 外观模式（持久生效，刷新/重启不丢）
+    React.createElement('div', { className: 'mdvr-themes-title' }, '外观模式（持久保存）'),
+    React.createElement('div', { className: 'mdvr-schemes' },
+      schemeOptions.map(([mode, label]) => {
+        const sel = scheme === mode
+        return React.createElement('button', {
+          key: mode,
+          className: 'mdvr-scheme-btn' + (sel ? ' mdvr-scheme-btn-active' : ''),
+          onClick: () => { applyScheme(mode); setSchemeState(mode) },
+        }, label)
+      }),
+    ),
+    // 主题选择（会话级：刷新/重启后恢复默认）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' },
       '主题切换（会话级：刷新/重启后恢复默认 ' + ACTIVE_THEME + '）'),
     entries.map(({ id, meta }) => {
       const sel = id === active
@@ -684,6 +729,9 @@ function ThemeSettings() {
 return {
   apply(ctx) {
     rootCtx = ctx
+    // 捕获产品 theme 服务（外观三档切换用；可选，缺失时按钮自动禁用）
+    const themeSvc = ctx.get('theme')
+    if (themeSvc !== undefined) themeService = themeSvc
     // 按配置应用默认主题（ACTIVE_THEME）
     activateTheme(ctx, ACTIVE_THEME)
     // Fiber 卸载清理：还原注入的样式表（stop/update/undefine 时自动执行）
