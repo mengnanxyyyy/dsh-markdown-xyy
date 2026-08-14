@@ -10,8 +10,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 🔒 主题铁律（最重要）
 
-1. **主题必须是 CSS 文件**，放在 `themes/`，每主题一个文件（当前：`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）。
-2. **`plugin/client.js` 的 `THEMES` 是构建产物，禁止手改**。改主题只改 `themes/*.css`，改逻辑只改 `plugin/src/client.core.js`，然后运行：
+1. **主题必须是 CSS 文件**：内置主题在仓库 `themes/`（每主题一文件，当前：`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）；**用户主题在 `~/.dsh/mdvr-themes/`**（插件专属目录，用户自行放置 `*.css` 即动态新主题，**无需打包/升级插件**，Host 用 fs 服务读取，设置页「🔄 刷新用户主题」重新加载）。
+2. **`plugin/client.js` 的 `THEMES` 是构建产物，禁止手改**。改内置主题只改 `themes/*.css`，改逻辑只改 `plugin/src/client.core.js`，然后运行：
    ```bash
    node scripts/build-client.js
    ```
@@ -44,8 +44,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-14）
 
-- 最新版本：v0.9.0（选择模型重构：「系统自带」默认零干预；第三方主题无深浅之分，选中后外观三档灰置）
-- 选择：`system-native`（系统自带，默认）/ 第三方主题 `lobeui-emphasis` / `inkpaper` / `qingci`
-- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`）
-- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`（v0.6.0 起 token 走 CSS）
+- 最新版本：v1.0.0（用户主题动态加载：`~/.dsh/mdvr-themes/` 放 CSS 即新主题，无需打包）
+- 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / 用户主题 `user:<id>`
+- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮）
+- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`（v0.6.0 起 token 走 CSS）；用户主题目录硬编码 `/home/lab/.dsh/mdvr-themes`（host.js 顶部 `USER_THEMES_DIR`，换机器需同步改）
 - 路线图：语法高亮 / gfm alert / 选择持久化 / 台账落盘

@@ -1,5 +1,5 @@
 // ============================================================
-// Client half v0.9.0 — 主题系统（CSS 文件驱动）+ Markdown 排版 + 版本面板
+// Client half v1.0.0 — 主题系统（CSS 文件驱动 + 用户主题动态加载）+ Markdown 排版 + 版本面板
 //
 // ⚠️ 本文件由 scripts/build-client.js 生成 —— THEMES 部分禁止手改！
 //    主题定义在 themes/*.css（每主题一个 CSS 文件），修改后运行：
@@ -27,14 +27,14 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '0.9.0',
+  version: '1.0.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '选择模型重构：顶部「系统自带」= 默认（插件零干预，深浅跟随系统）；第三方主题无深浅之分，选中后外观三档变灰禁用，回到「系统自带」重新可用',
-    '移除 demo（DSH 默认）与 native 主题，由「系统自带」统一承担原生观感',
-    '默认行为改为原生：插件默认不做任何主题动作',
+    '用户主题动态加载：~/.dsh/mdvr-themes/ 放 CSS 文件即成为新主题（无需打包/升级插件），设置页一键刷新',
+    'Host 新增 themes.user.list / themes.user.get RPC（fs 读取用户目录）',
+    '选择模型扩展：user:* 选择走用户主题缓存，与内置第三方一样无深浅之分',
   ],
 }
 
@@ -158,18 +158,54 @@ const PANEL_CSS = [
   '.mdvr-theme-info { display: flex; flex-direction: column; gap: 2px; }',
   '.mdvr-theme-name { font-weight: 650; }',
   '.mdvr-theme-desc { font-size: 12px; color: var(--dsw-alias-label-secondary); }',
+  // 用户主题区（刷新按钮）
+  '.mdvr-user-actions { display: flex; align-items: center; gap: 8px; }',
+  '.mdvr-refresh-btn { padding: 4px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); }',
+  '.mdvr-refresh-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }',
 ].join('\n')
 
 // ---------- §6 选择引擎 ----------
 // 运行时状态（函数体作用域，进程内有效）
 let rootCtx = null            // apply() 注入的 ctx 引用（供设置页切换时使用）
-let activeSelection = DEFAULT_SELECTION  // 当前选择：'system-native' 或第三方主题 id
+let activeSelection = DEFAULT_SELECTION  // 当前选择：'system-native'、内置主题 id 或 'user:<id>'
 let themeDisposer = null      // 当前样式表清理函数
 let themeService = null       // 产品 theme 服务（外观模式三档切换用，可选）
+let userThemes = {}           // 用户主题缓存：id → { css }（来自 ~/.dsh/mdvr-themes，动态加载）
+let userThemeIds = []         // 用户主题 id 列表（目录顺序）
+
+// 从 Host 加载用户主题（~/.dsh/mdvr-themes/*.css；放文件即新主题，无需打包升级）
+async function loadUserThemes() {
+  try {
+    const listRes = await host.call('themes.user.list')
+    if (!listRes || !listRes.ok) return []
+    const ids = Array.isArray(listRes.themes) ? listRes.themes : []
+    const loaded = []
+    for (const id of ids) {
+      const res = await host.call('themes.user.get', { id })
+      if (res && res.ok && typeof res.css === 'string') {
+        userThemes[id] = { css: res.css }
+        loaded.push(id)
+      }
+    }
+    userThemeIds = loaded
+    return loaded
+  } catch (e) {
+    return []
+  }
+}
+
+// 从主题 CSS 文本提取色板预览（浅色档 4 色：底色/抬升面/品牌色/强调色；取不到返回空）
+function parseThemeSwatches(css) {
+  const grab = (name) => {
+    const m = css.match(new RegExp(name + '\\s*:\\s*([^;]+);'))
+    return m ? m[1].trim() : null
+  }
+  return [grab('--dsw-alias-bg-base'), grab('--dsw-alias-bg-layer-1'), grab('--dsw-alias-brand-primary'), grab('--mdvr-accent')].filter(Boolean)
+}
 
 // 应用选择：注入 骨架 + 主题 CSS + 面板样式（先卸旧表再注入）
 // 'system-native'（系统自带）：插件零干预，只注入 PANEL_CSS（插件自有 UI），产品界面 100% 出厂观感
-// 第三方主题：注入 TYPO_CSS + 主题 CSS + PANEL_CSS
+// 内置第三方主题 / 'user:<id>' 用户主题：注入 TYPO_CSS + 主题 CSS + PANEL_CSS（均无深浅之分）
 // 说明：token 与强调变量都直接写在主题 CSS 的 body / body[data-ds-dark-theme] 上，
 //       与产品挂载机制一致（注入顺序晚于产品样式表 → 同选择器后者胜出）；
 //       切换时旧样式表整体卸载 → 产品观感随之恢复。
@@ -178,6 +214,11 @@ function applySelection(ctx, id) {
   if (id === 'system-native') {
     // 系统自带：不做任何主题动作（深浅跟随系统，外观三档按钮可用）
     themeDisposer = styles.insert(PANEL_CSS)
+  } else if (id.indexOf('user:') === 0) {
+    // 用户主题（~/.dsh/mdvr-themes）：动态加载，与内置第三方一样无深浅之分
+    const entry = userThemes[id.slice(5)]
+    if (!entry) return
+    themeDisposer = styles.insert(TYPO_CSS + '\n' + entry.css + '\n' + PANEL_CSS)
   } else {
     const entry = THEMES[id]
     if (!entry) return
@@ -258,14 +299,16 @@ function VersionCard(props) {
   )
 }
 
-// 主题设置页：外观模式 + 选择（系统自带 / 第三方主题）
-// 选择模型（v0.9.0）：
+// 主题设置页：外观模式 + 选择（系统自带 / 内置主题 / 用户主题）
+// 选择模型（v0.9.0 + v1.0.0）：
 //   - 「系统自带」= 默认：插件零干预，深浅跟随系统，☀️/🌙/🖥️ 三档可用
-//   - 第三方主题：无深浅之分 —— 选中后三档按钮变灰禁用（除非回到「系统自带」）
-//   - 两组互斥（单选），点击即切换
+//   - 内置第三方主题 & 用户主题：无深浅之分 —— 选中后三档按钮变灰禁用（除非回到「系统自带」）
+//   - 用户主题：~/.dsh/mdvr-themes/ 放 CSS 文件 + 点「刷新」即生效，无需打包升级
+//   - 各组互斥（单选），点击即切换
 function ThemeSettings() {
   const [sel, setSel] = React.useState(activeSelection)
   const [scheme, setSchemeState] = React.useState(readScheme())
+  const [userIds, setUserIds] = React.useState([])
   const isSystem = sel === 'system-native'
   const entries = Object.keys(THEMES).map((id) => ({ id, meta: THEME_META[id] || { name: id, desc: '', swatches: [] } }))
   const schemeOptions = [
@@ -276,8 +319,15 @@ function ThemeSettings() {
   // 系统自带卡片的色板预览（DSH 出厂色）
   const systemSwatches = ['#ffffff', '#f9fafb', '#0f1115', '#5686fe']
 
+  // 挂载时加载用户主题
+  React.useEffect(() => {
+    let alive = true
+    loadUserThemes().then((ids) => { if (alive) setUserIds(ids) })
+    return () => { alive = false }
+  }, [])
+
   return React.createElement('div', { className: 'mdvr-themes' },
-    // 外观模式（持久保存；仅「系统自带」下可用，第三方主题无深浅之分）
+    // 外观模式（持久保存；仅「系统自带」下可用，第三方/用户主题无深浅之分）
     React.createElement('div', { className: 'mdvr-themes-title' }, '外观模式（持久保存）'),
     React.createElement('div', { className: 'mdvr-schemes' },
       schemeOptions.map(([mode, label]) => {
@@ -285,7 +335,7 @@ function ThemeSettings() {
         return React.createElement('button', {
           key: mode,
           className: 'mdvr-scheme-btn' + (selMode ? ' mdvr-scheme-btn-active' : ''),
-          disabled: !isSystem, // 第三方主题激活时变灰禁用
+          disabled: !isSystem, // 第三方/用户主题激活时变灰禁用
           onClick: () => { applyScheme(mode); setSchemeState(mode) },
         }, label)
       }),
@@ -308,8 +358,8 @@ function ThemeSettings() {
         React.createElement('span', { className: 'mdvr-theme-desc' }, 'DSH 出厂观感：深浅跟随系统，插件零干预'),
       ),
     ),
-    // 第三方主题（无深浅之分）
-    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '第三方主题（无深浅之分）'),
+    // 内置第三方主题（无深浅之分）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题（无深浅之分）'),
     entries.map(({ id, meta }) => {
       const selTheme = sel === id
       return React.createElement('button', {
@@ -327,6 +377,38 @@ function ThemeSettings() {
         React.createElement('span', { className: 'mdvr-theme-info' },
           React.createElement('span', { className: 'mdvr-theme-name' }, meta.name + (selTheme ? ' ✓' : '')),
           React.createElement('span', { className: 'mdvr-theme-desc' }, meta.desc),
+        ),
+      )
+    }),
+    // 用户主题（~/.dsh/mdvr-themes/：放 CSS 文件即新主题，点刷新生效）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/mdvr-themes/）'),
+    React.createElement('div', { className: 'mdvr-user-actions' },
+      React.createElement('button', {
+        className: 'mdvr-refresh-btn',
+        onClick: () => { loadUserThemes().then((ids) => setUserIds(ids)) },
+      }, '🔄 刷新用户主题'),
+      React.createElement('span', { className: 'mdvr-themes-title' }, '放入 CSS 文件后点刷新即生效'),
+    ),
+    userIds.length === 0 && React.createElement('div', { className: 'mdvr-themes-title' }, '（暂无用户主题）'),
+    userIds.map((id) => {
+      const entry = userThemes[id]
+      const selUser = sel === 'user:' + id
+      const swatches = entry ? parseThemeSwatches(entry.css) : []
+      return React.createElement('button', {
+        key: id,
+        className: 'mdvr-theme-card' + (selUser ? ' mdvr-theme-card-active' : ''),
+        onClick: () => { applySelection(rootCtx, 'user:' + id); setSel('user:' + id) },
+      },
+        React.createElement('span', { className: 'mdvr-theme-swatches' },
+          (swatches.length ? swatches : ['#cccccc']).map((c, i) => React.createElement('span', {
+            key: i,
+            className: 'mdvr-theme-swatch',
+            style: { background: c },
+          })),
+        ),
+        React.createElement('span', { className: 'mdvr-theme-info' },
+          React.createElement('span', { className: 'mdvr-theme-name' }, id + (selUser ? ' ✓' : '')),
+          React.createElement('span', { className: 'mdvr-theme-desc' }, '用户主题：~/.dsh/mdvr-themes/' + id + '.css'),
         ),
       )
     }),

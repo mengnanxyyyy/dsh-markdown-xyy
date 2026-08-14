@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.0.0",
+      "packageId": "pkg-9",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-14",
+      "changes": [
+        "用户主题动态加载：~/.dsh/mdvr-themes/ 放 CSS 文件即成为新主题（无需打包/升级插件），设置页一键刷新",
+        "Host 新增 themes.user.list / themes.user.get RPC（fs 读取用户目录）",
+        "选择模型扩展：user:* 选择走用户主题缓存，与内置第三方一样无深浅之分"
+      ]
+    },
+    {
       "version": "0.9.0",
       "packageId": "pkg-8",
       "name": "LobeUI 风格 · 主题系统",
