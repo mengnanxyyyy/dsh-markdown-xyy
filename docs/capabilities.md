@@ -17,11 +17,11 @@
 
 | # | 能力 | 状态 |
 | --- | --- | --- |
-| B1 | 全局 token 覆盖：13 个 `--dsw-alias-*` token，浅色「宣纸」/ 深色「玄夜」双套 | ✅ v0.1.0 |
+| B1 | 全局 token 覆盖：13 个 `--dsw-alias-*` token，浅/深双套 | ✅ v0.1.0 |
 | B2 | 叠加层机制：不改基线主题，卸载即还原，同一 source 更新即整层替换 | ✅ v0.1.0 |
-| B3 | 结构修正（对标 LobeUI）：深色近黑 `#14120f`、三层表面+侧栏分层拉开、边框加深、secondary 文字提对比 | ✅ v0.2.0 |
-| B4 | 语义色解耦品牌棕：success/warn 直取 lobe step9（#379d4a/#62c473、#b77900/#ee9e0b），error 纯净红 | ✅ v0.2.0 |
-| B5 | 多套预设主题（如「墨纸」「青瓷」「霓虹」），一键切换 | 🔜 路线图 |
+| B3 | LobeUI 原生配色（v0.3.0）：中性灰阶（浅 #f8f8f8/#fff ↔ 深 #000/#0d0d0d）、主色中性黑 #222/#eee、边框/文字灰阶按 lobe 生成器映射 | ✅ v0.3.0 |
+| B4 | 语义色取 lobe step9（浅 volcano/green/gold、深 red/lime/blue）；链接信息蓝 #0072f5/#60b1ff | ✅ v0.3.0 |
+| B5 | 多套预设主题一键切换（如 LobeUI 风格 / 墨纸 / 青瓷） | 🔜 路线图 |
 | B6 | 设置页（`settings.section`）：主题预览卡 + 切换器 + 当前层来源说明 | 🔜 路线图 |
 | B7 | 第三档 auto：监听 `prefers-color-scheme` 事件重算 token | 🔜 路线图 |
 | B8 | 跟随系统深浅色（`theme` 服务内置感知） | ✅ 平台机制 |
@@ -30,12 +30,12 @@
 
 | # | 能力 | 状态 |
 | --- | --- | --- |
-| C1 | 字体栈：Markdown 作用域注入中文友好 sans 栈（PingFang/YaHei/Noto CJK）+ 等宽栈（JetBrains Mono 优先） | ✅ v0.2.0 |
+| C1 | 字体栈：LobeUI 原生 Geist / Geist Mono 优先 + 中文栈（PingFang/YaHei/Noto CJK） | ✅ v0.3.0 |
 | C2 | 倍数制排版节奏：段落首尾去空 + 段间 1em、行高 1.8、字距 0.02em | ✅ v0.2.0 |
 | C3 | 标题阶梯 2/1.6/1.3/1.15/1em、700、行高 1.25（h1 下边框签名保留） | ✅ v0.2.0 |
 | C4 | 行内 code 胶囊化（1px 边框 + lh 1）；代码块内描边 + 圆角 8px + padding 16px | ✅ v0.2.0 |
 | C5 | 表格外框+横线式（无单元格边框、min-width 120px、横向滚动、padding .75em 1em） | ✅ v0.2.0 |
-| C6 | hr 虚线、引用 4px 品牌边条+卡片底、ul 自定义符号、图片内描边、链接 hover 过渡 200ms（reduced-motion 降级） | ✅ v0.2.0 |
+| C6 | hr 虚线、引用 4px 中性左边条（无底色，LobeUI 极简风）、ul 自定义 "-" 符号、图片内描边、链接信息蓝 + hover 过渡 200ms（reduced-motion 降级） | ✅ v0.3.0 |
 | C7 | 零优先级策略（`:where()`）：只影响裸语义 Markdown，产品组件样式不被破坏 | ✅ v0.1.0 |
 | C8 | 全量颜色引用 token 变量，深浅色自动跟随，无写死色值 | ✅ v0.1.0 |
 | C9 | 按真实渲染 DOM 精细化作用域（当前为通用基线） | 🔜 路线图 |

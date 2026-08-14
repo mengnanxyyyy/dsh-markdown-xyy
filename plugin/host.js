@@ -1,17 +1,17 @@
-// Host half v0.2.0 — 版本台账（镜像 mdvr-1/pkg-1，与 Harness 定义保持一致）
+// Host half v0.3.0 — 版本台账（镜像 mdvr-1/pkg-2，与 Harness 定义保持一致）
+// v0.3.0：放弃「墨纸」暖纸身份，整体替换为 LobeUI 原生设计语言
 const MANIFEST = {
-  version: '0.2.0',
-  name: '墨纸 · InkPaper',
-  palette: 'inkpaper',
+  version: '0.3.0',
+  name: 'LobeUI 风格',
+  palette: 'lobeui',
   date: '2026-08-14',
   changes: [
-    '对标 LobeUI：深色近黑、表面分层拉开、语义色解耦（success/warn 取 lobe step9）',
-    '字体栈：Markdown 作用域注入中文友好 sans 栈 + 等宽栈（JetBrains Mono 优先）',
-    '排版节奏：段落首尾去空 + 段间 1em、行高 1.8、字距 0.02em',
-    '标题阶梯 2/1.6/1.3/1.15/1、700、行高 1.25',
-    '行内 code 胶囊化（1px 边框）；代码块内描边 + 圆角 8px + padding 16px',
-    '表格改外框+横线式（无单元格边框、min-width 120px、横向滚动）',
-    'hr 虚线、引用 4px 边条、列表自定义符号、图片内描边、链接 hover 过渡',
+    '放弃暖纸身份，整体替换为 LobeUI 原生设计语言',
+    '配色：中性灰阶（浅 #f8f8f8/#fff，深 #000/#0d0d0d）、主色中性黑 #222（深 #eee）',
+    '语义色取 lobe step9：浅 volcano/green/gold、深 red/lime/blue',
+    '链接改信息蓝 #0072f5 / #60b1ff（lobe colorLink=colorInfoText）',
+    '字体栈换 Geist / Geist Mono 优先（lobe 原生）',
+    '引用块去卡片化（4px 中性左边条）、h1 去下边框、列表符号改 "-"',
   ],
 }
 

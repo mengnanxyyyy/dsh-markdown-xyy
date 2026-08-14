@@ -3,6 +3,21 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "0.3.0",
+      "packageId": "pkg-2",
+      "name": "LobeUI 风格",
+      "palette": "lobeui",
+      "date": "2026-08-14",
+      "changes": [
+        "放弃暖纸身份，整体替换为 LobeUI 原生设计语言",
+        "配色：中性灰阶（浅 #f8f8f8/#fff，深 #000/#0d0d0d）、主色中性黑 #222（深 #eee）",
+        "语义色取 lobe step9：浅 volcano/green/gold、深 red/lime/blue",
+        "链接改信息蓝 #0072f5 / #60b1ff（lobe colorLink=colorInfoText）",
+        "字体栈换 Geist / Geist Mono 优先（lobe 原生）",
+        "引用块去卡片化（4px 中性左边条）、h1 去下边框、列表符号改 \"-\""
+      ]
+    },
+    {
       "version": "0.2.0",
       "packageId": "pkg-1",
       "name": "墨纸 · InkPaper",

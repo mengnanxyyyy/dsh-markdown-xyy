@@ -1,57 +1,63 @@
-// Client half v0.2.0 — 主题 + Markdown 排版 + 版本面板（镜像 mdvr-1/pkg-1，与 Harness 定义保持一致）
-// v0.2.0 对标 LobeUI 的细节改动，详见 docs/lobeui-synthesis.md
+// Client half v0.3.0 — 主题 + Markdown 排版 + 版本面板（镜像 mdvr-1/pkg-2，与 Harness 定义保持一致）
+// v0.3.0：放弃「墨纸」暖纸身份，整体替换为 LobeUI 原生设计语言
+// 色值来源：lobe-ui master src/color/colors/*.ts（13 步色板）+ token/{light,dark}.ts 生成映射
 
 const MANIFEST = {
-  version: '0.2.0',
-  name: '墨纸 · InkPaper',
-  palette: 'inkpaper',
+  version: '0.3.0',
+  name: 'LobeUI 风格',
+  palette: 'lobeui',
   date: '2026-08-14',
   changes: [
-    '对标 LobeUI：深色近黑、表面分层拉开、语义色解耦（success/warn 取 lobe step9）',
-    '字体栈：Markdown 作用域注入中文友好 sans 栈 + 等宽栈（JetBrains Mono 优先）',
-    '排版节奏：段落首尾去空 + 段间 1em、行高 1.8、字距 0.02em',
-    '标题阶梯 2/1.6/1.3/1.15/1、700、行高 1.25',
-    '行内 code 胶囊化（1px 边框）；代码块内描边 + 圆角 8px + padding 16px',
-    '表格改外框+横线式（无单元格边框、min-width 120px、横向滚动）',
-    'hr 虚线、引用 4px 边条、列表自定义符号、图片内描边、链接 hover 过渡',
+    '放弃暖纸身份，整体替换为 LobeUI 原生设计语言',
+    '配色：中性灰阶（浅 #f8f8f8/#fff，深 #000/#0d0d0d）、主色中性黑 #222（深 #eee）',
+    '语义色取 lobe step9：浅 volcano/green/gold、深 red/lime/blue',
+    '链接改信息蓝 #0072f5 / #60b1ff（lobe colorLink=colorInfoText）',
+    '字体栈换 Geist / Geist Mono 优先（lobe 原生）',
+    '引用块去卡片化（4px 中性左边条）、h1 去下边框、列表符号改 "-"',
   ],
 }
 
-// ---------- 1) 字体栈（LobeUI 结构 + 暖纸身份） ----------
+// ---------- 1) 字体栈（LobeUI 原生：Geist 优先 + 中文栈） ----------
 const FONT_SANS = [
-  '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"',
-  '"PingFang SC"', '"Hiragino Sans GB"', '"HarmonyOS Sans SC"',
-  '"Microsoft YaHei"', '"Source Han Sans SC"', '"Noto Sans CJK SC"',
-  '"Helvetica Neue"', 'Arial', 'sans-serif',
-  '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Noto Color Emoji"',
+  'Geist', '-apple-system', 'BlinkMacSystemFont',
+  '"Segoe UI Variable Display"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial',
+  '"HarmonyOS Sans SC"', '"PingFang SC"', '"Hiragino Sans GB"',
+  '"Microsoft YaHei UI"', '"Microsoft YaHei"', '"Source Han Sans SC"', '"Noto Sans CJK SC"',
+  'ui-sans-serif', 'system-ui', 'sans-serif',
+  '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"',
 ].join(', ')
 const FONT_MONO = [
-  '"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', '"SF Mono"',
+  '"Geist Mono"', 'ui-monospace', 'SFMono-Regular', '"SF Mono"',
   'Menlo', '"Cascadia Code"', 'Consolas', '"Liberation Mono"', 'monospace',
 ].join(', ')
 
-// ---------- 2) 主题层：墨纸 InkPaper v0.2.0（宣纸 light / 玄夜 dark） ----------
-// 结构修正：深色近黑、表面分层拉开、边框加深、语义色解耦（详见 docs/lobeui-synthesis.md）
+// ---------- 2) 主题层：LobeUI 原生配色（light / dark，全部取自 lobe-ui 色板） ----------
+// 映射规则（generateColorPalette / generateColorNeutralPalette）：
+//   bgLayout=gray[1]/[0]  bgContainer=gray[0]/[1]  bgElevated=gray[0]/[2]
+//   border=gray[3]  borderSecondary=gray[2]  text=[12]  textSecondary=[10]
+//   primary=primary[9]（中性黑/白）  success=green[9]/lime[9]  warn=gold[9]
+//   error=volcano[9]/red[9]  link=geekblue[9]/blue[9]
 const TOKENS = {
-  '--dsw-alias-bg-base': { light: '#faf6ef', dark: '#14120f' },
-  '--dsw-alias-bg-layer-1': { light: '#f2ece0', dark: '#1d1915' },
-  '--dsw-alias-bg-layer-2': { light: '#e9e1d0', dark: '#28231d' },
-  '--dsw-alias-bg-overlay': { light: '#fffdf8', dark: '#211c17' },
-  '--dsw-alias-border-l1': { light: '#dbcfb3', dark: '#3a342b' },
-  '--dsw-alias-border-l2': { light: '#c6b68f', dark: '#4a4132' },
-  '--dsw-alias-brand-primary': { light: '#8a5a2b', dark: '#d9a15c' },
-  '--dsw-alias-label-primary': { light: '#292113', dark: '#efe8da' },
-  '--dsw-alias-label-secondary': { light: '#71664f', dark: '#a8a08c' },
-  '--dsw-alias-state-error-primary': { light: '#b23a30', dark: '#f4416c' },
-  '--dsw-alias-state-success-primary': { light: '#379d4a', dark: '#62c473' },
-  '--dsw-alias-state-warn-primary': { light: '#b77900', dark: '#ee9e0b' },
-  '--dsw-specific-sidebar-fill': { light: '#ece4d5', dark: '#1a1612' },
+  '--dsw-alias-bg-base': { light: '#f8f8f8', dark: '#000000' },
+  '--dsw-alias-bg-layer-1': { light: '#ffffff', dark: '#0d0d0d' },
+  '--dsw-alias-bg-layer-2': { light: '#f0f0f0', dark: '#1a1a1a' },
+  '--dsw-alias-bg-overlay': { light: '#ffffff', dark: '#1a1a1a' },
+  '--dsw-alias-border-l1': { light: '#e3e3e3', dark: '#202020' },
+  '--dsw-alias-border-l2': { light: '#eeeeee', dark: '#1a1a1a' },
+  '--dsw-alias-brand-primary': { light: '#222222', dark: '#eeeeee' },
+  '--dsw-alias-label-primary': { light: '#080808', dark: '#ffffff' },
+  '--dsw-alias-label-secondary': { light: '#666666', dark: '#aaaaaa' },
+  '--dsw-alias-state-error-primary': { light: '#ec5e41', dark: '#f4416c' },
+  '--dsw-alias-state-success-primary': { light: '#379d4a', dark: '#c4f042' },
+  '--dsw-alias-state-warn-primary': { light: '#ee9e0b', dark: '#ffb224' },
+  '--dsw-specific-sidebar-fill': { light: '#f0f0f0', dark: '#101010' },
 }
 
-// ---------- 3) 排版层 v0.2.0（:where() 零优先级，产品显式样式胜出） ----------
+// ---------- 3) 排版层 v0.3.0（:where() 零优先级，产品显式样式胜出） ----------
 const TYPO_CSS = [
   // 全局自定义属性（命名空间 --mdvr-*，不影响产品）
-  ':root { --mdvr-sans: ' + FONT_SANS + '; --mdvr-mono: ' + FONT_MONO + '; --mdvr-mm: 2; }',
+  ':root { --mdvr-sans: ' + FONT_SANS + '; --mdvr-mono: ' + FONT_MONO + '; --mdvr-mm: 2; --mdvr-link: #0072f5; --mdvr-link-hover: #005ae0; }',
+  '@media (prefers-color-scheme: dark) { :root { --mdvr-link: #60b1ff; --mdvr-link-hover: #a7d3ff; } }',
   // 基线：行高 1.8（中文友好）+ 断字
   ':where(p, ul, ol, blockquote, pre, table, li) { line-height: 1.8; overflow-wrap: break-word; }',
   ':where(p, ul, ol, blockquote, pre, table, h1, h2, h3, h4, h5, h6, li, td, th, a) { font-family: var(--mdvr-sans); }',
@@ -59,18 +65,18 @@ const TYPO_CSS = [
   ':where(p) { margin: 0; letter-spacing: 0.02em; }',
   ':where(p:not(:first-child)) { margin-top: 1em; }',
   ':where(p:not(:last-child)) { margin-bottom: 1em; }',
-  // 标题：阶梯 2/1.6/1.3/1.15/1、700、1.25（h1 下边框为产品签名）
+  // 标题：阶梯 2/1.6/1.3/1.15/1、700、1.25（LobeUI：无下边框）
   ':where(h1, h2, h3, h4, h5, h6) { line-height: 1.25; font-weight: 700; margin: 1.1em 0 0.6em; }',
-  ':where(h1) { font-size: 2em; padding-bottom: 0.35em; border-bottom: 1px solid var(--dsw-alias-border-l1); }',
+  ':where(h1) { font-size: 2em; }',
   ':where(h2) { font-size: 1.6em; }',
   ':where(h3) { font-size: 1.3em; }',
   ':where(h4) { font-size: 1.15em; }',
   ':where(h5) { font-size: 1em; }',
   ':where(h6) { font-size: 0.9em; color: var(--dsw-alias-label-secondary); }',
-  // 列表：margin 1em + 自定义符号（LobeUI 模式）
+  // 列表：margin 1em + 自定义 "-" 符号（LobeUI）
   ':where(ul, ol) { margin: 1em 0; margin-left: 1em; padding-left: 0; list-style-position: outside; }',
   ':where(ul) { list-style-type: none; }',
-  ':where(ul > li::before) { content: "·"; margin-inline: -1em 0.5em; color: var(--dsw-alias-brand-primary); opacity: 0.6; }',
+  ':where(ul > li::before) { content: "-"; margin-inline: -1em 0.5em; opacity: 0.5; }',
   ':where(li) { margin: 0.4em 0; }',
   ':where(li p:first-child) { display: inline; }',
   ':where(li.task-list-item) { list-style: none; }',
@@ -80,22 +86,21 @@ const TYPO_CSS = [
   // 代码块：内描边 + 8px + 固定 16px
   ':where(pre) { margin: 1em 0; background: var(--dsw-alias-bg-layer-2); border-radius: 8px; padding: 16px; box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l1); overflow-x: auto; font-size: 0.85em; line-height: 1.6; font-variant-ligatures: none; }',
   ':where(pre code) { background: transparent; border: none; padding: 0; margin: 0; font-size: inherit; line-height: inherit; white-space: pre; }',
-  // 引用：4px 品牌边条 + 卡片底（产品签名）+ 次文字色
-  ':where(blockquote) { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--dsw-alias-brand-primary); border-radius: 0 8px 8px 0; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary); }',
+  // 引用：LobeUI 极简风 —— 4px 中性左边条、无底色、次级文字
+  ':where(blockquote) { margin: 1em 0; padding: 0 0 0 1em; border-left: 4px solid var(--dsw-alias-border-l1); color: var(--dsw-alias-label-secondary); }',
   ':where(blockquote p:first-child) { margin-top: 0; }',
   ':where(blockquote p:last-child) { margin-bottom: 0; }',
-  ':where(blockquote blockquote) { background: var(--dsw-alias-bg-layer-2); }',
   // 表格：外框 + 横线式，无单元格边框（LobeUI 模式）
   ':where(table) { display: block; overflow-x: auto; width: max-content; max-width: 100%; border-collapse: collapse; border-spacing: 0; margin: 1em 0; border-radius: 8px; box-shadow: 0 0 0 1px var(--dsw-alias-border-l2); font-size: 0.92em; word-break: auto-phrase; }',
   ':where(th, td) { min-width: 120px; padding: 0.75em 1em; text-align: start; }',
-  ':where(th) { background: var(--dsw-alias-bg-layer-1); font-weight: 600; }',
+  ':where(th) { background: var(--dsw-alias-bg-layer-2); font-weight: 600; }',
   ':where(tr) { box-shadow: 0 1px 0 var(--dsw-alias-border-l1); }',
   ':where(tr:last-child) { box-shadow: none; }',
   // 分割线：虚线（LobeUI）
   ':where(hr) { border: none; border-top: 1px dashed var(--dsw-alias-border-l2); margin: 1.8em 0; }',
-  // 链接：品牌色 + hover 下划线 + 200ms 过渡（尊重 reduced-motion）
-  ':where(a) { color: var(--dsw-alias-brand-primary); text-decoration: none; }',
-  ':where(a:hover) { text-decoration: underline; }',
+  // 链接：信息蓝（lobe colorLink）+ 200ms 过渡（尊重 reduced-motion）
+  ':where(a) { color: var(--mdvr-link); text-decoration: none; }',
+  ':where(a:hover) { color: var(--mdvr-link-hover); }',
   '@media (prefers-reduced-motion: no-preference) { :where(a) { transition: color 200ms cubic-bezier(0.05, 0.7, 0.1, 1); } }',
   // 强调 / 细节
   ':where(strong) { font-weight: 600; }',
@@ -179,7 +184,7 @@ return {
     const slots = ctx.get('slots')
 
     // 主题层：同 source 重调 = 整层替换并置顶；Fiber 卸载自动撤销
-    ctx.effect(() => ctx.theme.overrideTokens('md-inkpaper', TOKENS))
+    ctx.effect(() => ctx.theme.overrideTokens('md-lobeui', TOKENS))
     // 排版层：包级样式表，卸载自动清理
     ctx.effect(() => styles.insert(TYPO_CSS + '\n' + PANEL_CSS))
 

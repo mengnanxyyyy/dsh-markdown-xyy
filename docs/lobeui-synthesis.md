@@ -52,7 +52,34 @@
 4. 语法高亮、复制按钮、语言标签、行号（需 JS，留路线图 v0.3+）
 5. 主色单色化（我们本有墨褐/琥珀身份色）
 
-## 四、落地文件
+## 五、v0.3.0 追加：整体替换为 LobeUI 原生设计语言（推翻暖纸身份）
+
+> 用户决定放弃「墨纸 · InkPaper」暖纸身份，直接采用 LobeUI 原生设计语言。色值不再"借鉴后自调"，而是**直接取自 lobe-ui master 源码色板**（`src/color/colors/*.ts` 13 步色阶 + `token/{light,dark}.ts` 生成器映射，本次已用 curl 抓取原文件核实）。
+
+| token | v0.3.0 light / dark | 来源映射（lobe-ui master） |
+| --- | --- | --- |
+| bg-base | #f8f8f8 / #000000 | gray light[1] / dark[0]（colorBgLayout） |
+| bg-layer-1 | #ffffff / #0d0d0d | gray light[0] / dark[1]（colorBgContainer） |
+| bg-layer-2 | #f0f0f0 / #1a1a1a | fill 近似 / gray dark[2] |
+| bg-overlay | #ffffff / #1a1a1a | gray light[0] / dark[2]（colorBgElevated） |
+| border-l1 | #e3e3e3 / #202020 | gray[3]（colorBorder） |
+| border-l2 | #eeeeee / #1a1a1a | gray[2]（colorBorderSecondary） |
+| brand-primary | #222222 / #eeeeee | primary[9]（LobeUI 主色=中性黑/白） |
+| label-primary | #080808 / #ffffff | gray[12]（colorText） |
+| label-secondary | #666666 / #aaaaaa | gray[10]（colorTextSecondary） |
+| state-error | #ec5e41 / #f4416c | volcano[9] / red[9] |
+| state-success | #379d4a / #c4f042 | green[9] / lime[9] |
+| state-warn | #ee9e0b / #ffb224 | gold[9] |
+| sidebar-fill | #f0f0f0 / #101010 | 无对应 token，取灰阶近似 |
+
+配套身份改动：
+- 链接 = 信息蓝 `#0072f5` / `#60b1ff`（lobe `colorLink=colorInfoText`，geekblue[9]/blue[9]），hover 变体 #005ae0 / #a7d3ff
+- 字体栈：Geist / Geist Mono 优先（lobe 原生），中文回退栈保留
+- 引用块：去掉卡片底色 → 4px 中性左边条 + 次级文字（LobeUI 极简风）
+- h1 去掉下边框；列表符号 `·` → `-`（LobeUI 原样）
+- 版本面板名称改为「LobeUI 风格」，palette=`lobeui`，主题层 source 改为 `md-lobeui`
+
+## 六、落地文件（v0.3.0）
 
 - `plugin/client.js` — TOKENS + TYPO_CSS + PANEL_CSS（圆角统一 8px）
 - `plugin/host.js` — MANIFEST v0.2.0

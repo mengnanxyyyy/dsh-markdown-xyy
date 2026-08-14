@@ -20,7 +20,7 @@
 └─────────────────────────────────────────────────────────┘
               │  Package-private JSON RPC（host.call）
 ┌─ Client（浏览器页面）───────────────────────────────────┐
-│  theme.overrideTokens('md-inkpaper', {token: {light,dark}})  ← 13 个 token 双套配色
+│  theme.overrideTokens('md-lobeui', {token: {light,dark}})  ← 13 个 token 双套配色
 │  styles.insert(markdown 排版 CSS)                        │
 │  tool.view.cordis (key: self)                            │
 │    └─ 版本卡片：当前版本徽标 + 变更日志 + 历史台账         │

@@ -5,7 +5,7 @@
 它做三件事：
 
 1. **版本记录**：每次迭代都是一个不可变 Package，插件自动维护版本台账（版本号、日期、变更日志、主题名），并在 `cordis_run` 卡片内展示当前版本与历史。
-2. **主题**：通过 `theme.overrideTokens` 叠加全局 token 层（浅色「宣纸」/ 深色「玄夜」双套配色），不改动产品基线主题。
+2. **主题**：通过 `theme.overrideTokens` 叠加全局 token 层（浅/深双套配色，当前为 LobeUI 原生风格），不改动产品基线主题。
 3. **Markdown 排版**：通过 `styles.insert` 注入零优先级排版层（`:where()`），为对话中的语义化 Markdown（标题、列表、代码块、引用、表格…）提供中文友好排版；产品自带样式的组件不会被覆盖。
 
 ## 项目结构
@@ -45,6 +45,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v0.2.0「墨纸 · InkPaper」**：对标 LobeUI 的细节打磨——深色近黑、表面分层、语义色解耦；补字体栈；倍数制排版节奏（行高 1.8、段落首尾去空）；标题阶梯 2/1.6/1.3/1.15/1；行内 code 胶囊、代码块内描边、表格外框+横线式、hr 虚线、图片内描边。改动明细见 [docs/lobeui-synthesis.md](docs/lobeui-synthesis.md)。
+- **v0.3.0「LobeUI 风格」**：放弃暖纸身份，整体替换为 LobeUI 原生设计语言——中性灰阶配色（浅 #f8f8f8/#fff ↔ 深 #000/#0d0d0d）、主色中性黑 #222、语义色取 lobe step9、链接信息蓝 #0072f5/#60b1ff、Geist/Geist Mono 字体栈、引用去卡片化、h1 去下边框。色值直接取自 lobe-ui master 源码色板。
+- v0.2.0「墨纸 · InkPaper」：对标 LobeUI 的细节打磨（已被 v0.3.0 替换）。
 - v0.1.0：架构基线 + 主题层 + 基础排版 + 版本面板。
 - 台账：[manifest/versions.json](manifest/versions.json)
