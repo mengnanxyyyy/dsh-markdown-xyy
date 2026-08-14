@@ -16,7 +16,11 @@ dsh-markdown-xyy/
 ├── docs/
 │   ├── architecture.md          # 架构说明（双半分工 / 版本模型 / 迭代流程）
 │   ├── iteration-playbook.md    # 快速迭代手册（每次迭代的固定步骤）
-│   └── capabilities.md          # 能力清单（这个项目能提供什么 + 路线图）
+│   ├── capabilities.md          # 能力清单（这个项目能提供什么 + 路线图）
+│   ├── lobeui-synthesis.md      # v0.2.0 对标 LobeUI 的合成改动方案
+│   ├── lobeui-compare.md        # 竞品研究：代码块 / Markdown 组件
+│   ├── lobeui-typography-competitive.md  # 竞品研究：字体与排版
+│   └── lobeui-theme-comparison.md        # 竞品研究：色彩体系
 ├── manifest/
 │   └── versions.json            # 版本台账（持久态，与插件内存台账对应）
 ├── plugin/
@@ -41,5 +45,6 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v0.1.0「墨纸 · InkPaper」**：架构基线 + 主题层 + 基础排版 + 版本面板。
+- **v0.2.0「墨纸 · InkPaper」**：对标 LobeUI 的细节打磨——深色近黑、表面分层、语义色解耦；补字体栈；倍数制排版节奏（行高 1.8、段落首尾去空）；标题阶梯 2/1.6/1.3/1.15/1；行内 code 胶囊、代码块内描边、表格外框+横线式、hr 虚线、图片内描边。改动明细见 [docs/lobeui-synthesis.md](docs/lobeui-synthesis.md)。
+- v0.1.0：架构基线 + 主题层 + 基础排版 + 版本面板。
 - 台账：[manifest/versions.json](manifest/versions.json)
