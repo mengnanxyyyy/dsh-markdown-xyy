@@ -45,7 +45,8 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v0.3.0「LobeUI 风格」**：放弃暖纸身份，整体替换为 LobeUI 原生设计语言——中性灰阶配色（浅 #f8f8f8/#fff ↔ 深 #000/#0d0d0d）、主色中性黑 #222、语义色取 lobe step9、链接信息蓝 #0072f5/#60b1ff、Geist/Geist Mono 字体栈、引用去卡片化、h1 去下边框。色值直接取自 lobe-ui master 源码色板。
-- v0.2.0「墨纸 · InkPaper」：对标 LobeUI 的细节打磨（已被 v0.3.0 替换）。
+- **v0.4.0「LobeUI 风格 · 强调增强」**：重点信息强调色系统——靛蓝 accent（引用 tint 底+边条、行内代码靛蓝胶囊、代码块左侧标条、表头 tint、h1 靛蓝下划线、列表符号/分割线靛蓝）+ 琥珀 highlight；WCAG AA 实测修正（链接 #005ae0、浅档语义色加深）。方案：4 人 subagent 团队研究合成，见 [docs/readability-synthesis.md](docs/readability-synthesis.md)。
+- v0.3.0「LobeUI 风格」：放弃暖纸身份，整体替换为 LobeUI 原生设计语言（已被 v0.4.0 增强）。
+- v0.2.0「墨纸 · InkPaper」：对标 LobeUI 的细节打磨（历史版本）。
 - v0.1.0：架构基线 + 主题层 + 基础排版 + 版本面板。
 - 台账：[manifest/versions.json](manifest/versions.json)

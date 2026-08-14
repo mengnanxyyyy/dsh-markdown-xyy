@@ -1,17 +1,15 @@
-// Host half v0.3.0 — 版本台账（镜像 mdvr-1/pkg-2，与 Harness 定义保持一致）
-// v0.3.0：放弃「墨纸」暖纸身份，整体替换为 LobeUI 原生设计语言
+// Host half v0.4.0 — 版本台账（镜像 mdvr-1/pkg-3，与 Harness 定义保持一致）
+// v0.4.0：Markdown 重点信息强调色系统（靛蓝 accent + 琥珀 highlight）
 const MANIFEST = {
-  version: '0.3.0',
+  version: '0.4.0',
   name: 'LobeUI 风格',
-  palette: 'lobeui',
+  palette: 'lobeui-emphasis',
   date: '2026-08-14',
   changes: [
-    '放弃暖纸身份，整体替换为 LobeUI 原生设计语言',
-    '配色：中性灰阶（浅 #f8f8f8/#fff，深 #000/#0d0d0d）、主色中性黑 #222（深 #eee）',
-    '语义色取 lobe step9：浅 volcano/green/gold、深 red/lime/blue',
-    '链接改信息蓝 #0072f5 / #60b1ff（lobe colorLink=colorInfoText）',
-    '字体栈换 Geist / Geist Mono 优先（lobe 原生）',
-    '引用块去卡片化（4px 中性左边条）、h1 去下边框、列表符号改 "-"',
+    '强调色彩系统：靛蓝 accent + 琥珀 highlight（--mdvr-* 变量，浅/深双档）',
+    '元素强调：引用 tint 底+靛蓝边条、行内代码靛蓝 tint+描边+深蓝字、代码块左侧靛蓝标条、表头 tint+700、h1 靛蓝下划线、列表符号/分割线靛蓝',
+    'WCAG AA 实测修正：链接改 #005ae0/#60b1ff；浅档语义色加深 #c74330/#287b38/#985d00',
+    'strong 保持中性 700；代码块底色保持中性（为语法高亮留白）；kbd 不上色',
   ],
 }
 

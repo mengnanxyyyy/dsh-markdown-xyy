@@ -3,6 +3,19 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "0.4.0",
+      "packageId": "pkg-3",
+      "name": "LobeUI 风格",
+      "palette": "lobeui-emphasis",
+      "date": "2026-08-14",
+      "changes": [
+        "强调色彩系统：靛蓝 accent + 琥珀 highlight（--mdvr-* 变量，浅/深双档）",
+        "元素强调：引用 tint 底+靛蓝边条、行内代码靛蓝 tint+描边+深蓝字、代码块左侧靛蓝标条、表头 tint+700、h1 靛蓝下划线、列表符号/分割线靛蓝",
+        "WCAG AA 实测修正：链接改 #005ae0/#60b1ff；浅档语义色加深 #c74330/#287b38/#985d00",
+        "strong 保持中性 700；代码块底色保持中性（为语法高亮留白）；kbd 不上色"
+      ]
+    },
+    {
       "version": "0.3.0",
       "packageId": "pkg-2",
       "name": "LobeUI 风格",
