@@ -43,13 +43,20 @@ body[data-ds-dark-theme] { ... }
 - 变量齐全性：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。
 - **共享骨架 `TYPO_CSS` 只引用变量，不含写死色值** —— 主题切换 = 换变量，骨架不动。
 
-## 三、内置主题
+## 三、选择模型（v0.9.0）
+
+设置页「主题设置」分两组互斥单选：
+
+1. **「系统自带」（默认，`DEFAULT_SELECTION = 'system-native'`）**：插件零干预（不注入 token/排版/变量），深浅跟随系统/外观偏好，☀️/🌙/🖥️ 三档可用（持久保存）。
+2. **第三方主题（无深浅之分）**：选中后外观三档按钮变灰禁用（`disabled: !isSystem`），主题按当前生效档渲染自身色板；回到「系统自带」三档重新可用。默认行为 = 原生（插件不做任何主题动作）。
+
+> `demo.css`（DSH 默认）与 `native.css`（原生）已随 v0.9.0 移除，由「系统自带」统一承担原生观感（历史版本在 git 中可查）。
+
+## 四、内置主题
 
 | 文件 | 名称 | 风格 |
 | --- | --- | --- |
-| `themes/native.css` | 原生（无插件样式） | **零干预**：不含任何规则（token/变量/排版全不覆盖），运行时只注入插件自有 UI 的 PANEL_CSS，产品界面 100% DSH 出厂观感 |
-| `themes/demo.css` | DSH 默认 | **出厂观感**：13 token 取 DSH 出厂值（`dsh-client-ui-theme` 的 `--dsw-static-*`），强调色用品牌蓝 `#5686fe` 体系；§C 是全元素目录（每元素一条规则 + 注释说明控制哪部分） |
-| `themes/lobeui-emphasis.css` | LobeUI 风格（强调） | LobeUI 中性灰阶 + 靛蓝强调系统（默认启用） |
+| `themes/lobeui-emphasis.css` | LobeUI 风格（强调） | LobeUI 中性灰阶 + 靛蓝强调系统 |
 | `themes/inkpaper.css` | 墨纸 · InkPaper | 暖纸：米白纸底 + 墨褐 accent + 琥珀 highlight |
 | `themes/qingci.css` | 青瓷 | 青绿灰阶 + 青瓷绿 accent + 12px 圆角釉感 |
 

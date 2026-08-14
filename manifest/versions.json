@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "0.9.0",
+      "packageId": "pkg-8",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-14",
+      "changes": [
+        "选择模型重构：顶部「系统自带」= 默认（插件零干预，深浅跟随系统）；第三方主题无深浅之分，选中后外观三档变灰禁用，回到「系统自带」重新可用",
+        "移除 demo（DSH 默认）与 native 主题，由「系统自带」统一承担原生观感",
+        "默认行为改为原生：插件默认不做任何主题动作"
+      ]
+    },
+    {
       "version": "0.8.0",
       "packageId": "pkg-7",
       "name": "LobeUI 风格 · 主题系统",

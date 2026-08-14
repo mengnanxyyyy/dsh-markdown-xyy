@@ -10,16 +10,13 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 🔒 主题铁律（最重要）
 
-1. **主题必须是 CSS 文件**，放在 `themes/`，每主题一个文件（`native.css` / `demo.css` / `lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）。
+1. **主题必须是 CSS 文件**，放在 `themes/`，每主题一个文件（当前：`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）。
 2. **`plugin/client.js` 的 `THEMES` 是构建产物，禁止手改**。改主题只改 `themes/*.css`，改逻辑只改 `plugin/src/client.core.js`，然后运行：
    ```bash
    node scripts/build-client.js
    ```
-3. **`themes/demo.css` = DSH 默认主题**：
-   - 必须覆盖**所有可控元素和样式**（13 token + 全部 `--mdvr-*` + 每个元素一条规则），每条带注释说明控制哪个部分
-   - **每次版本更新必须同步 demo.css**：① 13 token 取 DSH 出厂值（来源 `dsh-client-ui-theme/lib/styles/design-platform.css` 的 `--dsw-static-*`）；② §C 元素目录必须与 `client.core.js` 的 `TYPO_CSS` 逐条对应
-4. **`themes/native.css` = 原生（无插件样式）**：刻意不含任何规则（token/变量/排版全不注入）；运行时只注入 `PANEL_CSS`（插件自有 UI），产品界面 100% 出厂观感。`THEME_META.native` 条目带 `native: true` 标记，`activateTheme` 据此走原生分支。
-5. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
+3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
+4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
 6. 主题 CSS 内同时定义：13 个 `--dsw-alias-*`（全局配色）+ `--mdvr-*`（强调变量：accent 系 5 个、quote/code/table 系 5 个、link/highlight 系 4 个）。**不再调用 `theme.overrideTokens`**。
 7. **PANEL_CSS 里的 `var(--mdvr-*)` 必须带默认回退值**（如 `var(--mdvr-accent, #5856d6)`），否则原生模式下插件自有 UI 样式失效。
 
@@ -47,8 +44,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-14）
 
-- 最新版本：v0.8.0（设置页新增外观三档切换：浅色/深色/跟随系统，走 `theme.setTheme` 持久化）
-- 主题：`native`（原生无插件样式）/ `demo`（DSH 默认）/ `lobeui-emphasis`（默认启用）/ `inkpaper` / `qingci`
-- 设置页：设置 → 主题设置（外观模式=持久，主题选择=会话级，刷新恢复 `ACTIVE_THEME`）
+- 最新版本：v0.9.0（选择模型重构：「系统自带」默认零干预；第三方主题无深浅之分，选中后外观三档灰置）
+- 选择：`system-native`（系统自带，默认）/ 第三方主题 `lobeui-emphasis` / `inkpaper` / `qingci`
+- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`）
 - 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`（v0.6.0 起 token 走 CSS）
-- 路线图：语法高亮 / gfm alert / 主题选择持久化 / 台账落盘
+- 路线图：语法高亮 / gfm alert / 选择持久化 / 台账落盘
