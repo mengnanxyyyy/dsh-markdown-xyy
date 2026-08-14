@@ -21,9 +21,10 @@
 | B2 | 叠加层机制：不改基线主题，卸载即还原，同一 source 更新即整层替换 | ✅ v0.1.0 |
 | B3 | LobeUI 原生配色（v0.3.0）：中性灰阶（浅 #f8f8f8/#fff ↔ 深 #000/#0d0d0d）、主色中性黑 #222/#eee、边框/文字灰阶按 lobe 生成器映射 | ✅ v0.3.0 |
 | B4 | 语义色取 lobe step9（深档沿用）；浅档按 WCAG AA 实测加深 `#c74330`/`#287b38`/`#985d00`；链接信息蓝 `#005ae0`/`#60b1ff`（AA） | ✅ v0.4.0 |
-| B5 | 主题系统化：每主题一个独立 CSS 文件（`themes/*.css`），构建脚本内联；内置 demo / lobeui-emphasis / inkpaper / qingci | ✅ v0.6.0 |
+| B5 | 主题系统化：每主题一个独立 CSS 文件（`themes/*.css`），构建脚本内联；内置 native / demo / lobeui-emphasis / inkpaper / qingci | ✅ v0.6.0 |
 | B6 | 设置页「主题设置」（`settings.section`）：卡片式切换（色板预览 + 会话级内存态，默认 `ACTIVE_THEME` 可配置） | ✅ v0.5.0 |
 | B7 | demo.css：DSH 默认主题（出厂 token 值 + 全元素目录注释，随版本同步） | ✅ v0.6.0 |
+| B8 | 「原生」主题（v0.7.0）：完全不注入插件样式（token/排版/变量全不覆盖），一键恢复 DSH 出厂观感；插件自有 UI 保留最小样式（变量带默认回退） | ✅ v0.7.0 |
 | B8 | 第三档 auto：监听 `prefers-color-scheme` 事件重算 token | 🔜 路线图 |
 | B9 | 跟随系统深浅色（`theme` 服务内置感知；v0.6.0 起用产品原生 `body[data-ds-dark-theme]` 机制） | ✅ 平台机制 |
 

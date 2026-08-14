@@ -1,5 +1,5 @@
 // ============================================================
-// Client half v0.6.0 — 主题系统（CSS 文件驱动）+ Markdown 排版 + 版本面板
+// Client half v0.7.0 — 主题系统（CSS 文件驱动）+ Markdown 排版 + 版本面板
 //
 // ⚠️ 本文件由 scripts/build-client.js 生成 —— THEMES 部分禁止手改！
 //    主题定义在 themes/*.css（每主题一个 CSS 文件），修改后运行：
@@ -27,14 +27,14 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '0.6.0',
+  version: '0.7.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '主题改为独立 CSS 文件：themes/*.css（每主题一文件，含注释），构建脚本内联进 client.js',
-    '新增 demo.css：DSH 默认主题（body/body[data-ds-dark-theme] 原生挂载机制 + 出厂 token 值 + 全元素目录注释）',
-    'AGENTS.md 记录主题文件约定与构建流程',
+    '新增「原生」主题（themes/native.css）：完全不注入插件样式（不覆盖 token、不注入排版骨架、不定义变量），一键恢复 DSH 出厂观感',
+    '面板样式变量加回退值：原生模式下插件自有 UI（版本卡片/主题设置页）仍正常渲染',
+    '切换引擎支持原生分支：原生主题仅注入 PANEL_CSS，离开时自动卸载全部插件样式',
   ],
 }
 
@@ -43,6 +43,12 @@ const ACTIVE_THEME = 'lobeui-emphasis'
 
 // ---------- §2 主题元信息（显示名/描述/色板预览；CSS 内容在 §3） ----------
 const THEME_META = {
+  'native': {
+    name: '原生（无插件样式）',
+    desc: '完全恢复 DSH 出厂观感：不覆盖 token、不注入排版',
+    swatches: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'],
+    native: true, // 原生模式标记：运行时只注入 PANEL_CSS，跳过 TYPO_CSS 与主题 CSS
+  },
   'demo': {
     name: 'DSH 默认',
     desc: 'DSH 出厂观感（全元素目录参考）',
@@ -135,20 +141,20 @@ const PANEL_CSS = [
   '.mdvr-card { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); font-size: 13px; line-height: 1.6; }',
   '.mdvr-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }',
   '.mdvr-title { font-weight: 650; font-size: 13px; }',
-  '.mdvr-badge { font-family: var(--mdvr-mono); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--mdvr-accent); color: #ffffff; }',
+  '.mdvr-badge { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--mdvr-accent, #5856d6); color: #ffffff; }',
   '.mdvr-meta { color: var(--dsw-alias-label-secondary); font-size: 12px; opacity: 0.9; }',
   '.mdvr-changes { margin: 2px 0 0; padding-left: 18px; color: var(--dsw-alias-label-secondary); }',
   '.mdvr-changes li { margin: 2px 0; }',
-  '.mdvr-hist { border-top: 1px dashed var(--mdvr-accent-fainter); padding-top: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }',
+  '.mdvr-hist { border-top: 1px dashed var(--mdvr-accent-fainter, #cdccf3); padding-top: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }',
   '.mdvr-hist-title { font-size: 11px; color: var(--dsw-alias-label-secondary); text-transform: uppercase; letter-spacing: 0.05em; }',
   '.mdvr-hist-item { display: flex; gap: 8px; align-items: baseline; font-size: 12px; }',
-  '.mdvr-tag { font-family: var(--mdvr-mono); font-size: 10px; flex: none; }',
+  '.mdvr-tag { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 10px; flex: none; }',
   // 主题设置页
   '.mdvr-themes { display: flex; flex-direction: column; gap: 8px; }',
   '.mdvr-themes-title { font-size: 12px; color: var(--dsw-alias-label-secondary); }',
   '.mdvr-theme-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }',
-  '.mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint); }',
-  '.mdvr-theme-card-active { border-color: var(--mdvr-accent); box-shadow: 0 0 0 1px var(--mdvr-accent); }',
+  '.mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }',
+  '.mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }',
   '.mdvr-theme-swatches { display: flex; gap: 4px; }',
   '.mdvr-theme-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--dsw-alias-border-l1); }',
   '.mdvr-theme-info { display: flex; flex-direction: column; gap: 2px; }',
@@ -163,13 +169,21 @@ let activeThemeId = ACTIVE_THEME  // 当前生效主题 id
 let themeDisposer = null      // 当前样式表清理函数
 
 // 激活主题：注入 骨架 + 主题 CSS + 面板样式（先卸旧表再注入）
+// 原生模式（THEME_META[id].native）：只注入 PANEL_CSS，不碰产品 token 与排版
 // 说明：token 与强调变量都直接写在主题 CSS 的 body / body[data-ds-dark-theme] 上，
-//       与产品挂载机制一致（注入顺序晚于产品样式表 → 同选择器后者胜出）。
+//       与产品挂载机制一致（注入顺序晚于产品样式表 → 同选择器后者胜出）；
+//       切换主题时旧样式表整体卸载 → 产品观感随之恢复。
 function activateTheme(ctx, id) {
   const entry = THEMES[id]
   if (!entry) return
   if (themeDisposer) { themeDisposer(); themeDisposer = null }
-  themeDisposer = styles.insert(TYPO_CSS + '\n' + entry.css + '\n' + PANEL_CSS)
+  const meta = THEME_META[id] || {}
+  if (meta.native) {
+    // 原生模式：仅保留插件自有 UI 的最小样式（不影响产品界面）
+    themeDisposer = styles.insert(PANEL_CSS)
+  } else {
+    themeDisposer = styles.insert(TYPO_CSS + '\n' + entry.css + '\n' + PANEL_CSS)
+  }
   activeThemeId = id
 }
 

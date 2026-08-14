@@ -47,6 +47,7 @@ body[data-ds-dark-theme] { ... }
 
 | 文件 | 名称 | 风格 |
 | --- | --- | --- |
+| `themes/native.css` | 原生（无插件样式） | **零干预**：不含任何规则（token/变量/排版全不覆盖），运行时只注入插件自有 UI 的 PANEL_CSS，产品界面 100% DSH 出厂观感 |
 | `themes/demo.css` | DSH 默认 | **出厂观感**：13 token 取 DSH 出厂值（`dsh-client-ui-theme` 的 `--dsw-static-*`），强调色用品牌蓝 `#5686fe` 体系；§C 是全元素目录（每元素一条规则 + 注释说明控制哪部分） |
 | `themes/lobeui-emphasis.css` | LobeUI 风格（强调） | LobeUI 中性灰阶 + 靛蓝强调系统（默认启用） |
 | `themes/inkpaper.css` | 墨纸 · InkPaper | 暖纸：米白纸底 + 墨褐 accent + 琥珀 highlight |
