@@ -1,0 +1,19 @@
+{
+  "project": "dsh-markdown-xyy",
+  "description": "版本记录 + Markdown 对话主题排版插件",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "packageId": "pkg-1",
+      "name": "墨纸 · InkPaper",
+      "palette": "inkpaper",
+      "date": "2026-08-14",
+      "changes": [
+        "搭建快速迭代架构：双半分工 + 版本台账 + 迭代手册",
+        "主题层：13 个 token 覆盖（宣纸浅色 / 玄夜深色）",
+        "Markdown 排版：标题/列表/代码/引用/表格/分割线基线",
+        "版本面板：cordis_run 卡片内显示当前版本与历史台账"
+      ]
+    }
+  ]
+}
