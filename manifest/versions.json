@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.4",
+      "packageId": "pkg-24",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-15",
+      "changes": [
+        "修复编辑器叠加层：pre/textarea 断行一致（去 overflow-wrap:break-word）+ -webkit-text-fill-color 彻底透明 → 消除叠字重叠（panel.css 资产，刷新即生效）",
+        "编辑器高亮异步化（rAF）：输入与高亮分离 → 大文本粘贴/编辑不卡顿"
+      ]
+    },
+    {
       "version": "1.2.3",
       "packageId": "pkg-23",
       "name": "LobeUI 风格 · 主题系统",

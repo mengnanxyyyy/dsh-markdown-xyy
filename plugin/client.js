@@ -27,14 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.2.3',
+  version: '1.2.4',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '传输修复：所有主题内容走分块传输（8000 字符/片），解决消息通道 ~16KB 上限导致的资产加载失败、主题保存静默截断',
-    'CSS 语法校验：保存前检测注释/字符串/花括号/圆括号闭合，错误明确拒绝并提示（不再写入损坏文件）',
-    'asset RPC 拆分：themeAssets.core（骨架+面板）+ themeAssets.template（分块）；模板恢复完整版',
+    '修复编辑器叠加层：pre 与 textarea 断行/透明一致（去 overflow-wrap:break-word + -webkit-text-fill-color），消除叠字重叠',
+    '编辑器高亮异步化（rAF）：输入与高亮分离，大文本粘贴/编辑不卡顿',
   ],
 }
 
@@ -394,8 +393,16 @@ function ThemeEditor(props) {
   const [css, setCss] = React.useState(props.initialCss || '')
   const [status, setStatus] = React.useState('')
   const [busy, setBusy] = React.useState(false)
+  // 高亮结果与输入分离：输入即时（onChange 只 setCss），高亮异步（rAF）→ 大文本粘贴/编辑不卡顿
+  const [hl, setHl] = React.useState(() => highlightCss(props.initialCss || ''))
   const taRef = React.useRef(null)
   const preRef = React.useRef(null)
+  React.useEffect(() => {
+    const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (fn) => setTimeout(fn, 0)
+    const caf = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout
+    const id = raf(() => setHl(highlightCss(css)))
+    return () => caf(id)
+  }, [css])
 
   const syncScroll = (e) => {
     const p = preRef.current
@@ -446,7 +453,7 @@ function ThemeEditor(props) {
       }),
     ),
     React.createElement('div', { className: 'mdvr-editor-body' },
-      React.createElement('pre', { ref: preRef, className: 'mdvr-editor-pre', dangerouslySetInnerHTML: { __html: highlightCss(css) } }),
+      React.createElement('pre', { ref: preRef, className: 'mdvr-editor-pre', dangerouslySetInnerHTML: { __html: hl } }),
       React.createElement('textarea', {
         ref: taRef,
         className: 'mdvr-editor-ta',

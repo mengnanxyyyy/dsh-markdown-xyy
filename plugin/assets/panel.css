@@ -46,8 +46,11 @@
 .mdvr-editor-label { font-size: 12px; color: var(--dsw-alias-label-secondary); flex: none; }
 .mdvr-editor-input { flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); font-size: 12px; }
 .mdvr-editor-body { position: relative; height: 320px; }
-.mdvr-editor-pre, .mdvr-editor-ta { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 12px/1.6 var(--mdvr-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); white-space: pre-wrap; overflow-wrap: break-word; tab-size: 2; overflow: auto; border: 0; }
-.mdvr-editor-ta { background: transparent; color: transparent; caret-color: var(--dsw-alias-label-primary); resize: none; outline: none; z-index: 1; }
+/* 叠加对齐铁律：pre 与 textarea 的字体/行高/内边距/断行必须完全一致，否则错位叠字。
+   不用 overflow-wrap: break-word（textarea soft wrap 与 pre-wrap 断行点不一致）；
+   textarea 需 -webkit-text-fill-color 彻底透明（仅 color: transparent 在 WebKit 下会残留文字→叠字） */
+.mdvr-editor-pre, .mdvr-editor-ta { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 12px/1.6 var(--mdvr-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); white-space: pre-wrap; tab-size: 2; overflow: auto; border: 0; text-align: left; letter-spacing: normal; word-spacing: normal; }
+.mdvr-editor-ta { background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--dsw-alias-label-primary); resize: none; outline: none; z-index: 1; }
 .mdvr-editor-pre { z-index: 0; pointer-events: none; }
 .mdvr-editor-pre .hl-com { color: var(--dsw-alias-label-secondary); font-style: italic; }
 .mdvr-editor-pre .hl-str { color: var(--mdvr-highlight, #b3541e); }
