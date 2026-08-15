@@ -1,8 +1,10 @@
-# 主题系统说明（v0.6.0）
+# 主题系统说明（v1.2.0 资产文件化）
 
-> 插件能控制的全部 CSS 收敛为「主题系统」：**每套主题 = `themes/` 下一个独立 CSS 文件**，
-> 由构建脚本内联进插件（`node scripts/build-client.js`）。
-> 项目约定见 `AGENTS.md`（铁律：主题必须 CSS 文件、demo.css 必须随版本同步）。
+> 插件能控制的全部 CSS 收敛为「主题系统」：**每套主题 = `themes/` 下一个独立 CSS 文件**。
+> v1.2.0 起全部资产文件化：内置主题 + 共享资产（排版骨架/面板样式/新建模板）由 **Host 运行时从文件读取**
+> （`themes.builtin.list` / `themeAssets.get` RPC，路径基于 `sandboxPolicy.workspaceRoot`），
+> **改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
+> 项目约定见 `AGENTS.md`。
 
 ## 一、插件能控制什么 / 到什么程度
 
@@ -10,15 +12,15 @@
 | --- | --- | --- | --- |
 | ① 全局 token | `--dsw-alias-*` 13 个（bg 三层/overlay/边框×2/品牌/文字×2/语义×3/侧栏） | 整个应用表面、文字、边框、语义色 | 浅/深双值，全量覆盖 |
 | ② 强调变量 | `--mdvr-*`（accent 系 5 个 + highlight 系 2 个 + quote/code/table 系 5 个 + link 系 2 个） | 排版层的全部色彩细节 | 浅/深双值 |
-| ③ 元素排版 | `TYPO_CSS` 约 30 条规则：字体栈、字号、行高、间距、圆角、边框、阴影、动效、列表符号、表格、代码、引用、hr、kbd、img、mark | 所有 Markdown 元素的样式 | 规则级（`:where()` 零优先级） |
-| ④ 面板 UI | `PANEL_CSS` + 自绘组件（版本卡片 / 主题设置页） | 插件自有 UI | 完全控制 |
+| ③ 元素排版 | `plugin/assets/typography.css` 约 30 条规则：字体栈、字号、行高、间距、圆角、边框、阴影、动效、列表符号、表格、代码、引用、hr、kbd、img、mark | 所有 Markdown 元素的样式 | 规则级（`:where()` 零优先级） |
+| ④ 面板 UI | `plugin/assets/panel.css` + 自绘组件（版本卡片 / 主题设置页 / 主题编辑器） | 插件自有 UI | 完全控制 |
 
 ### 明确做不到（平台限制）
 
 1. **不改产品 DOM**：不能改类名、结构、属性；不能操作 `document.body`/`window`。
 2. **零优先级**：`:where()` 意味着产品显式样式永远优先，我们只兜底"裸语义元素"。
 3. **token 名单固定**：13 个 `--dsw-alias-*` 由平台 `Theme.listTokens` 决定，不可新增（新色只能走 `--mdvr-*` 自定义变量）。
-4. **无持久化**：动态插件是内存态，设置页的选择在刷新/重启后恢复默认（`ACTIVE_THEME` 配置项决定默认值）。
+4. **无持久化**：动态插件是内存态，设置页的选择在刷新/重启后恢复默认（`DEFAULT_SELECTION = 'system-native'` 决定默认值）。
 5. **无 JS 组件进对话流**：只能注册平台预留的座位（run 卡片、设置页、侧栏动作等）。
 
 ## 二、主题文件格式（`themes/*.css`）
@@ -41,7 +43,8 @@ body[data-ds-dark-theme] { ... }
 要点：
 - **挂载机制与产品一致**：浅色 `body`、深色 `body[data-ds-dark-theme]`（产品用属性选择器而非 `prefers-color-scheme`）。插件样式注入晚于产品样式表 → 同选择器后者胜出。
 - 变量齐全性：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。
-- **共享骨架 `TYPO_CSS` 只引用变量，不含写死色值** —— 主题切换 = 换变量，骨架不动。
+- **共享骨架 `plugin/assets/typography.css` 只引用变量，不含写死色值** —— 主题切换 = 换变量，骨架不动。
+
 
 ## 三、选择模型（v0.9.0）
 
@@ -50,10 +53,15 @@ body[data-ds-dark-theme] { ... }
 1. **「系统自带」（默认，`DEFAULT_SELECTION = 'system-native'`）**：插件零干预（不注入 token/排版/变量），深浅跟随系统/外观偏好，☀️/🌙/🖥️ 三档可用（持久保存）。
 2. **第三方主题（无深浅之分）**：选中后外观三档按钮变灰禁用（`disabled: !isSystem`），主题按当前生效档渲染自身色板；回到「系统自带」三档重新可用。默认行为 = 原生（插件不做任何主题动作）。
 
-### 用户主题（v1.0.0+，动态添加）
+### 用户主题（v1.0.0+，动态添加；v1.2.0 起可在设置页内编辑）
 
 - 目录：`$HOME/.dsh/web-themes/`（v1.1.0 起**系统动态解析**，不硬编码：shell 读 `$HOME` → `sandboxPolicy.workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 回退，见 host.js `resolveUserThemesDir`）
-- 放入任意 `*.css`（三段式格式，参考 `$HOME/.dsh/web-themes/example.css` 或仓库 `themes/*.css`）→ 设置页「🔄 刷新用户主题」即生效，**无需打包/升级插件**
+- 添加方式三选一：
+  1. 手动放入任意 `*.css`（三段式格式，参考 `$HOME/.dsh/web-themes/example.css` 或仓库 `themes/*.css`）→ 设置页「🔄 刷新用户主题」即生效，**无需打包/升级插件**；
+  2. 设置页「🆕 新建用户主题」：以三段式模板起步（内容来自 `plugin/assets/template.css`，浅色档 / 深色档 / 元素定制注释），填文件名保存；
+  3. 已有主题点卡片右上「✏️ 编辑」：改 CSS 后「💾 保存」写回原文件（Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。
+- 编辑器能力（v1.2.0）：**实时语法高亮**（透明 textarea 叠彩色 pre：注释/字符串/选择器/变量/at 规则/颜色/数值/属性名分色，跟随主题变量配色）；「🧹 格式化」一键排版（补分号、花括号换行、2 空格缩进、注释保留）；「Tab」插入缩进；保存成功后若该主题正被使用则自动重新应用（修改即时生效）。
+- **内置主题只读**：仓库 `themes/*.css` 的卡片无「编辑」按钮；但 v1.2.0 起内置主题与骨架/面板样式由 Host 从文件读取，**改 `themes/*.css` 或 `plugin/assets/*.css` 后刷新/重启插件即生效**（无需重新打包）。
 - 选中后与内置第三方主题一样无深浅之分（外观三档灰置，回到「系统自带」恢复）
 
 > `demo.css`（DSH 默认）与 `native.css`（原生）已随 v0.9.0 移除，由「系统自带」统一承担原生观感（历史版本在 git 中可查）。
@@ -75,8 +83,9 @@ body[data-ds-dark-theme] { ... }
 
 ## 五、构建与切换机制
 
-- **构建**：`node scripts/build-client.js` → 读取 `themes/*.css`，JSON 转义后生成 `plugin/client.js` 的 `THEMES` 注册表（`THEMES` 禁止手改）。
-- **切换（设置页/会话级）**：`activateTheme(id)` 注入 `TYPO_CSS + 主题css + PANEL_CSS`（先 dispose 旧表）；默认主题由 `ACTIVE_THEME` 决定。
+- **构建（v1.2.0 起）**：`node scripts/build-client.js` = 拷贝 `plugin/src/client.core.js` → `plugin/client.js` + 资产完整性检查。CSS 资产不再内联：Host 经 `themes.builtin.list` / `themeAssets.get` 从 `themes/*.css` 与 `plugin/assets/*.css` 读取（`sandboxPolicy.workspaceRoot` 定位）。
+- **define 传输**：`node scripts/minify.js` 生成精简双半（仅删注释/折叠空白，token 流等价校验），一次传 host+client 双半。
+- **切换（设置页/会话级）**：`applySelection(id)` 注入 `typography.css + 主题css + panel.css`（先 dispose 旧表）；默认选择 `DEFAULT_SELECTION = 'system-native'`（资产就绪后应用）。
 - **卸载**：`ctx.effect` 持有样式表 disposer，stop/update/undefine 自动还原。
 
 ## 六、如何新增一个主题

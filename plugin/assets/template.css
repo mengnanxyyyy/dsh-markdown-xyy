@@ -1,0 +1,73 @@
+/* ============================================================
+ * 主题：新建主题（修改名称与颜色后保存）
+ * 说明：① 浅色档写 body；② 深色档写 body[data-ds-dark-theme]；③ 可选元素定制
+ * ============================================================ */
+
+/* ① 浅色档：13 个全局 token + 强调变量 */
+body {
+  --dsw-alias-bg-base: #faf6ef;
+  --dsw-alias-bg-layer-1: #f2ece0;
+  --dsw-alias-bg-layer-2: #e9e1d0;
+  --dsw-alias-bg-overlay: #fffdf8;
+  --dsw-alias-border-l1: #dbcfb3;
+  --dsw-alias-border-l2: #c6b68f;
+  --dsw-alias-brand-primary: #8a5a2b;
+  --dsw-alias-label-primary: #292113;
+  --dsw-alias-label-secondary: #71664f;
+  --dsw-alias-state-error-primary: #c74330;
+  --dsw-alias-state-success-primary: #287b38;
+  --dsw-alias-state-warn-primary: #985d00;
+  --dsw-specific-sidebar-fill: #ece4d5;
+  --mdvr-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mdvr-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --mdvr-mm: 2;
+  --mdvr-link: #005ae0;
+  --mdvr-link-hover: #0072f5;
+  --mdvr-highlight: #b3541e;
+  --mdvr-highlight-soft: #fdf0dc;
+  --mdvr-accent: #8a5a2b;
+  --mdvr-accent-text: #6d4a1f;
+  --mdvr-accent-soft: #f4ecdc;
+  --mdvr-accent-faint: #cab5a0;
+  --mdvr-accent-fainter: #dccebf;
+  --mdvr-code-border: #e6dcc8;
+  --mdvr-table-head-bg: #f1e8d8;
+  --mdvr-table-head-text: #6d4a1f;
+  --mdvr-quote-bg: #f6efe2;
+  --mdvr-quote-border: #8a5a2b;
+}
+
+/* ② 深色档 */
+body[data-ds-dark-theme] {
+  --dsw-alias-bg-base: #14120f;
+  --dsw-alias-bg-layer-1: #1d1915;
+  --dsw-alias-bg-layer-2: #28231d;
+  --dsw-alias-bg-overlay: #211c17;
+  --dsw-alias-border-l1: #3a342b;
+  --dsw-alias-border-l2: #4a4132;
+  --dsw-alias-brand-primary: #d9a15c;
+  --dsw-alias-label-primary: #efe8da;
+  --dsw-alias-label-secondary: #a8a08c;
+  --dsw-alias-state-error-primary: #f4416c;
+  --dsw-alias-state-success-primary: #62c473;
+  --dsw-alias-state-warn-primary: #ee9e0b;
+  --dsw-specific-sidebar-fill: #1a1612;
+  --mdvr-link: #60b1ff;
+  --mdvr-link-hover: #a7d3ff;
+  --mdvr-highlight: #ffb45e;
+  --mdvr-highlight-soft: #3a2f1e;
+  --mdvr-accent: #d9a15c;
+  --mdvr-accent-text: #e8b872;
+  --mdvr-accent-soft: #2b2418;
+  --mdvr-accent-faint: #6d5232;
+  --mdvr-accent-fainter: #4f3d26;
+  --mdvr-code-border: #4a3d28;
+  --mdvr-table-head-bg: #2b2418;
+  --mdvr-table-head-text: #e8b872;
+  --mdvr-quote-bg: #221d15;
+  --mdvr-quote-border: #d9a15c;
+}
+
+/* ③ 专属元素定制（可选） */
+:where(blockquote) { border-radius: 0 12px 12px 0; }
+

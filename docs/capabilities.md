@@ -24,6 +24,8 @@
 | B5 | 主题系统化：每主题一个独立 CSS 文件（`themes/*.css`），构建脚本内联；内置 lobeui-emphasis / inkpaper / qingci 三套主题 | ✅ v0.6.0 |
 | B6 | 设置页「主题设置」（`settings.section`）：选择模型——「系统自带」默认（零干预）+ 内置/用户主题卡片（互斥单选）；外观三档按钮在第三方/用户主题激活时变灰禁用 | ✅ v0.9.0 |
 | B7 | 用户主题动态加载：`$HOME/.dsh/web-themes/`（v1.1.0 起系统动态解析：shell 读 `$HOME` → workspaceRoot 推导 → 硬编码回退）放 CSS 文件即新主题（无需打包升级），Host fs 读取 + 设置页一键刷新 | ✅ v1.0.0 → v1.1.0 |
+| B11 | 用户主题管理（v1.2.0）：设置页「🆕 新建用户主题」（模板来自 plugin/assets/template.css）+ 每卡「✏️ 编辑」；内置主题只读（无编辑按钮）；编辑器 = 实时语法高亮（透明 textarea 叠彩色 pre）+「🧹 格式化」（补分号/换行/2 空格缩进/注释保留）+「💾 保存」写回文件（Host `themes.user.save` RPC，沙箱放开 `danger-full-access`），保存后正在使用的主题自动重新应用 | ✅ v1.2.0 |
+| B12 | 资产文件化（v1.2.0）：内置主题/排版骨架/面板样式/新建模板由 Host 从文件读取（themes/*.css + plugin/assets/*.css，基于 workspaceRoot），改文件刷新即生效无需升级插件；Host 新增 themes.builtin.list / themeAssets.get RPC；构建脚本改为源码拷贝 | ✅ v1.2.0 |
 | B8 | 「系统自带」选项：插件零干预（不注入 token/排版/变量），深浅跟随系统，默认选择 | ✅ v0.9.0 |
 | B9 | 外观三档切换（v0.8.0）：设置页 ☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统（产品 `theme.setTheme` 官方接口，实时生效 + 偏好持久化） | ✅ v0.8.0 |
 | B9 | 第三档 auto：监听 `prefers-color-scheme` 事件重算 token | 🔜 路线图（v0.8.0 已提供产品级「跟随系统」档，此路线图项已基本覆盖） |

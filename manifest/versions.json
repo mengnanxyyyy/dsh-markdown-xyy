@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.0",
+      "packageId": "pkg-17",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-14",
+      "changes": [
+        "用户主题管理：设置页新增「🆕 新建用户主题」与每卡「✏️ 编辑」按钮，内置主题只读",
+        "内置主题编辑器：实时语法高亮（透明 textarea 叠彩色 pre）+ 一键格式化 + 保存写回 ~/.dsh/web-themes（Host themes.user.save，沙箱放开到 full）",
+        "主题资产文件化：内置主题/排版骨架/面板样式/新建模板改为 Host 从文件读取（themes/*.css + plugin/assets/*.css，改文件即生效，无需升级插件）；Host 新增 themes.builtin.list / themeAssets.get RPC"
+      ]
+    },
+    {
       "version": "1.1.0",
       "packageId": "pkg-10",
       "name": "LobeUI 风格 · 主题系统",

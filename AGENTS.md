@@ -5,47 +5,67 @@
 ## 项目是什么
 
 DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版本记录 + Markdown 对话主题排版**。
-- Host 半：版本台账（`versions.note` / `versions.list` RPC，内存态）
-- Client 半：主题系统（`themes/*.css`）+ 共享排版骨架 + 版本面板 + 设置页「主题设置」
+- Host 半：版本台账（`versions.note` / `versions.list` RPC，内存态）+ 主题资产/用户主题读写
+- Client 半：主题系统（选择引擎 + 设置页 + 编辑器）+ 版本面板
 
 ## 🔒 主题铁律（最重要）
 
-1. **主题必须是 CSS 文件**：内置主题在仓库 `themes/`（每主题一文件，当前：`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）；**用户主题在 `$HOME/.dsh/web-themes/`**（插件专属目录，用户自行放置 `*.css` 即动态新主题，**无需打包/升级插件**，Host 用 fs 服务读取，设置页「🔄 刷新用户主题」重新加载）。**目录不硬编码**：Host 按 `shell 读 $HOME` → `sandboxPolicy.workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 三级解析（见 host.js `resolveUserThemesDir`）。
-2. **`plugin/client.js` 的 `THEMES` 是构建产物，禁止手改**。改内置主题只改 `themes/*.css`，改逻辑只改 `plugin/src/client.core.js`，然后运行：
+1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
+   - 内置主题：仓库 `themes/*.css`（`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）
+   - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（新建用户主题模板）
+   - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
+   - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取（路径基于 `sandboxPolicy.workspaceRoot` = 会话工作区）；客户端在 apply 时缓存一次。
+   - 用户主题目录**不硬编码**：`shell 读 $HOME` → `workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 三级解析（host.js `resolveUserThemesDir`）。
+2. **`plugin/client.js` = `plugin/src/client.core.js` 的拷贝（构建产物，禁止手改）**。改逻辑只改 `plugin/src/client.core.js`，然后：
    ```bash
-   node scripts/build-client.js
+   node scripts/build-client.js   # 拷贝 + 资产完整性检查
    ```
+   ⚠️ `scripts/extract-assets.js` 是 v1.2.0 的一次性迁移工具（从旧内联常量抽取资产文件），勿再运行。
 3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
 4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
+5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（模板来自 `plugin/assets/template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
 6. 主题 CSS 内同时定义：13 个 `--dsw-alias-*`（全局配色）+ `--mdvr-*`（强调变量：accent 系 5 个、quote/code/table 系 5 个、link/highlight 系 4 个）。**不再调用 `theme.overrideTokens`**。
-7. **PANEL_CSS 里的 `var(--mdvr-*)` 必须带默认回退值**（如 `var(--mdvr-accent, #5856d6)`），否则原生模式下插件自有 UI 样式失效。
+7. **panel.css 里的 `var(--mdvr-*)` 必须带默认回退值**（如 `var(--mdvr-accent, #5856d6)`），否则原生模式下插件自有 UI 样式失效。
+
+## 📦 define 传输约定（重要）
+
+- **每次 cordis_define 必须同时传 `code.host` + `code.client` 双半**（单包运行 = 单包双半，host-only 或 client-only 包都是废包）。
+- **用 minify 产物传输**：单条消息有 ~26KB 转义字节上限，`plugin/host.js` + `plugin/client.js` 全文（~31KB raw）放不下。先跑：
+  ```bash
+  node scripts/minify.js plugin/host.js /tmp/host.min.js
+  node scripts/minify.js plugin/client.js /tmp/client.min.js   # 可选 --strip-css-comments（模板内 CSS 注释）
+  node --check /tmp/host.min.js && node --check /tmp/client.min.js
+  ```
+  minify 只删注释/折叠空白（保留换行，ASI 安全），并做 token 流等价断言；传输前务必确认两半都完整（用 `cordis_inspect_self` 核对 code.host / code.client 均存在且含 `return {` 结尾）。
+- 历史废包 pkg-11 ~ pkg-16（host-only / client-only / 残缺包）不可删除，忽略即可。
 
 ## 能力边界（详见 docs/themes.md）
 
-- 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（TYPO_CSS 约 30 条）④ 面板 UI
-- 不能：改产品 DOM、token 名单固定 13 个、`:where()` 零优先级（产品显式样式优先）、无持久化（内存态，`ACTIVE_THEME` 决定默认）
+- 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（typography.css 约 30 条）④ 面板 UI（panel.css）
+- 不能：改产品 DOM、token 名单固定 13 个、`:where()` 零优先级（产品显式样式优先）、无持久化（内存态，刷新恢复 `DEFAULT_SELECTION`）
 
 ## 标准迭代流程（每次版本）
 
 1. 决定版本号（semver），更新 `plugin/host.js` + `plugin/src/client.core.js` 的 `MANIFEST`（双份一致）
-2. 改 `themes/*.css`（含 demo.css 同步）→ `node scripts/build-client.js`
+2. 改 `themes/*.css` 或 `plugin/assets/*.css` 或逻辑 → `node scripts/build-client.js`
 3. `manifest/versions.json` 顶部插入条目（packageId 留空）
-4. `cordis_define`（kind: existing，pluginId 用当前实例）→ 拿到新 packageId
+4. minify 双半 → `cordis_define`（kind: existing，pluginId 用当前实例；**双半一次传完**）→ 拿到新 packageId → `cordis_inspect_self` 核对双半完整
 5. `cordis_run`（update）→ 可能需用户审批 → 通过后验证
 6. 回填 packageId → 更新 README/capabilities → `git commit` + `git tag vX.Y.Z`
 
 ## 常见坑
 
-- `THEMES` 手改会被构建覆盖；改完 css 忘了 build 会导致 define 的代码与文件不一致
+- **define 漏传 host 或 client**：先 inspect 确认双半都在再 run（本会话踩过 5 次）
+- 传输超长被截断：单条消息约 26KB 转义上限，超长会静默截断成残缺包 —— 永远用 minify 产物
 - 浅档语义色要过 WCAG AA（参考 `docs/readability-a11y.md` 的实测值：error #c74330 / success #287b38 / warn #985d00）
 - `body[data-ds-dark-theme]` 选择器拼错 → 深色档不回退
-- 动态插件是内存态：进程重启后插件丢失，需用当前 `plugin/host.js` + `plugin/client.js` 重新 define（台账历史在 `manifest/versions.json`）
+- 动态插件是内存态：进程重启后插件丢失，需用当前 `plugin/host.js` + `plugin/client.js`（minify 后）重新 define（台账历史在 `manifest/versions.json`）
 - 审批被拒不要重复请求；技术失败读 `cordis_inspect_self` 诊断后修同一插件
 
 ## 当前状态（2026-08-14）
 
-- 最新版本：v1.1.0（用户主题目录系统动态解析：`$HOME/.dsh/web-themes`）
+- 最新版本：v1.2.0（用户主题管理：新建 / 编辑 / 保存，编辑器带实时语法高亮 + 一键格式化；内置主题只读；资产文件化）
 - 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / 用户主题 `user:<id>`
-- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮）
-- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`（v0.6.0 起 token 走 CSS）；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）
-- 路线图：语法高亮 / gfm alert / 选择持久化 / 台账落盘
+- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位）
+- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）
+- 路线图：gfm alert / 选择持久化 / 台账落盘

@@ -1,0 +1,67 @@
+/* ============================================================
+ * plugin/assets/panel.css — 插件自有 UI 样式（版本卡片 / 主题设置页 / 主题编辑器）
+ * 由 Host themeAssets.get RPC 读取；var(--mdvr-*) 必须带默认回退值
+ * ============================================================ */
+
+.mdvr-card { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); font-size: 13px; line-height: 1.6; }
+.mdvr-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mdvr-title { font-weight: 650; font-size: 13px; }
+.mdvr-badge { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--mdvr-accent, #5856d6); color: #ffffff; }
+.mdvr-meta { color: var(--dsw-alias-label-secondary); font-size: 12px; opacity: 0.9; }
+.mdvr-changes { margin: 2px 0 0; padding-left: 18px; color: var(--dsw-alias-label-secondary); }
+.mdvr-changes li { margin: 2px 0; }
+.mdvr-hist { border-top: 1px dashed var(--mdvr-accent-fainter, #cdccf3); padding-top: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+.mdvr-hist-title { font-size: 11px; color: var(--dsw-alias-label-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.mdvr-hist-item { display: flex; gap: 8px; align-items: baseline; font-size: 12px; }
+.mdvr-tag { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 10px; flex: none; }
+.mdvr-themes { display: flex; flex-direction: column; gap: 8px; }
+.mdvr-themes-title { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+.mdvr-themes-title-gap { margin-top: 6px; }
+.mdvr-schemes { display: flex; gap: 6px; }
+.mdvr-scheme-btn { flex: 1; padding: 6px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); }
+.mdvr-scheme-btn:hover:not(:disabled) { border-color: var(--mdvr-accent-faint, #b4b3ed); }
+.mdvr-scheme-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.mdvr-scheme-btn-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); font-weight: 650; }
+.mdvr-theme-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }
+.mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
+.mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }
+.mdvr-theme-swatches { display: flex; gap: 4px; }
+.mdvr-theme-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--dsw-alias-border-l1); }
+.mdvr-theme-info { display: flex; flex-direction: column; gap: 2px; }
+.mdvr-theme-name { font-weight: 650; }
+.mdvr-theme-desc { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+.mdvr-user-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mdvr-refresh-btn { padding: 4px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); }
+.mdvr-refresh-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
+.mdvr-theme-card { position: relative; }
+.mdvr-edit-btn { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); cursor: pointer; font-size: 11px; color: var(--dsw-alias-label-secondary); }
+.mdvr-edit-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); color: var(--mdvr-accent-text, #3a3a4e); }
+.mdvr-theme-card-editable .mdvr-theme-info { padding-right: 44px; }
+.mdvr-editor { margin-top: 8px; border: 1px solid var(--mdvr-accent-faint, #b4b3ed); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); overflow: hidden; }
+.mdvr-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--dsw-alias-border-l1); }
+.mdvr-editor-title { font-weight: 650; font-size: 13px; }
+.mdvr-editor-close { border: 0; background: transparent; cursor: pointer; font-size: 13px; color: var(--dsw-alias-label-secondary); padding: 2px 6px; border-radius: 6px; }
+.mdvr-editor-close:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
+.mdvr-editor-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+.mdvr-editor-label { font-size: 12px; color: var(--dsw-alias-label-secondary); flex: none; }
+.mdvr-editor-input { flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); font-size: 12px; }
+.mdvr-editor-body { position: relative; height: 320px; }
+.mdvr-editor-pre, .mdvr-editor-ta { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 12px/1.6 var(--mdvr-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); white-space: pre-wrap; overflow-wrap: break-word; tab-size: 2; overflow: auto; border: 0; }
+.mdvr-editor-ta { background: transparent; color: transparent; caret-color: var(--dsw-alias-label-primary); resize: none; outline: none; z-index: 1; }
+.mdvr-editor-pre { z-index: 0; pointer-events: none; }
+.mdvr-editor-pre .hl-com { color: var(--dsw-alias-label-secondary); font-style: italic; }
+.mdvr-editor-pre .hl-str { color: var(--mdvr-highlight, #b3541e); }
+.mdvr-editor-pre .hl-var { color: var(--mdvr-accent, #5856d6); font-weight: 600; }
+.mdvr-editor-pre .hl-at { color: var(--mdvr-accent, #5856d6); }
+.mdvr-editor-pre .hl-col { color: var(--mdvr-highlight, #b3541e); font-weight: 600; }
+.mdvr-editor-pre .hl-num { color: var(--mdvr-highlight, #b3541e); }
+.mdvr-editor-pre .hl-prop { color: var(--dsw-alias-label-primary); font-weight: 600; }
+.mdvr-editor-pre .hl-sel { color: var(--mdvr-link, #005ae0); font-weight: 600; }
+.mdvr-editor-foot { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-top: 1px solid var(--dsw-alias-border-l1); }
+.mdvr-editor-status { font-size: 12px; color: var(--mdvr-accent-text, #3a3a4e); flex: 1; min-width: 0; overflow-wrap: break-word; }
+.mdvr-editor-hint { font-size: 11px; color: var(--dsw-alias-label-secondary); opacity: 0.85; flex: none; }
+.mdvr-editor-btn { padding: 5px 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); flex: none; }
+.mdvr-editor-btn:hover:not(:disabled) { border-color: var(--mdvr-accent-faint, #b4b3ed); }
+.mdvr-editor-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mdvr-editor-btn-primary { background: var(--mdvr-accent, #5856d6); border-color: var(--mdvr-accent, #5856d6); color: #ffffff; }
+.mdvr-editor-btn-primary:hover:not(:disabled) { border-color: var(--mdvr-accent, #5856d6); filter: brightness(1.08); }
