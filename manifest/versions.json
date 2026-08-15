@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.1",
+      "packageId": "pkg-19",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-15",
+      "changes": [
+        "修复：Host 项目根改为按内容探测（resolveProjectRoot：workspaceRoot → 其父目录及兄弟目录 → FALLBACK_PROJECT_DIR 兜底），解决 DSH 启动目录 ≠ 插件项目目录时 themes.builtin.list / themeAssets.get 读取失败、设置页无面板样式的问题"
+      ]
+    },
+    {
       "version": "1.2.0",
       "packageId": "pkg-17",
       "name": "LobeUI 风格 · 主题系统",

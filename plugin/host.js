@@ -17,7 +17,10 @@
 //   2) sandboxPolicy.workspaceRoot 推导（/home/<user>/... → /home/<user>）
 //   3) 硬编码回退（本部署环境已知路径）
 const FALLBACK_USER_THEMES_DIR = '/home/lab/.dsh/web-themes'
+// 显式兜底的项目目录（resolveProjectRoot 探测全部失败时使用）
+const FALLBACK_PROJECT_DIR = '/home/lab/xyygithub/dsh-markdown-xyy'
 let userThemesDir = null // 首次解析后缓存
+let projectRoot = null   // 首次探测后缓存
 
 async function resolveUserThemesDir(ctx) {
   if (userThemesDir) return userThemesDir
@@ -51,26 +54,62 @@ async function resolveUserThemesDir(ctx) {
   return userThemesDir
 }
 
-// 工作区根目录（内置主题与共享资产所在）：来自 sandboxPolicy.workspaceRoot
-async function resolveWorkspaceRoot(ctx) {
+// 工作区根目录（内置主题与共享资产所在）：按内容探测，不信任 sandboxPolicy.workspaceRoot
+// ⚠️ 陷阱（v1.2.0 踩坑）：sandboxPolicy.workspaceRoot = DSH 主进程启动目录，
+//    不一定是插件项目目录（本环境 = /home/lab/xyygithub/dsh-xyy-ui）。
+//    探测策略（首次解析后缓存）：
+//      1) sp.workspaceRoot 本身（理想情况即项目目录）
+//      2) 其父目录下的一级子目录（兄弟项目，逐个查 plugin/assets/typography.css + panel.css）
+//      3) 显式兜底（本部署已知项目路径）
+async function resolveProjectRoot(ctx) {
+  if (projectRoot) return projectRoot
+  const fsSvc = ctx.get('fs')
+  if (fsSvc === undefined) return null
+  const hasAssets = async (root) => {
+    try {
+      const a = await fsSvc.stat(root + '/plugin/assets/typography.css')
+      const b = await fsSvc.stat(root + '/plugin/assets/panel.css')
+      return !!(a && b)
+    } catch (e) {
+      return false
+    }
+  }
+  const roots = []
   try {
     const sp = ctx.get('sandboxPolicy')
     if (sp && typeof sp.workspaceRoot === 'string' && sp.workspaceRoot.length > 0) {
-      return sp.workspaceRoot
+      roots.push(sp.workspaceRoot)
+      const parent = sp.workspaceRoot.replace(/\/+$/, '').split('/').slice(0, -1).join('/')
+      if (parent.length > 0) {
+        roots.push(parent) // 父目录本身（项目即 workspaceRoot 的上一级时）
+        try {
+          const entries = await fsSvc.listDir(await fsSvc.resolve(parent))
+          for (const e of entries) {
+            if (e && e.name && e.name.charAt(0) !== '.') roots.push(parent + '/' + e.name)
+          }
+        } catch (e) { /* 忽略：父目录不可列时跳过兄弟扫描 */ }
+      }
     }
   } catch (e) { /* 忽略 */ }
+  // 显式兜底（与 FALLBACK_USER_THEMES_DIR 同风格）
+  roots.push(FALLBACK_PROJECT_DIR)
+  for (const root of roots) {
+    if (await hasAssets(root)) {
+      projectRoot = root
+      console.log('[mdvr] projectRoot = ' + projectRoot)
+      return projectRoot
+    }
+  }
   return null
 }
 
 const MANIFEST = {
-  version: '1.2.0',
+  version: '1.2.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-14',
+  date: '2026-08-15',
   changes: [
-    '用户主题管理：新建（模板）/ 编辑（语法高亮 + 一键格式化 + 保存回写）按钮；内置主题只读，编辑仅限用户主题',
-    '主题资产文件化：内置主题/排版骨架/面板样式/新建模板改为 Host 从文件读取（改文件即生效，无需升级插件）',
-    'Host 新增 themes.builtin.list / themeAssets.get / themes.user.save RPC',
+    '修复：项目根改为按内容探测（workspaceRoot 及其兄弟/上级目录中找 plugin/assets/typography.css + panel.css，再兜底显式路径）——解决 DSH 启动目录 ≠ 项目目录时资产读取失败、设置页无样式的问题',
   ],
 }
 
@@ -111,12 +150,12 @@ return {
     // 面板查询台账快照
     harness.handle('versions.list', async () => snapshot())
 
-    // 列出内置主题（工作区 themes/*.css；文件即主题，改文件后刷新/重启插件即生效，无需升级）
+    // 列出内置主题（项目根 themes/*.css；文件即主题，改文件后刷新/重启插件即生效，无需升级）
     harness.handle('themes.builtin.list', async () => {
       const fsSvc = ctx.get('fs')
-      const root = await resolveWorkspaceRoot(ctx)
+      const root = await resolveProjectRoot(ctx)
       if (fsSvc === undefined || root === null) {
-        return { ok: false, reason: 'fs or workspace unavailable', themes: [] }
+        return { ok: false, reason: 'fs or project root unavailable', themes: [] }
       }
       try {
         const dir = await fsSvc.resolve(root + '/themes')
@@ -137,12 +176,12 @@ return {
       }
     })
 
-    // 共享资产：排版骨架 / 面板样式 / 新建模板（plugin/assets/*.css）
+    // 共享资产：排版骨架 / 面板样式 / 新建模板（项目根 plugin/assets/*.css）
     harness.handle('themeAssets.get', async () => {
       const fsSvc = ctx.get('fs')
-      const root = await resolveWorkspaceRoot(ctx)
+      const root = await resolveProjectRoot(ctx)
       if (fsSvc === undefined || root === null) {
-        return { ok: false, reason: 'fs or workspace unavailable' }
+        return { ok: false, reason: 'fs or project root unavailable' }
       }
       const read = async (name) => {
         try {

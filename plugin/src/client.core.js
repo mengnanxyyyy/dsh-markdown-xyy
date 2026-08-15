@@ -27,14 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.2.0',
+  version: '1.2.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-14',
+  date: '2026-08-15',
   changes: [
-    '用户主题管理：新建（模板）/ 编辑（语法高亮 + 一键格式化 + 保存回写）按钮；内置主题只读，编辑仅限用户主题',
-    '主题资产文件化：内置主题/排版骨架/面板样式/新建模板改为 Host 从文件读取（改文件即生效，无需升级插件）',
-    'Host 新增 themes.builtin.list / themeAssets.get / themes.user.save RPC',
+    '修复：项目根改为按内容探测（workspaceRoot 及其兄弟/上级目录中找 plugin/assets/typography.css + panel.css，再兜底显式路径）——解决 DSH 启动目录 ≠ 项目目录时资产读取失败、设置页无样式的问题',
   ],
 }
 

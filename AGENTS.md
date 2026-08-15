@@ -14,7 +14,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
    - 内置主题：仓库 `themes/*.css`（`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）
    - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（新建用户主题模板）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
-   - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取（路径基于 `sandboxPolicy.workspaceRoot` = 会话工作区）；客户端在 apply 时缓存一次。
+   - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
+   - **项目根探测（v1.2.1 修复）**：⚠️ `sandboxPolicy.workspaceRoot` = **DSH 主进程启动目录**，不一定是插件项目目录（本环境 = `/home/lab/xyygithub/dsh-xyy-ui`）！Host 用 `resolveProjectRoot(ctx)` **按内容探测**：`workspaceRoot` → 其父目录及一级子目录（兄弟项目）→ `FALLBACK_PROJECT_DIR`（`/home/lab/xyygithub/dsh-markdown-xyy`）兜底，以同时存在 `plugin/assets/typography.css` + `panel.css` 为准，首次解析后缓存。
    - 用户主题目录**不硬编码**：`shell 读 $HOME` → `workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 三级解析（host.js `resolveUserThemesDir`）。
 2. **`plugin/client.js` = `plugin/src/client.core.js` 的拷贝（构建产物，禁止手改）**。改逻辑只改 `plugin/src/client.core.js`，然后：
    ```bash
@@ -62,9 +63,9 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - 动态插件是内存态：进程重启后插件丢失，需用当前 `plugin/host.js` + `plugin/client.js`（minify 后）重新 define（台账历史在 `manifest/versions.json`）
 - 审批被拒不要重复请求；技术失败读 `cordis_inspect_self` 诊断后修同一插件
 
-## 当前状态（2026-08-14）
+## 当前状态（2026-08-15）
 
-- 最新版本：v1.2.0（用户主题管理：新建 / 编辑 / 保存，编辑器带实时语法高亮 + 一键格式化；内置主题只读；资产文件化）
+- 最新版本：v1.2.1（修复：项目根按内容探测 `resolveProjectRoot`，解决 DSH 启动目录 ≠ 项目目录时资产读取失败、设置页无样式）
 - 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / 用户主题 `user:<id>`
 - 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位）
 - 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）

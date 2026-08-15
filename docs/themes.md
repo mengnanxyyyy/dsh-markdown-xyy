@@ -2,8 +2,8 @@
 
 > 插件能控制的全部 CSS 收敛为「主题系统」：**每套主题 = `themes/` 下一个独立 CSS 文件**。
 > v1.2.0 起全部资产文件化：内置主题 + 共享资产（排版骨架/面板样式/新建模板）由 **Host 运行时从文件读取**
-> （`themes.builtin.list` / `themeAssets.get` RPC，路径基于 `sandboxPolicy.workspaceRoot`），
-> **改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
+> （`themes.builtin.list` / `themeAssets.get` RPC），**改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
+> v1.2.1 起项目根按内容探测（`resolveProjectRoot`：workspaceRoot → 兄弟目录 → 显式兜底，⚠️ workspaceRoot 是 DSH 启动目录而非必然的项目目录）。
 > 项目约定见 `AGENTS.md`。
 
 ## 一、插件能控制什么 / 到什么程度
