@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.5",
+      "packageId": "pkg-25",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-15",
+      "changes": [
+        "编辑器叠加根治：pre/textarea 一律不软换行（white-space:pre + wrap=\"off\"），长行横向滚动——换行只由 \\n 决定，逐字符对齐，杜绝叠字重叠（v1.2.4 的断行修复不彻底）"
+      ]
+    },
+    {
       "version": "1.2.4",
       "packageId": "pkg-24",
       "name": "LobeUI 风格 · 主题系统",

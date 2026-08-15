@@ -27,13 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.2.4',
+  version: '1.2.5',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '修复编辑器叠加层：pre 与 textarea 断行/透明一致（去 overflow-wrap:break-word + -webkit-text-fill-color），消除叠字重叠',
-    '编辑器高亮异步化（rAF）：输入与高亮分离，大文本粘贴/编辑不卡顿',
+    '编辑器叠加根治：pre/textarea 一律不软换行（white-space:pre + wrap="off"），长行横向滚动，换行只由 \\n 决定 → 逐字符对齐，杜绝叠字重叠',
   ],
 }
 
@@ -461,6 +460,7 @@ function ThemeEditor(props) {
         spellCheck: false,
         autoCapitalize: 'off',
         autoCorrect: 'off',
+        wrap: 'off', // 与 pre 的 white-space:pre 对齐：不软换行，长行横向滚动（杜绝断行错位）
         onChange: (e) => setCss(e.target.value),
         onScroll: syncScroll,
         onKeyDown,
