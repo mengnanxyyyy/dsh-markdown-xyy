@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.2.1',
+  version: '1.2.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '修复：项目根改为按内容探测（workspaceRoot 及其兄弟/上级目录中找 plugin/assets/typography.css + panel.css，再兜底显式路径）——解决 DSH 启动目录 ≠ 项目目录时资产读取失败、设置页无样式的问题',
+    '修复：resolveProjectRoot 的资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径）——v1.2.1 探测未生效的补丁，恢复设置页面板样式',
   ],
 }
 

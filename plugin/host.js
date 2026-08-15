@@ -67,8 +67,9 @@ async function resolveProjectRoot(ctx) {
   if (fsSvc === undefined) return null
   const hasAssets = async (root) => {
     try {
-      const a = await fsSvc.stat(root + '/plugin/assets/typography.css')
-      const b = await fsSvc.stat(root + '/plugin/assets/panel.css')
+      // ⚠️ fs 服务要求 resolve() 句柄（{targetKey}），不能直接传字符串路径
+      const a = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/typography.css'))
+      const b = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/panel.css'))
       return !!(a && b)
     } catch (e) {
       return false
@@ -104,12 +105,12 @@ async function resolveProjectRoot(ctx) {
 }
 
 const MANIFEST = {
-  version: '1.2.1',
+  version: '1.2.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '修复：项目根改为按内容探测（workspaceRoot 及其兄弟/上级目录中找 plugin/assets/typography.css + panel.css，再兜底显式路径）——解决 DSH 启动目录 ≠ 项目目录时资产读取失败、设置页无样式的问题',
+    '修复：resolveProjectRoot 的资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径）——v1.2.1 探测未生效的补丁，恢复设置页面板样式',
   ],
 }
 
@@ -250,7 +251,7 @@ return {
         const dir = await resolveUserThemesDir(ctx)
         // 目录不存在时尽力创建（幂等；shell 可能受限，失败则由 writeText 报错）
         try {
-          const dirStat = await fsSvc.stat(dir)
+          const dirStat = await fsSvc.stat(await fsSvc.resolve(dir))
           if (!dirStat) {
             const shellSvc = ctx.get('shell')
             if (shellSvc !== undefined) {

@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.2",
+      "packageId": "pkg-20",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-15",
+      "changes": [
+        "修复：resolveProjectRoot 资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径，v1.2.1 全部候选 miss 的补丁）——已用诊断包实测命中 /home/lab/xyygithub/dsh-markdown-xyy"
+      ]
+    },
+    {
       "version": "1.2.1",
       "packageId": "pkg-19",
       "name": "LobeUI 风格 · 主题系统",
