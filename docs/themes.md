@@ -50,6 +50,12 @@ body[data-ds-dark-theme] { ... }
 1. **「系统自带」（默认，`DEFAULT_SELECTION = 'system-native'`）**：插件零干预（不注入 token/排版/变量），深浅跟随系统/外观偏好，☀️/🌙/🖥️ 三档可用（持久保存）。
 2. **第三方主题（无深浅之分）**：选中后外观三档按钮变灰禁用（`disabled: !isSystem`），主题按当前生效档渲染自身色板；回到「系统自带」三档重新可用。默认行为 = 原生（插件不做任何主题动作）。
 
+### 用户主题（v1.0.0+，动态添加）
+
+- 目录：`$HOME/.dsh/web-themes/`（v1.1.0 起**系统动态解析**，不硬编码：shell 读 `$HOME` → `sandboxPolicy.workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 回退，见 host.js `resolveUserThemesDir`）
+- 放入任意 `*.css`（三段式格式，参考 `$HOME/.dsh/web-themes/example.css` 或仓库 `themes/*.css`）→ 设置页「🔄 刷新用户主题」即生效，**无需打包/升级插件**
+- 选中后与内置第三方主题一样无深浅之分（外观三档灰置，回到「系统自带」恢复）
+
 > `demo.css`（DSH 默认）与 `native.css`（原生）已随 v0.9.0 移除，由「系统自带」统一承担原生观感（历史版本在 git 中可查）。
 
 ## 四、内置主题

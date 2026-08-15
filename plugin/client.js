@@ -1,5 +1,5 @@
 // ============================================================
-// Client half v1.0.0 — 主题系统（CSS 文件驱动 + 用户主题动态加载）+ Markdown 排版 + 版本面板
+// Client half v1.1.0 — 主题系统（CSS 文件驱动 + 用户主题动态加载）+ Markdown 排版 + 版本面板
 //
 // ⚠️ 本文件由 scripts/build-client.js 生成 —— THEMES 部分禁止手改！
 //    主题定义在 themes/*.css（每主题一个 CSS 文件），修改后运行：
@@ -27,14 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.0.0',
+  version: '1.1.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '用户主题动态加载：~/.dsh/mdvr-themes/ 放 CSS 文件即成为新主题（无需打包/升级插件），设置页一键刷新',
-    'Host 新增 themes.user.list / themes.user.get RPC（fs 读取用户目录）',
-    '选择模型扩展：user:* 选择走用户主题缓存，与内置第三方一样无深浅之分',
+    '用户主题目录改为系统动态解析：$HOME/.dsh/web-themes（shell 读 $HOME 优先，回退 workspaceRoot 推导，再回退硬编码）',
+    '用户主题目录更名：mdvr-themes → web-themes',
   ],
 }
 
@@ -415,10 +414,10 @@ let rootCtx = null            // apply() 注入的 ctx 引用（供设置页切�
 let activeSelection = DEFAULT_SELECTION  // 当前选择：'system-native'、内置主题 id 或 'user:<id>'
 let themeDisposer = null      // 当前样式表清理函数
 let themeService = null       // 产品 theme 服务（外观模式三档切换用，可选）
-let userThemes = {}           // 用户主题缓存：id → { css }（来自 ~/.dsh/mdvr-themes，动态加载）
+let userThemes = {}           // 用户主题缓存：id → { css }（来自 ~/.dsh/web-themes，动态加载）
 let userThemeIds = []         // 用户主题 id 列表（目录顺序）
 
-// 从 Host 加载用户主题（~/.dsh/mdvr-themes/*.css；放文件即新主题，无需打包升级）
+// 从 Host 加载用户主题（~/.dsh/web-themes/*.css；放文件即新主题，无需打包升级）
 async function loadUserThemes() {
   try {
     const listRes = await host.call('themes.user.list')
@@ -460,7 +459,7 @@ function applySelection(ctx, id) {
     // 系统自带：不做任何主题动作（深浅跟随系统，外观三档按钮可用）
     themeDisposer = styles.insert(PANEL_CSS)
   } else if (id.indexOf('user:') === 0) {
-    // 用户主题（~/.dsh/mdvr-themes）：动态加载，与内置第三方一样无深浅之分
+    // 用户主题（~/.dsh/web-themes）：动态加载，与内置第三方一样无深浅之分
     const entry = userThemes[id.slice(5)]
     if (!entry) return
     themeDisposer = styles.insert(TYPO_CSS + '\n' + entry.css + '\n' + PANEL_CSS)
@@ -548,7 +547,7 @@ function VersionCard(props) {
 // 选择模型（v0.9.0 + v1.0.0）：
 //   - 「系统自带」= 默认：插件零干预，深浅跟随系统，☀️/🌙/🖥️ 三档可用
 //   - 内置第三方主题 & 用户主题：无深浅之分 —— 选中后三档按钮变灰禁用（除非回到「系统自带」）
-//   - 用户主题：~/.dsh/mdvr-themes/ 放 CSS 文件 + 点「刷新」即生效，无需打包升级
+//   - 用户主题：~/.dsh/web-themes/ 放 CSS 文件 + 点「刷新」即生效，无需打包升级
 //   - 各组互斥（单选），点击即切换
 function ThemeSettings() {
   const [sel, setSel] = React.useState(activeSelection)
@@ -625,8 +624,8 @@ function ThemeSettings() {
         ),
       )
     }),
-    // 用户主题（~/.dsh/mdvr-themes/：放 CSS 文件即新主题，点刷新生效）
-    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/mdvr-themes/）'),
+    // 用户主题（~/.dsh/web-themes/：放 CSS 文件即新主题，点刷新生效）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/web-themes/）'),
     React.createElement('div', { className: 'mdvr-user-actions' },
       React.createElement('button', {
         className: 'mdvr-refresh-btn',
@@ -653,7 +652,7 @@ function ThemeSettings() {
         ),
         React.createElement('span', { className: 'mdvr-theme-info' },
           React.createElement('span', { className: 'mdvr-theme-name' }, id + (selUser ? ' ✓' : '')),
-          React.createElement('span', { className: 'mdvr-theme-desc' }, '用户主题：~/.dsh/mdvr-themes/' + id + '.css'),
+          React.createElement('span', { className: 'mdvr-theme-desc' }, '用户主题：~/.dsh/web-themes/' + id + '.css'),
         ),
       )
     }),

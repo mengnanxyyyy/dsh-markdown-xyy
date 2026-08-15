@@ -1,28 +1,63 @@
 // ============================================================
-// Host half v1.0.0 — 版本台账 + 用户主题读取（镜像 mdvr-1/pkg-9，与 Harness 定义保持一致）
+// Host half v1.1.0 — 版本台账 + 用户主题读取（镜像 mdvr-1/pkg-10，与 Harness 定义保持一致）
 //
 // 【职责】
 //   维护内存台账（按 packageId 去重、最新在前）
 //   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
 //   versions.list —— 面板查询台账快照 { current, history }
-//   themes.user.list —— 列出用户主题（~/.dsh/mdvr-themes/*.css，动态添加无需打包）
+//   themes.user.list —— 列出用户主题（$HOME/.dsh/web-themes/*.css，动态添加无需打包）
 //   themes.user.get —— 读取指定用户主题的 CSS 内容
 //   只传 JSON 标量，不序列化任何 Cordis/DSH 活对象
 // ============================================================
 
-// 用户主题目录：用户在此放置 *.css 即成为新主题（无需升级插件）
-// 说明：DSH_HOME 无现成插件配置目录，本插件约定此专属目录（见 AGENTS.md）
-const USER_THEMES_DIR = '/home/lab/.dsh/mdvr-themes'
+// 用户主题目录：按系统用户目录动态拼接 $HOME/.dsh/web-themes（不硬编码）
+// 解析策略（三级回退）：
+//   1) shell 服务执行 printf %s "$HOME" —— 系统真实用户目录
+//   2) sandboxPolicy.workspaceRoot 推导（/home/<user>/... → /home/<user>）
+//   3) 硬编码回退（本部署环境已知路径）
+const FALLBACK_USER_THEMES_DIR = '/home/lab/.dsh/web-themes'
+let userThemesDir = null // 首次解析后缓存
+
+async function resolveUserThemesDir(ctx) {
+  if (userThemesDir) return userThemesDir
+  // 1) 系统用户目录：shell 读取 $HOME
+  try {
+    const shellSvc = ctx.get('shell')
+    if (shellSvc !== undefined) {
+      const spec = shellSvc.resolve({ command: 'printf %s "$HOME"' })
+      const res = await shellSvc.run(spec)
+      const raw = res ? (res.stdout !== undefined ? res.stdout : (res.output !== undefined ? res.output : '')) : ''
+      const home = String(raw).trim()
+      if (home.startsWith('/')) {
+        userThemesDir = home + '/.dsh/web-themes'
+        return userThemesDir
+      }
+    }
+  } catch (e) { /* 忽略，走下一步回退 */ }
+  // 2) 由 workspaceRoot 推导用户目录（/home/<user>/workspace → /home/<user>）
+  try {
+    const sp = ctx.get('sandboxPolicy')
+    if (sp && typeof sp.workspaceRoot === 'string') {
+      const parts = sp.workspaceRoot.split('/')
+      if (parts.length >= 3 && parts[1] === 'home') {
+        userThemesDir = '/' + parts[1] + '/' + parts[2] + '/.dsh/web-themes'
+        return userThemesDir
+      }
+    }
+  } catch (e) { /* 忽略 */ }
+  // 3) 最终回退
+  userThemesDir = FALLBACK_USER_THEMES_DIR
+  return userThemesDir
+}
 
 const MANIFEST = {
-  version: '1.0.0',
+  version: '1.1.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-14',
   changes: [
-    '用户主题动态加载：~/.dsh/mdvr-themes/ 放 CSS 文件即成为新主题（无需打包/升级插件），设置页一键刷新',
-    'Host 新增 themes.user.list / themes.user.get RPC（fs 读取用户目录）',
-    '选择模型扩展：user:* 选择走用户主题缓存，与内置第三方一样无深浅之分',
+    '用户主题目录改为系统动态解析：$HOME/.dsh/web-themes（shell 读 $HOME 优先，回退 workspaceRoot 推导，再回退硬编码）',
+    '用户主题目录更名：mdvr-themes → web-themes',
   ],
 }
 
@@ -63,12 +98,12 @@ return {
     // 面板查询台账快照
     harness.handle('versions.list', async () => snapshot())
 
-    // 列出用户主题 id（~/.dsh/mdvr-themes 下 *.css 文件名，动态添加无需打包）
+    // 列出用户主题 id（$HOME/.dsh/web-themes 下 *.css 文件名，动态添加无需打包）
     harness.handle('themes.user.list', async () => {
       const fsSvc = ctx.get('fs')
       if (fsSvc === undefined) return { ok: false, reason: 'fs unavailable', themes: [] }
       try {
-        const dir = await fsSvc.resolve(USER_THEMES_DIR)
+        const dir = await fsSvc.resolve(await resolveUserThemesDir(ctx))
         const entries = await fsSvc.listDir(dir)
         const themes = entries
           .filter((e) => e.name && e.name.endsWith('.css'))
@@ -89,7 +124,7 @@ return {
         return { ok: false, reason: 'bad id' }
       }
       try {
-        const target = await fsSvc.resolve(USER_THEMES_DIR + '/' + id + '.css')
+        const target = await fsSvc.resolve((await resolveUserThemesDir(ctx)) + '/' + id + '.css')
         const css = await fsSvc.readText(target)
         return { ok: true, css }
       } catch (e) {
