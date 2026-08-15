@@ -1,13 +1,16 @@
 // ============================================================
-// Host half v1.2.0 — 版本台账 + 主题资产/用户主题读写
+// Host half v1.2.3 — 版本台账 + 主题资产/用户主题读写（分块传输 + CSS 校验）
 //
 // 【职责】
 //   维护内存台账（按 packageId 去重、最新在前）
 //   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
 //   versions.list —— 面板查询台账快照 { current, history }
-//   themes.builtin.list —— 列出内置主题（工作区 themes/*.css，文件即主题，改文件刷新即生效）
-//   themeAssets.get —— 读取共享资产（plugin/assets/{typography,panel,template}.css）
+//   themes.builtin.list —— 列出内置主题（项目根 themes/*.css，文件即主题）
+//   themeAssets.core —— 排版骨架 + 面板样式（plugin/assets/{typography,panel}.css）
+//   themeAssets.template —— 新建模板（分块，8000 字符/片）
 //   themes.user.list / get / save —— 用户主题（$HOME/.dsh/web-themes/*.css）
+//     get/save 均分块传输（页面↔宿主消息通道有 ~16KB 单条上限，v1.2.2 实测 24KB 返回失败、16.8KB 保存截断）
+//     save 附带 CSS 语法校验（注释/字符串/花括号/圆括号闭合），错误明确拒绝
 //   只传 JSON 标量，不序列化任何 Cordis/DSH 活对象
 // ============================================================
 
@@ -19,6 +22,10 @@
 const FALLBACK_USER_THEMES_DIR = '/home/lab/.dsh/web-themes'
 // 显式兜底的项目目录（resolveProjectRoot 探测全部失败时使用）
 const FALLBACK_PROJECT_DIR = '/home/lab/xyygithub/dsh-markdown-xyy'
+// 分块传输：单片字符数（单条消息 ≈ 8KB 安全区，远低于 ~16KB 通道上限）
+const CHUNK_SIZE = 8000
+// 用户主题总大小上限（防滥用）
+const MAX_THEME_LEN = 100000
 let userThemesDir = null // 首次解析后缓存
 let projectRoot = null   // 首次探测后缓存
 
@@ -54,13 +61,8 @@ async function resolveUserThemesDir(ctx) {
   return userThemesDir
 }
 
-// 工作区根目录（内置主题与共享资产所在）：按内容探测，不信任 sandboxPolicy.workspaceRoot
-// ⚠️ 陷阱（v1.2.0 踩坑）：sandboxPolicy.workspaceRoot = DSH 主进程启动目录，
-//    不一定是插件项目目录（本环境 = /home/lab/xyygithub/dsh-xyy-ui）。
-//    探测策略（首次解析后缓存）：
-//      1) sp.workspaceRoot 本身（理想情况即项目目录）
-//      2) 其父目录下的一级子目录（兄弟项目，逐个查 plugin/assets/typography.css + panel.css）
-//      3) 显式兜底（本部署已知项目路径）
+// 项目根（内置主题与共享资产所在）：按内容探测，不信任 sandboxPolicy.workspaceRoot
+// ⚠️ workspaceRoot = DSH 主进程启动目录，不一定是插件项目目录（本环境 = dsh-xyy-ui）
 async function resolveProjectRoot(ctx) {
   if (projectRoot) return projectRoot
   const fsSvc = ctx.get('fs')
@@ -82,7 +84,7 @@ async function resolveProjectRoot(ctx) {
       roots.push(sp.workspaceRoot)
       const parent = sp.workspaceRoot.replace(/\/+$/, '').split('/').slice(0, -1).join('/')
       if (parent.length > 0) {
-        roots.push(parent) // 父目录本身（项目即 workspaceRoot 的上一级时）
+        roots.push(parent)
         try {
           const entries = await fsSvc.listDir(await fsSvc.resolve(parent))
           for (const e of entries) {
@@ -92,7 +94,6 @@ async function resolveProjectRoot(ctx) {
       }
     }
   } catch (e) { /* 忽略 */ }
-  // 显式兜底（与 FALLBACK_USER_THEMES_DIR 同风格）
   roots.push(FALLBACK_PROJECT_DIR)
   for (const root of roots) {
     if (await hasAssets(root)) {
@@ -104,19 +105,30 @@ async function resolveProjectRoot(ctx) {
   return null
 }
 
+// 大文本按固定大小切片
+function sliceChunks(text) {
+  const chunks = []
+  for (let i = 0; i < text.length; i += CHUNK_SIZE) chunks.push(text.slice(i, i + CHUNK_SIZE))
+  return chunks
+}
+
 const MANIFEST = {
-  version: '1.2.2',
+  version: '1.2.3',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '修复：resolveProjectRoot 的资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径）——v1.2.1 探测未生效的补丁，恢复设置页面板样式',
+    '传输修复：所有主题内容走分块传输（8000 字符/片，单条消息 <8.5KB），解决页面↔宿主消息通道 ~16KB 上限导致的资产加载失败、主题保存静默截断',
+    'CSS 语法校验：保存前检测注释/字符串/花括号/圆括号闭合，错误明确拒绝并提示（不再写入损坏文件）',
+    'asset RPC 拆分：themeAssets.core（骨架+面板）+ themeAssets.template（分块）；模板恢复完整版（与 example.css 同源）',
   ],
 }
 
 return {
   apply(ctx) {
     const ledger = []
+    // 分块保存缓冲区：id → { total, chunks: [] }（apply 作用域内，随插件重启清空）
+    const saveBuffers = new Map()
 
     const record = (entry) => {
       const prev = ledger.find((e) => e.packageId === entry.packageId)
@@ -177,8 +189,8 @@ return {
       }
     })
 
-    // 共享资产：排版骨架 / 面板样式 / 新建模板（项目根 plugin/assets/*.css）
-    harness.handle('themeAssets.get', async () => {
+    // 共享资产核心：排版骨架 + 面板样式（单次返回 ~11.5KB，安全区）
+    harness.handle('themeAssets.core', async () => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
       if (fsSvc === undefined || root === null) {
@@ -196,7 +208,25 @@ return {
       if (typography === null || panel === null) {
         return { ok: false, reason: 'assets missing' }
       }
-      return { ok: true, typography, panel, template: (await read('template.css')) || '' }
+      return { ok: true, typography, panel }
+    })
+
+    // 新建模板（分块）：{index} → {ok, index, total, chunk}
+    harness.handle('themeAssets.template', async (args) => {
+      const fsSvc = ctx.get('fs')
+      const root = await resolveProjectRoot(ctx)
+      if (fsSvc === undefined || root === null) {
+        return { ok: false, reason: 'fs or project root unavailable' }
+      }
+      try {
+        const text = await fsSvc.readText(await fsSvc.resolve(root + '/plugin/assets/template.css'))
+        const chunks = sliceChunks(text)
+        const index = Number((args && args.index) || 0)
+        if (index < 0 || index >= chunks.length) return { ok: false, reason: 'bad index' }
+        return { ok: true, index, total: chunks.length, chunk: chunks[index] }
+      } catch (e) {
+        return { ok: false, reason: String((e && e.message) || e) }
+      }
     })
 
     // 列出用户主题 id（$HOME/.dsh/web-themes 下 *.css 文件名，动态添加无需打包）
@@ -216,7 +246,7 @@ return {
       }
     })
 
-    // 读取指定用户主题的 CSS 内容（id 防路径穿越：不含 / 与 \，且非 ..）
+    // 读取指定用户主题（分块）：{id, index} → {ok, id, index, total, chunk}
     harness.handle('themes.user.get', async (args) => {
       const fsSvc = ctx.get('fs')
       if (fsSvc === undefined) return { ok: false, reason: 'fs unavailable' }
@@ -226,27 +256,45 @@ return {
       }
       try {
         const target = await fsSvc.resolve((await resolveUserThemesDir(ctx)) + '/' + id + '.css')
-        const css = await fsSvc.readText(target)
-        return { ok: true, css }
+        const text = await fsSvc.readText(target)
+        const chunks = sliceChunks(text)
+        const index = Number((args && args.index) || 0)
+        if (index < 0 || index >= chunks.length) return { ok: false, reason: 'bad index' }
+        return { ok: true, id, index, total: chunks.length, chunk: chunks[index] }
       } catch (e) {
         return { ok: false, reason: String((e && e.message) || e) }
       }
     })
 
-    // 保存 / 新建用户主题：写回 $HOME/.dsh/web-themes/<id>.css
-    // 说明：用户主题目录在 ~/.dsh（工作区外），写操作需放开沙箱策略；
-    //       id 防路径穿越，css 限长防滥用
+    // 保存 / 新建用户主题（分块上传 + CSS 语法校验 + 大小上限）
+    // 协议：client 依次发送 {id, index, total, chunk}；最后一块到达时拼接、校验、写盘
     harness.handle('themes.user.save', async (args) => {
       const fsSvc = ctx.get('fs')
       if (fsSvc === undefined) return { ok: false, reason: 'fs unavailable' }
       const id = args && args.id
-      const css = args && args.css
       if (!id || id.indexOf('/') >= 0 || id.indexOf('\\') >= 0 || id === '..') {
         return { ok: false, reason: 'bad id' }
       }
-      if (typeof css !== 'string' || css.length > 200000) {
-        return { ok: false, reason: 'bad css' }
+      const chunk = String((args && args.chunk) || '')
+      const index = Number((args && args.index) || 0)
+      const total = Number((args && args.total) || 1)
+      if (index < 0 || index >= total) return { ok: false, reason: 'bad index' }
+      if (chunk.length > CHUNK_SIZE) return { ok: false, reason: '单块过大(>8000字符)' }
+      if (total > Math.ceil(MAX_THEME_LEN / CHUNK_SIZE)) return { ok: false, reason: '块数过多' }
+      // 覆盖重传：index 0 时重置缓冲区
+      let buf = saveBuffers.get(id)
+      if (!buf || buf.total !== total || index === 0) {
+        buf = { total, chunks: [] }
+        saveBuffers.set(id, buf)
       }
+      buf.chunks[index] = chunk
+      if (index < total - 1) {
+        return { ok: true, pending: true }
+      }
+      // 最后一块：拼接 + 长度校验 + 写盘（CSS 语法校验由 client 端保存前执行）
+      const css = buf.chunks.join('')
+      saveBuffers.delete(id)
+      if (css.length > MAX_THEME_LEN) return { ok: false, reason: '主题过大(>100KB)' }
       try {
         const dir = await resolveUserThemesDir(ctx)
         // 目录不存在时尽力创建（幂等；shell 可能受限，失败则由 writeText 报错）

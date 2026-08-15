@@ -1,73 +1,219 @@
 /* ============================================================
- * 主题：新建主题（修改名称与颜色后保存）
- * 说明：① 浅色档写 body；② 深色档写 body[data-ds-dark-theme]；③ 可选元素定制
+ * 主题：新建模板 —— 完整参考（第三方用户手册版）
+ * ------------------------------------------------------------
+ * 本模板演示「一个主题能改的全部内容」，新建主题以此为起点：
+ *   ① 13 个全局 token（--dsw-alias-*，平台固定名单）
+ *   ② 15 个强调变量（--mdvr-*，主题身份色）
+ *   ③ 全部可控元素（每条规则注释里写明影响范围）
+ *   ④ 扩展定制示例（选区 / 滚动条 / 复选框等）
+ * 风格：青瓷绿（演示用，颜色可随意替换）。
+ *
+ * ⚠️ 重要警告（写主题前必读）：
+ *  [挂载] 浅色必须写 body{...}；深色必须写 body[data-ds-dark-theme]{...}
+ *         —— 产品用属性选择器标记深色，不是 @media (prefers-color-scheme)！
+ *         写错/拼错深色选择器 → 深色档完全不生效且不回退。
+ *  [优先级] 元素定制一律用 :where()（零优先级，与共享骨架同级）。
+ *         注入顺序 = 骨架 → 你的主题 → 面板样式，同优先级下后者胜出，
+ *         所以 :where() 里写的东西能稳定覆盖骨架，但盖不过产品显式 class。
+ *  [名单] --dsw-alias-* 只有 13 个（平台 Theme.listTokens 固定），不可新增；
+ *         新颜色只能走 --mdvr-* 自定义变量。
+ *  [深浅] 用户主题「无深浅之分」：选中后外观 ☀️/🌙/🖥️ 三档按钮变灰禁用，
+ *         浅/深两档完全由本文件自己定义（① 与 ②）。
+ *  [对比度] 正文 ≥ 4.5:1、大号字 ≥ 3:1（WCAG AA）。浅档语义色请用实测 AA 值：
+ *         错误 #c74330 / 成功 #287b38 / 警告 #985d00（白底与页面底均达标）。
+ *  [生效] 改本文件后到设置页点「🔄 刷新用户主题」即生效（无需升级插件）。
+ *  [谨慎] 不建议 @import 外部 URL / 依赖网络字体（离线或沙箱下会失效）；
+ *         一条 CSS 语法错误可能导致后续规则整段不生效。
  * ============================================================ */
 
-/* ① 浅色档：13 个全局 token + 强调变量 */
+/* ------------------------------------------------------------
+ * ① 浅色档 —— 全部变量（影响范围写在每行注释中）
+ * ---------------------------------------------------------- */
 body {
-  --dsw-alias-bg-base: #faf6ef;
-  --dsw-alias-bg-layer-1: #f2ece0;
-  --dsw-alias-bg-layer-2: #e9e1d0;
-  --dsw-alias-bg-overlay: #fffdf8;
-  --dsw-alias-border-l1: #dbcfb3;
-  --dsw-alias-border-l2: #c6b68f;
-  --dsw-alias-brand-primary: #8a5a2b;
-  --dsw-alias-label-primary: #292113;
-  --dsw-alias-label-secondary: #71664f;
-  --dsw-alias-state-error-primary: #c74330;
-  --dsw-alias-state-success-primary: #287b38;
-  --dsw-alias-state-warn-primary: #985d00;
-  --dsw-specific-sidebar-fill: #ece4d5;
-  --mdvr-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --mdvr-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --mdvr-mm: 2;
-  --mdvr-link: #005ae0;
-  --mdvr-link-hover: #0072f5;
-  --mdvr-highlight: #b3541e;
-  --mdvr-highlight-soft: #fdf0dc;
-  --mdvr-accent: #8a5a2b;
-  --mdvr-accent-text: #6d4a1f;
-  --mdvr-accent-soft: #f4ecdc;
-  --mdvr-accent-faint: #cab5a0;
-  --mdvr-accent-fainter: #dccebf;
-  --mdvr-code-border: #e6dcc8;
-  --mdvr-table-head-bg: #f1e8d8;
-  --mdvr-table-head-text: #6d4a1f;
-  --mdvr-quote-bg: #f6efe2;
-  --mdvr-quote-border: #8a5a2b;
+  /* ===== 13 个全局 token（平台固定名单，官方语义） ===== */
+  --dsw-alias-bg-base: #f4f7f5;            /* 应用底色：整个对话区背景 */
+  --dsw-alias-bg-layer-1: #fbfdfb;         /* 抬升表面：卡片、消息气泡 */
+  --dsw-alias-bg-layer-2: #e9efea;         /* 嵌套表面：代码块、引用衬底、kbd */
+  --dsw-alias-bg-overlay: #ffffff;         /* 浮层：弹窗、popover、下拉 */
+  --dsw-alias-border-l1: #d7e0d8;          /* 主边框：卡片描边、图片描边、表格行分隔 */
+  --dsw-alias-border-l2: #c2d0c4;          /* 次边框：kbd 描边、表格外框 */
+  --dsw-alias-brand-primary: #2f6b52;      /* 品牌主色：产品品牌元素 */
+  --dsw-alias-label-primary: #17231c;      /* 主文字：正文、标题、strong */
+  --dsw-alias-label-secondary: #5c6f62;    /* 次文字：h6、del、历史信息、说明 */
+  --dsw-alias-state-error-primary: #c74330; /* 错误状态色（WCAG AA 实测值） */
+  --dsw-alias-state-success-primary: #287b38; /* 成功状态色（WCAG AA 实测值） */
+  --dsw-alias-state-warn-primary: #985d00; /* 警告状态色（WCAG AA 实测值） */
+  --dsw-specific-sidebar-fill: #edf2ee;    /* 侧栏底：侧边栏、标题行 */
+
+  /* ===== 排版常量（不随主题色变，但可整体替换） ===== */
+  --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif; /* 正文字体栈：p/h1-h6/li/td/th/a/blockquote/pre/table */
+  --mdvr-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; /* 等宽字体栈：行内 code、代码块、kbd */
+  --mdvr-mm: 2;                            /* 间距倍数（整数；骨架段距 1em 的倍率基准） */
+
+  /* ===== 公共约定：链接（信息蓝） ===== */
+  --mdvr-link: #005ae0;                    /* 链接色（浅档白底 5.93:1 达标；勿用 #0072f5 仅 4.44:1） */
+  --mdvr-link-hover: #0072f5;              /* 链接 hover 色 */
+
+  /* ===== 公共约定：高亮（琥珀） ===== */
+  --mdvr-highlight: #b3541e;               /* 强调色：HTML <mark> 的关键词色 */
+  --mdvr-highlight-soft: #fdf0dc;          /* mark 高亮衬底（tint） */
+
+  /* ===== 身份色：accent 系 5 个（主题的主强调，建议同族） ===== */
+  --mdvr-accent: #2f6b52;                  /* 主强调色：列表 "-" 符号、代码块左侧 3px 标条、h1 下划线源色、表头/引用边条源色 */
+  --mdvr-accent-text: #1e4d3a;             /* tint 面上的强调文字（行内 code 的字色；浅档必须加深一档才过 AA） */
+  --mdvr-accent-soft: #e4efe7;             /* 强调 tint 衬底：行内 code 背景、嵌套引用背景（tint 配方：accent 12% 混合表面色） */
+  --mdvr-accent-faint: #a1bcb1;            /* 45% 预混：h1 下划线 */
+  --mdvr-accent-fainter: #c1d3cb;          /* 30% 预混：hr 分割线 */
+
+  /* ===== 身份色：quote/code/table 系 5 个 ===== */
+  --mdvr-quote-border: #2f6b52;            /* 引用块左侧 4px 边条 */
+  --mdvr-quote-bg: #eaf2ec;                /* 引用块衬底 */
+  --mdvr-code-border: #cfdcd2;             /* 行内代码 1px 描边 */
+  --mdvr-table-head-bg: #e0ebe3;           /* 表格表头底（≈accent 11% tint） */
+  --mdvr-table-head-text: #1e4d3a;         /* 表头文字（≥5.9:1） */
 }
 
-/* ② 深色档 */
+/* ------------------------------------------------------------
+ * ② 深色档 —— 同一组变量，按深底提亮
+ *   注意选择器是 body[data-ds-dark-theme]，不是媒体查询！
+ * ---------------------------------------------------------- */
 body[data-ds-dark-theme] {
-  --dsw-alias-bg-base: #14120f;
-  --dsw-alias-bg-layer-1: #1d1915;
-  --dsw-alias-bg-layer-2: #28231d;
-  --dsw-alias-bg-overlay: #211c17;
-  --dsw-alias-border-l1: #3a342b;
-  --dsw-alias-border-l2: #4a4132;
-  --dsw-alias-brand-primary: #d9a15c;
-  --dsw-alias-label-primary: #efe8da;
-  --dsw-alias-label-secondary: #a8a08c;
-  --dsw-alias-state-error-primary: #f4416c;
-  --dsw-alias-state-success-primary: #62c473;
-  --dsw-alias-state-warn-primary: #ee9e0b;
-  --dsw-specific-sidebar-fill: #1a1612;
-  --mdvr-link: #60b1ff;
-  --mdvr-link-hover: #a7d3ff;
-  --mdvr-highlight: #ffb45e;
-  --mdvr-highlight-soft: #3a2f1e;
-  --mdvr-accent: #d9a15c;
-  --mdvr-accent-text: #e8b872;
-  --mdvr-accent-soft: #2b2418;
-  --mdvr-accent-faint: #6d5232;
-  --mdvr-accent-fainter: #4f3d26;
-  --mdvr-code-border: #4a3d28;
-  --mdvr-table-head-bg: #2b2418;
-  --mdvr-table-head-text: #e8b872;
-  --mdvr-quote-bg: #221d15;
-  --mdvr-quote-border: #d9a15c;
+  /* ===== 13 个全局 token ===== */
+  --dsw-alias-bg-base: #0e1210;            /* 应用底色（深） */
+  --dsw-alias-bg-layer-1: #141a16;         /* 抬升表面（深） */
+  --dsw-alias-bg-layer-2: #1b231d;         /* 嵌套表面（深） */
+  --dsw-alias-bg-overlay: #171d19;         /* 浮层（深） */
+  --dsw-alias-border-l1: #2a352d;          /* 主边框（深） */
+  --dsw-alias-border-l2: #37443b;          /* 次边框（深） */
+  --dsw-alias-brand-primary: #7fc4a0;      /* 品牌主色（深，提亮） */
+  --dsw-alias-label-primary: #e8f0ea;      /* 主文字（深） */
+  --dsw-alias-label-secondary: #97a89c;    /* 次文字（深） */
+  --dsw-alias-state-error-primary: #f4416c; /* 错误（深；深底天然达标） */
+  --dsw-alias-state-success-primary: #62c473; /* 成功（深） */
+  --dsw-alias-state-warn-primary: #ee9e0b; /* 警告（深） */
+  --dsw-specific-sidebar-fill: #111613;    /* 侧栏底（深） */
+
+  /* ===== 排版常量（与浅档同值即可） ===== */
+  --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
+  --mdvr-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --mdvr-mm: 2;
+
+  /* ===== 公共约定：链接（深档提亮） ===== */
+  --mdvr-link: #60b1ff;                    /* 链接色（深） */
+  --mdvr-link-hover: #a7d3ff;              /* 链接 hover（深） */
+
+  /* ===== 公共约定：高亮 ===== */
+  --mdvr-highlight: #ffb45e;               /* mark 关键词色（深） */
+  --mdvr-highlight-soft: #3a2f1e;          /* mark 衬底（深 tint） */
+
+  /* ===== 身份色：accent 系 ===== */
+  --mdvr-accent: #7fc4a0;                  /* 主强调色（深，同族提亮） */
+  --mdvr-accent-text: #9ed9b8;             /* tint 面强调文字（深） */
+  --mdvr-accent-soft: #17241d;             /* 强调 tint 衬底（深；tint 配方 α=14%） */
+  --mdvr-accent-faint: #416251;            /* 45% 预混（深） */
+  --mdvr-accent-fainter: #30473b;          /* 30% 预混（深） */
+
+  /* ===== 身份色：quote/code/table 系 ===== */
+  --mdvr-quote-border: #7fc4a0;            /* 引用边条（深） */
+  --mdvr-quote-bg: #15201a;                /* 引用衬底（深） */
+  --mdvr-code-border: #2e3d33;             /* 行内代码描边（深） */
+  --mdvr-table-head-bg: #18241d;           /* 表头底（深） */
+  --mdvr-table-head-text: #9ed9b8;         /* 表头字（深） */
 }
 
-/* ③ 专属元素定制（可选） */
-:where(blockquote) { border-radius: 0 12px 12px 0; }
+/* ------------------------------------------------------------
+ * ③ 元素级定制 —— 全部可控元素（:where() 零优先级，覆盖骨架）
+ *   每个元素给出「可改属性」示例，值引用变量（深浅自动跟随）。
+ *   想改哪个就改哪行；不想改就删掉该行。
+ * ---------------------------------------------------------- */
 
+/* 标题：阶梯字号 2/1.6/1.3/1.15/1/0.9，700，行高 1.25，段前 1.1em 段后 0.6em */
+:where(h1, h2, h3, h4, h5, h6) { line-height: 1.25; font-weight: 700; margin: 1.1em 0 0.6em; }
+:where(h1) { font-size: 2em; padding-bottom: 0.35em; border-bottom: 1px solid var(--mdvr-accent-faint); } /* h1：字号 + 主题色下划线（唯一彩色标题元素） */
+:where(h2) { font-size: 1.6em; }           /* h2 字号 */
+:where(h3) { font-size: 1.3em; }           /* h3 字号 */
+:where(h4) { font-size: 1.15em; }          /* h4 字号 */
+:where(h5) { font-size: 1em; }             /* h5 字号 */
+:where(h6) { font-size: 0.9em; color: var(--dsw-alias-label-secondary); } /* h6：小号次文字色 */
+
+/* 段落：行高 1.8、字距 0.02em、段间 1em（倍数制节奏，--mdvr-mm 为基准） */
+:where(p) { margin: 0; letter-spacing: 0.02em; }   /* 段落去首尾空白 + 字距 */
+:where(p:not(:first-child)) { margin-top: 1em; }   /* 非首段：段前距 */
+:where(p:not(:last-child)) { margin-bottom: 1em; } /* 非末段：段后距 */
+
+/* 列表：符号用主题色 "-"（LobeUI 式）；任务列表对齐 */
+:where(ul, ol) { margin: 1em 0; margin-left: 1em; padding-left: 0; list-style-position: outside; } /* 列表容器 */
+:where(ul) { list-style-type: none; }      /* 无序列表关掉原生圆点 */
+:where(ul > li::before) { content: "-"; margin-inline: -1em 0.5em; color: var(--mdvr-accent); opacity: 0.85; } /* 列表符号：颜色/符号字形/间距在此改 */
+:where(li) { margin: 0.4em 0; }            /* 列表项间距 */
+:where(li p:first-child) { display: inline; } /* 列表项内首段不换行 */
+:where(li.task-list-item) { list-style: none; } /* 任务列表项去符号 */
+:where(input[type="checkbox"]) { margin: 0 0.4em 0.2em 0; vertical-align: middle; accent-color: var(--mdvr-accent); } /* 任务复选框：间距/对齐/勾选色 */
+
+/* 行内代码：主题 tint 底 + 同色系描边 + 强调字（一眼可辨代码） */
+:where(code, samp) { font-family: var(--mdvr-mono); font-size: 0.875em; line-height: 1; padding: 0.1em 0.4em; margin-inline: 0.15em; border: 1px solid var(--mdvr-code-border); border-radius: 0.25em; background: var(--mdvr-accent-soft); color: var(--mdvr-accent-text); white-space: break-spaces; overflow-wrap: break-word; }
+
+/* 代码块：中性底 + 左侧主题色标条 + 细描边 */
+:where(pre) { margin: 1em 0; background: var(--dsw-alias-bg-layer-2); border-radius: 8px; padding: 16px; box-shadow: inset 3px 0 0 0 var(--mdvr-accent), inset 0 0 0 1px var(--dsw-alias-border-l1); overflow-x: auto; font-size: 0.85em; line-height: 1.6; font-variant-ligatures: none; }
+:where(pre code) { background: transparent; border: none; padding: 0; margin: 0; font-size: inherit; line-height: inherit; white-space: pre; } /* 块内 code 复位 */
+
+/* 引用：主题色边条 + tint 底（重点块） */
+:where(blockquote) { margin: 1em 0; padding: 0.5em 1em; border-left: 4px solid var(--mdvr-quote-border); border-radius: 0 8px 8px 0; background: var(--mdvr-quote-bg); color: var(--dsw-alias-label-primary); }
+:where(blockquote p:first-child) { margin-top: 0; }  /* 引用首段 */
+:where(blockquote p:last-child) { margin-bottom: 0; } /* 引用末段 */
+:where(blockquote blockquote) { background: var(--mdvr-accent-soft); } /* 嵌套引用：更深的层级衬底（可再叠一层） */
+
+/* 表格：外框+横线式，表头 tint + 强调字 */
+:where(table) { display: block; overflow-x: auto; width: max-content; max-width: 100%; border-collapse: collapse; border-spacing: 0; margin: 1em 0; border-radius: 8px; box-shadow: 0 0 0 1px var(--dsw-alias-border-l2); font-size: 0.92em; word-break: auto-phrase; }
+:where(th, td) { min-width: 120px; padding: 0.75em 1em; text-align: start; } /* 单元格：最小宽/内边距/对齐 */
+:where(th) { background: var(--mdvr-table-head-bg); color: var(--mdvr-table-head-text); font-weight: 700; } /* 表头 */
+:where(tr) { box-shadow: 0 1px 0 var(--dsw-alias-border-l1); } /* 行分隔线 */
+:where(tr:last-child) { box-shadow: none; } /* 末行无分隔 */
+
+/* 分割线：主题色 30% 虚线 */
+:where(hr) { border: none; border-top: 1px dashed var(--mdvr-accent-fainter); margin: 1.8em 0; }
+
+/* 链接：公共信息蓝 + hover 过渡（尊重 reduced-motion） */
+:where(a) { color: var(--mdvr-link); text-decoration: none; }        /* 链接（想加下划线在此写 text-decoration: underline） */
+:where(a:hover) { color: var(--mdvr-link-hover); }
+:where(a:visited) { color: var(--mdvr-link); }                       /* 已访问链接（可选） */
+@media (prefers-reduced-motion: no-preference) { :where(a) { transition: color 200ms cubic-bezier(0.05, 0.7, 0.1, 1); } } /* 链接 hover 过渡 */
+
+/* 强调/细节：strong 中性 700；mark 琥珀 tint；del 次文字；kbd 中性键帽 */
+:where(strong) { font-weight: 700; color: var(--dsw-alias-label-primary); } /* 粗体（保持中性，浓度强调） */
+:where(mark) { background: var(--mdvr-highlight-soft); color: var(--dsw-alias-label-primary); padding: 0 0.2em; border-radius: 3px; } /* 高亮词 */
+:where(del) { color: var(--dsw-alias-label-secondary); }             /* 删除线文字 */
+:where(sup, sub) { font-size: 0.75em; line-height: 1; }              /* 上/下标 */
+:where(kbd) { font-family: var(--mdvr-mono); font-size: 0.85em; background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l2); border-radius: 4px; padding: 0.15em 0.45em; } /* 键盘键帽 */
+
+/* 图片：限宽 + 圆角 + 细描边 */
+:where(img) { max-width: 100%; border-radius: 8px; box-shadow: 0 0 0 1px var(--dsw-alias-border-l1); }
+
+/* ------------------------------------------------------------
+ * ④ 扩展定制示例（可选）—— 骨架未覆盖，可自行补充
+ *   这些是"骨架之外还能改"的方向，按需启用
+ * ---------------------------------------------------------- */
+
+/* 文本选区（鼠标选中文字的颜色） */
+::selection { background: var(--mdvr-accent-soft, #e4efe7); color: var(--mdvr-accent-text, #1e4d3a); }
+
+/* 滚动条配色（WebKit） */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--mdvr-accent-faint, #a1bcb1); border-radius: 5px; }
+::-webkit-scrollbar-track { background: var(--dsw-alias-bg-layer-1, #fbfdfb); }
+
+/* 表体斑马纹（可选） */
+:where(tbody tr:nth-child(odd)) { background: var(--mdvr-accent-soft, #e4efe7); }
+
+/* 焦点可见性（键盘导航轮廓，可选） */
+:where(a:focus-visible) { outline: 2px solid var(--mdvr-accent, #2f6b52); outline-offset: 2px; }
+
+/* ============================================================
+ * 附：配色速查（写自己的主题时参考）
+ *  - tint 配方：result = round(α·A + (1−α)·S)（逐 RGB 通道）
+ *      浅档 α=12%（表头 11%），深档 α=14%；S=表面色，A=accent
+ *  - 浅档语义色 AA 实测值：error #c74330 / success #287b38 / warn #985d00
+ *  - 浅档链接：用 #005ae0（5.93:1），勿用 #0072f5（4.44:1 不达标）
+ *  - 强调色做边条最稳妥（4px 边条均过 3:1）；tint 面文字用 --mdvr-accent-text 深一档
+ *  - 深档高亮色勿做整块大面填充底（过亮刺眼）
+ * ============================================================ */

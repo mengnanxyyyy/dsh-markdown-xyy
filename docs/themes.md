@@ -90,9 +90,16 @@ body[data-ds-dark-theme] { ... }
 
 ## 六、如何新增一个主题
 
-1. 在 `themes/` 新建 `my-theme.css`（复制任意主题为模板，改头注释）。
+1. 在 `themes/` 或 `$HOME/.dsh/web-themes/` 新建 `.css`（复制任意主题为模板，改头注释）。
 2. 定 13 个 token 的浅/深值（浅档语义色参考 `docs/readability-a11y.md` 的 AA 值）。
 3. 定 accent 系变量（tint 配方：`result = round(α·A + (1−α)·S)`，浅档 α=12%、深档 α=14%）。
 4. 需要差异化元素时写 ③ 段扩展规则。
-5. 在 `plugin/src/client.core.js` 的 `THEME_META` 加一行（显示名/描述/色板预览）。
+5. 在 `plugin/src/client.core.js` 的 `THEME_META` 加一行（显示名/描述/色板预览）——仅内置主题需要；用户主题自动出现在列表。
 6. `node scripts/build-client.js` → 定义新 Package → update → 设置页验证。
+
+## 七、完整参考主题（第三方用户手册）
+
+- **`$HOME/.dsh/web-themes/example.css`** 是"完整参考主题"：涵盖全部可控面并逐条注释影响范围——
+  ① 13 全局 token（官方语义注释）② 15 个 `--mdvr-*` 变量（每个标注影响哪些元素）③ 全部可控元素规则（标题/段落/列表/任务框/行内代码/代码块/引用/表格/分割线/链接/粗体/高亮/删除线/上下标/kbd/图片，`:where()` 零优先级覆盖骨架）④ 扩展示例（选区/滚动条/斑马纹/焦点轮廓）⑤ 头部警告区（挂载机制、零优先级、固定名单、无深浅之分、WCAG AA、生效方式）+ 尾部配色速查（tint 配方、AA 实测值）。
+- **`plugin/assets/template.css`**（新建用户主题的起点模板）与 example.css 同源完整版，点「🆕 新建用户主题」即以此起步。
+- 编写时警告要点：浅色 `body` / 深色 `body[data-ds-dark-theme]`（属性选择器，**非** `prefers-color-scheme`）；元素定制一律 `:where()`；`--dsw-alias-*` 固定 13 个不可新增；正文对比度 ≥4.5:1。

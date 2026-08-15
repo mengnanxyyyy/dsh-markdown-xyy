@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.2.3",
+      "packageId": "pkg-23",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-15",
+      "changes": [
+        "传输修复：主题内容分块传输（8000 字符/片，单条消息 <8.5KB）——解决页面↔宿主消息通道 ~16KB 上限导致的 themeAssets 加载失败（设置面板错误占位/无样式）与 themes.user.save 静默截断（Velvet 文件损坏的根因）",
+        "CSS 语法校验：保存前检测注释/字符串/花括号/圆括号闭合，错误拒绝保存并提示具体原因（不再写入损坏文件）",
+        "asset RPC 拆分 themeAssets.core + themeAssets.template（分块）；模板恢复完整版（与 example.css 同源）；用户主题读写分块（>16KB 文件可用）"
+      ]
+    },
+    {
       "version": "1.2.2",
       "packageId": "pkg-20",
       "name": "LobeUI 风格 · 主题系统",

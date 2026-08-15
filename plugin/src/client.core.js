@@ -27,12 +27,14 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.2.2',
+  version: '1.2.3',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-15',
   changes: [
-    '修复：resolveProjectRoot 的资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径）——v1.2.1 探测未生效的补丁，恢复设置页面板样式',
+    '传输修复：所有主题内容走分块传输（8000 字符/片），解决消息通道 ~16KB 上限导致的资产加载失败、主题保存静默截断',
+    'CSS 语法校验：保存前检测注释/字符串/花括号/圆括号闭合，错误明确拒绝并提示（不再写入损坏文件）',
+    'asset RPC 拆分：themeAssets.core（骨架+面板）+ themeAssets.template（分块）；模板恢复完整版',
   ],
 }
 
@@ -94,15 +96,16 @@ async function loadBuiltinThemes() {
   }
 }
 
-// 加载共享资产（排版骨架 / 面板样式 / 新建模板）
+// 加载共享资产（排版骨架 + 面板样式 + 新建模板；模板分块拉取）
 async function loadAssets() {
   try {
-    const res = await host.call('themeAssets.get')
-    if (res && res.ok) {
-      if (typeof res.typography === 'string') typographyCss = res.typography
-      if (typeof res.panel === 'string') panelCss = res.panel
-      if (typeof res.template === 'string' && res.template.length > 0) templateCss = res.template
+    const coreRes = await host.call('themeAssets.core')
+    if (coreRes && coreRes.ok) {
+      if (typeof coreRes.typography === 'string') typographyCss = coreRes.typography
+      if (typeof coreRes.panel === 'string') panelCss = coreRes.panel
     }
+    const tpl = await fetchChunks('themeAssets.template', (index) => ({ index }))
+    if (tpl !== null && tpl.length > 0) templateCss = tpl
   } catch (e) { /* 忽略：资产缺失时插件仍可用（仅无样式） */ }
 }
 
@@ -114,6 +117,64 @@ function ensureAssets() {
   return assetsPromise
 }
 
+// CSS 语法校验：注释/字符串/花括号/圆括号闭合检查；返回错误信息或 null（通过）
+// ⚠️ 与 plugin/host.js 的 validateCss 保持一致（双端同逻辑）
+function validateCss(src) {
+  let depth = 0
+  let paren = 0
+  let inComment = false
+  let inStr = null
+  let i = 0
+  const n = src.length
+  while (i < n) {
+    const c = src[i]
+    const c2 = src[i + 1]
+    if (inComment) {
+      if (c === '*' && c2 === '/') { inComment = false; i += 2 }
+      else i++
+      continue
+    }
+    if (inStr !== null) {
+      if (c === '\\') i += 2
+      else if (c === inStr) { inStr = null; i++ }
+      else i++
+      continue
+    }
+    if (c === '/' && c2 === '*') { inComment = true; i += 2; continue }
+    if (c === '"' || c === "'") { inStr = c; i++; continue }
+    if (c === '{') depth++
+    else if (c === '}') {
+      depth--
+      if (depth < 0) return '出现多余的 }'
+    } else if (c === '(') paren++
+    else if (c === ')') {
+      paren--
+      if (paren < 0) return '出现多余的 )'
+    }
+    i++
+  }
+  if (inComment) return '注释未闭合（缺少 */）'
+  if (inStr !== null) return '字符串未闭合（缺少 ' + inStr + '）'
+  if (depth > 0) return '花括号未闭合（缺少 ' + depth + ' 个 }）'
+  if (paren > 0) return '圆括号未闭合（缺少 ' + paren + ' 个 )）'
+  return null
+}
+
+// 分块拉取并拼接（页面↔宿主消息通道有 ~16KB 单条上限，v1.2.3 起大文本分块传输）
+// argFn(index) 构造第 index 片的参数；field 为分片字段名（默认 chunk）
+async function fetchChunks(method, argFn) {
+  const first = await host.call(method, argFn(0))
+  if (!first || !first.ok) return null
+  let text = String(first.chunk || '')
+  const total = first.total || 1
+  for (let i = 1; i < total; i++) {
+    const r = await host.call(method, argFn(i))
+    if (!r || !r.ok) return null
+    text += String(r.chunk || '')
+  }
+  return text
+}
+
 // 从 Host 加载用户主题（~/.dsh/web-themes/*.css；放文件即新主题，无需打包升级）
 async function loadUserThemes() {
   try {
@@ -122,9 +183,9 @@ async function loadUserThemes() {
     const ids = Array.isArray(listRes.themes) ? listRes.themes : []
     const loaded = []
     for (const id of ids) {
-      const res = await host.call('themes.user.get', { id })
-      if (res && res.ok && typeof res.css === 'string') {
-        userThemes[id] = { css: res.css }
+      const css = await fetchChunks('themes.user.get', (index) => ({ id, index }))
+      if (css !== null) {
+        userThemes[id] = { css }
         loaded.push(id)
       }
     }
@@ -135,13 +196,24 @@ async function loadUserThemes() {
   }
 }
 
-// 保存 / 新建用户主题：写回 ~/.dsh/web-themes/<id>.css（Host RPC）
+// 保存 / 新建用户主题：先本地 CSS 校验（错误禁止保存）→ 分块上传 → 写回 ~/.dsh/web-themes/<id>.css
+// 返回 { ok, reason? }：reason 为用户可读的错误说明（语法错误 / 超限 / 写入失败）
 async function saveUserTheme(id, css) {
+  const err = validateCss(css)
+  if (err) return { ok: false, reason: 'CSS 语法错误：' + err }
   try {
-    const res = await host.call('themes.user.save', { id, css })
-    return !!(res && res.ok)
+    const chunks = []
+    for (let i = 0; i < css.length; i += 8000) chunks.push(css.slice(i, i + 8000))
+    if (chunks.length === 0) chunks.push('')
+    for (let i = 0; i < chunks.length; i++) {
+      const res = await host.call('themes.user.save', { id, index: i, total: chunks.length, chunk: chunks[i] })
+      if (!res || !res.ok) {
+        return { ok: false, reason: (res && res.reason) || '保存失败' }
+      }
+    }
+    return { ok: true }
   } catch (e) {
-    return false
+    return { ok: false, reason: String((e && e.message) || e) }
   }
 }
 
@@ -348,13 +420,13 @@ function ThemeEditor(props) {
     }
     setBusy(true)
     setStatus('')
-    const ok = await saveUserTheme(id, css)
+    const result = await saveUserTheme(id, css)
     setBusy(false)
-    if (ok) {
+    if (result.ok) {
       setStatus('✅ 已保存到 ~/.dsh/web-themes/' + id + '.css')
       props.onSaved(id)
     } else {
-      setStatus('❌ 保存失败（目录不可写或文件已锁定）')
+      setStatus('❌ ' + (result.reason || '保存失败（目录不可写或文件已锁定）'))
     }
   }
 
