@@ -45,7 +45,7 @@ body[data-ds-dark-theme] { ... }
 - 变量齐全性：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。
 - **共享骨架 `plugin/assets/typography.css` 只引用变量，不含写死色值** —— 主题切换 = 换变量，骨架不动。
 - **变量分层（v1.4.0 起统一契约，见 `docs/unified-variables.md`）**：L0 平台 token（13 个固定名单）→ L1 身份色（`--mdvr-*` 与 `--hl-*`，浅/深成对，写在 ① ② 两档）→ L2 排版/形状常量（行高/字号/圆角/内距等，单值）→ L3 功能旋钮（`--mdvr-mm` 等）→ 字体栈（单值）。L2/L3/字体放 `:root` 声明一次，不再在 body 两档重复。
-- 参考实现：`plugin/assets/themes/strawberry-mocha.css` 是带**完整 ③ 元素段**（近 80 条规则、全量消费 `--mdvr-*`/`--hl-*`）的内置主题；其余三套以变量为主、各带 0~1 条 `:where` 增强（lobeui 无、inkpaper/qingci 各 1 条），元素观感主要走产品兜底。
+- 参考实现：`plugin/assets/themes/strawberry-mocha.css` 是内置主题（v1.7.0 起唯一），带**完整 ③ 元素段**（近 80 条规则、全量消费 `--mdvr-*`/`--hl-*`）；早期纯配色主题（lobeui/inkpaper/qingci）已在 v1.7.0 移除。
 
 
 ## 三、选择模型（v0.9.0）
@@ -72,10 +72,9 @@ body[data-ds-dark-theme] { ... }
 
 | 文件 | 名称 | 风格 |
 | --- | --- | --- |
-| `plugin/assets/themes/lobeui-emphasis.css` | LobeUI 风格（强调） | LobeUI 中性灰阶 + 靛蓝强调系统 |
-| `plugin/assets/themes/inkpaper.css` | 墨纸 · InkPaper | 暖纸：米白纸底 + 墨褐 accent + 琥珀 highlight |
-| `plugin/assets/themes/qingci.css` | 青瓷 | 青绿灰阶 + 青瓷绿 accent + 12px 圆角釉感 |
 | `plugin/assets/themes/strawberry-mocha.css` | 草莓猛男粉 | 丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量（全变量化参考实现，变量分层见 `docs/unified-variables.md`） |
+
+> v1.7.0 起内置主题仅保留草莓猛男粉；早期纯配色主题 lobeui-emphasis / inkpaper / qingci 已移除（历史在 git）。
 
 ## 四、demo.css 维护规则（铁律）
 

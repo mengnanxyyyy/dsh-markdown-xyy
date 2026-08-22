@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.7.0",
+      "packageId": "pkg-26",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-22",
+      "changes": [
+        "内置主题精简：移除早期纯配色主题 lobeui-emphasis / inkpaper / qingci，内置主题仅保留全变量化完整主题「草莓猛男粉」（plugin/assets/themes/strawberry-mocha.css；历史在 git）",
+        "THEME_META 同步精简；docs/AGENTS/README/capabilities/themes.md/unified-variables 全部改为 v1.7.0 口径（统一变量契约由草莓猛男粉独占承载）"
+      ]
+    },
+    {
       "version": "1.6.0",
       "packageId": "pkg-24",
       "name": "LobeUI 风格 · 主题系统",

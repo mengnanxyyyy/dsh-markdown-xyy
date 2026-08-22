@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.6.0',
+  version: '1.7.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '内置主题目录内聚到 plugin/assets/themes/（随 plugin/ 目录打包即携带，不再依赖仓库根 themes/）；Host 优先读 assets 下、旧 themes/ 兼容回退（RPC 协议不变，客户端无感知）',
+    '内置主题精简：移除 lobeui-emphasis / inkpaper / qingci 三套早期纯配色主题，仅保留全变量化完整主题「草莓猛男粉」（历史在 git）',
   ],
 }
 
@@ -45,22 +45,8 @@ const FALLBACK_TEMPLATE_CSS = '/* 主题模板不可用，请检查插件资产 
 
 // ---------- §2 主题元信息（第三方主题：显示名/描述/色板预览；CSS 内容运行时由 Host 提供） ----------
 // 「系统自带」（id: system-native）不是主题，是特殊选择：插件零干预，见 §4
+// v1.7.0：内置主题精简为唯一「草莓猛男粉」（lobeui-emphasis/inkpaper/qingci 已移除，历史在 git）
 const THEME_META = {
-  'lobeui-emphasis': {
-    name: 'LobeUI 风格（强调）',
-    desc: 'LobeUI 原生中性色 + 靛蓝强调系统（默认）',
-    swatches: ['#f8f8f8', '#ffffff', '#222222', '#5856d6'],
-  },
-  'inkpaper': {
-    name: '墨纸 · InkPaper',
-    desc: '暖纸身份：米白纸底 + 墨褐 accent',
-    swatches: ['#faf6ef', '#f2ece0', '#8a5a2b', '#8a5a2b'],
-  },
-  'qingci': {
-    name: '青瓷',
-    desc: '青绿灰阶：瓷白底 + 青瓷绿 accent',
-    swatches: ['#f4f7f5', '#fbfdfb', '#2f6b52', '#2f6b52'],
-  },
   'strawberry-mocha': {
     name: '草莓猛男粉',
     desc: '丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全变量化（含语法高亮）',

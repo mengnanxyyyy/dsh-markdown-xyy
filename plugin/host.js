@@ -167,12 +167,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.6.0',
+  version: '1.7.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '内置主题目录内聚到 plugin/assets/themes/（随 plugin/ 目录打包即携带，不再依赖仓库根 themes/）；Host 优先读 assets 下、旧 themes/ 兼容回退',
+    '内置主题精简：移除 lobeui-emphasis / inkpaper / qingci 三套早期纯配色主题，仅保留全变量化完整主题「草莓猛男粉」（历史在 git）',
   ],
 }
 

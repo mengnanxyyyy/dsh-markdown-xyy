@@ -1,8 +1,8 @@
 # 统一变量契约（Unified Variable Contract）—— v1.4.0
 
-> 盘点对象：内置主题（lobeui-emphasis / inkpaper / qingci / **strawberry-mocha**）+ 新建模板（`plugin/assets/template.css`）+ 完整参考主题（`~/.dsh/web-themes/example.css`）+ 面板样式（`plugin/assets/panel.css`）。
+> 盘点对象：内置主题（v1.4~v1.6 期间的 lobeui-emphasis / inkpaper / qingci / **strawberry-mocha**；**v1.7.0 起仅保留 strawberry-mocha**）+ 新建模板（`plugin/assets/template.css`）+ 完整参考主题（`~/.dsh/web-themes/example.css`）+ 面板样式（`plugin/assets/panel.css`）。
 > 触发点：v1.4.0 把第三方主题 Velvet-Strawberry-Mocha-v2-native-var.css 内置化为「草莓猛男粉」（`plugin/assets/themes/strawberry-mocha.css`）时，对全部主题/资产做了一次「哪些变量能统一」的检测与分类。
-> 结论一句话：**L0 平台 token（13 个固定名单）+ L1 身份色核心契约（17 个）是四套内置主题共用的统一变量集；L1 扩展（标题/文本/列表/`--hl-*`）+ L2 排版/形状常量 + L3 旋钮是 strawberry-mocha 的完整化演示；panel.css 只消费核心契约里的 7 个变量（全部带默认回退）。**
+> 结论一句话：**L0 平台 token（13 个固定名单）+ L1 身份色核心契约（17 个）是曾并存的四套内置主题共用的统一变量集（v1.7.0 起由草莓猛男粉独占承载）；L1 扩展（标题/文本/列表/`--hl-*`）+ L2 排版/形状常量 + L3 旋钮是 strawberry-mocha 的完整化演示；panel.css 只消费核心契约里的 7 个变量（全部带默认回退）。**
 > 日期：2026-08-22
 
 ---
@@ -11,12 +11,12 @@
 
 | 层 | 内容 | 单值 / 浅深成对 | 是否全主题统一 | 现状 |
 |---|---|---|---|---|
-| **L0 平台 token** | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | ✅ 成对（body / body[data-ds-dark-theme]） | ✅ 4 套内置全部定义（固定名单不可增删） | 已统一 |
-| **L1 身份色 · 核心** | accent 系 5 + link/highlight 系 4 + quote/code/table 系 5 + 字体 2 + `--mdvr-mm` = **17 个** | ✅ 色彩成对；字体/mm 单值 | ✅ 4 套内置 + template + example 全定义（唯一强制集） | 已统一 |
+| **L0 平台 token** | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | ✅ 成对（body / body[data-ds-dark-theme]） | ✅ 内置主题全量定义（固定名单不可增删；v1.7.0 起仅草莓猛男粉） | 已统一 |
+| **L1 身份色 · 核心** | accent 系 5 + link/highlight 系 4 + quote/code/table 系 5 + 字体 2 + `--mdvr-mm` = **17 个** | ✅ 色彩成对；字体/mm 单值 | ✅ 内置主题 + template + example 全定义（唯一强制集；v1.7.0 起由草莓猛男粉承载） | 已统一 |
 | **L1 身份色 · 扩展** | 标题梯度 h1~h6（6）、文本排印 strong/italic/bold-italic/subsup/del（5）、列表 bullet-l1/2/3 + checkbox-checked（4）、派生色 accent-rgb + inline-code/selection/check-mark（6） | 色彩成对；派生色 5 个当前单值 | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
 | **L1 语法高亮** | `--hl-keyword/string/number/property/function/comment`（6） | ✅ 成对 | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
 | **L2 排版/形状常量** | 行高/段距/字号/圆角/边框/内距/阴影/滚动条/焦点（40 个，`--mdvr-*` 单值） | ❌ 单值（`:root` 一次） | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
-| **L3 功能旋钮** | `--mdvr-mm`（间距倍率） | ❌ 单值 | ⚠️ 4 套都定义但 **0 处消费**（休眠旋钮） | 待激活 |
+| **L3 功能旋钮** | `--mdvr-mm`（间距倍率） | ❌ 单值 | ⚠️ 内置主题均定义但 **0 处消费**（休眠旋钮） | 待激活 |
 
 > 统一变量名证据：inkpaper / qingci / template.css / example.css 的 `--mdvr-*` 名单与 lobeui-emphasis **完全一致**（16 个色彩常量 + sans + mono + mm），说明核心 17 个是事实上的跨主题契约。
 
@@ -33,7 +33,7 @@
 | `--dsw-alias-state-error-primary` / `success-primary` / `warn-primary` | 错误 / 成功 / 警告语义色 |
 | `--dsw-specific-sidebar-fill` | 侧栏底 |
 
-- 名单固定（平台 Theme.listTokens），**不可新增**；四套主题全部按此名单浅深各一组。
+- 名单固定（平台 Theme.listTokens），**不可新增**；内置主题均按此名单浅深各一组（v1.7.0 起仅草莓猛男粉）。
 - strawberry-mocha 浅档语义色按文档 AA 实测值（error #C74330 / success #237834 / warn #965B00）；深档取 Catppuccin Mocha 对应色。
 
 ---
@@ -119,7 +119,7 @@
 
 | 变量 | 值 | 状态 |
 |---|---|---|
-| `--mdvr-mm` | 2 | 4 套主题均有定义，**0 消费**——已规划为全局间距倍率（如 `margin: calc(0.45em * var(--mdvr-mm))`），待某版本激活 |
+| `--mdvr-mm` | 2 | 内置主题均有定义（曾 4 套、v1.7.0 起仅草莓猛男粉），**0 消费**——已规划为全局间距倍率（如 `margin: calc(0.45em * var(--mdvr-mm))`），待某版本激活 |
 | `--mdvr-sans` / `--mdvr-mono` / `--mdvr-math-font` | Geist+中文栈 / JetBrains Mono 栈 / KaTeX 数学栈 | sans/mono 属核心契约；math-font 仅 strawberry-mocha |
 
 ---
@@ -128,7 +128,7 @@
 
 - **消费的 `--mdvr-*`（全部带默认回退，铁律）**：`accent`（11 处，回退 #5856d6）、`accent-faint`（6，回退 #b4b3ed）、`highlight`（3，回退 #b3541e）、`mono`（3，回退 ui-monospace…）、`accent-text`（2，回退 #3a3a4e）、`link`（1，回退 #005ae0）、`accent-fainter`（1，回退 #cdccf3）。
 - **消费的 `--dsw-alias-*`**：`bg-layer-1/2`、`border-l1`、`label-primary/secondary`、`state-error-primary`。
-- **推论**：① 面板最低兼容 = 7 个 `--mdvr-*`（accent / accent-faint / accent-fainter / accent-text / highlight / link / mono）——主题只要定义这 7 个，插件面板就自带该主题配色；② 完整契约 30 个全量提供时（4 套内置主题现状），从配色到排版与面板全链路统一。`strawberry-mocha` 浅档 accent=#D93B68、深档=#FB7185，面板自动换粉——panel 无需任何改动。
+- **推论**：① 面板最低兼容 = 7 个 `--mdvr-*`（accent / accent-faint / accent-fainter / accent-text / highlight / link / mono）——主题只要定义这 7 个，插件面板就自带该主题配色；② 完整契约 30 个全量提供时（v1.4~v1.6 曾 4 套、v1.7.0 起仅草莓猛男粉），从配色到排版与面板全链路统一。`strawberry-mocha` 浅档 accent=#D93B68、深档=#FB7185，面板自动换粉——panel 无需任何改动。
 
 ---
 
@@ -144,7 +144,7 @@
 
 ## 十、维护引用（改变量名/值要动的地方）
 
-- 改核心 17 个变量之一：`panel.css` 回退值 → 4 套内置主题 + `template.css` + `example.css`（参考主题）→ strawberry-mocha 元素段。
+- 改核心 17 个变量之一：`panel.css` 回退值 → 内置主题 + `template.css` + `example.css`（参考主题）→ strawberry-mocha 元素段。
 - 改 strawberry-mocha 专属变量：仅 `plugin/assets/themes/strawberry-mocha.css` + 本文档 §四~§六。
 - 新增 `--dsw-alias-*`：❌ 不允许（平台名单固定）。
 - 版本台账：`manifest/versions.json` v1.4.0 条目已登记本契约。
