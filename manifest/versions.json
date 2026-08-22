@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.4.0",
+      "packageId": "pkg-17",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-22",
+      "changes": [
+        "新增内置主题「草莓猛男粉」（strawberry-mocha）：第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化——① 13 个平台 token ② 全量 --mdvr-* 身份色（标题/文本/accent/组件/列表，浅深成对）③ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）④ --hl-* 语法高亮（浅深成对）",
+        "元素段按 docs/diagnosis-velvet-native-leak.md 整改：删除臆测产品类名（.dsw-code-block/.markdown-body 等）、复选框收敛到任务列表、KaTeX 显示块强制重排与子树透明化移除、!important 收敛（仅 ::marker/复选框/行内代码基线等必须处保留）",
+        "统一变量契约盘点：docs/unified-variables.md —— L0 平台 token（13 固定名单）/ L1 身份色（浅深成对）/ L2 排版形状常量 / L3 功能旋钮 / panel.css 消费面；新主题与 lobeui-emphasis / inkpaper / qingci 共用同一变量命名，成为 --mdvr-* 全量消费的参考模板"
+      ]
+    },
+    {
       "version": "1.3.0",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

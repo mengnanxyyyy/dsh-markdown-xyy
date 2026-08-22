@@ -44,6 +44,8 @@ body[data-ds-dark-theme] { ... }
 - **挂载机制与产品一致**：浅色 `body`、深色 `body[data-ds-dark-theme]`（产品用属性选择器而非 `prefers-color-scheme`）。插件样式注入晚于产品样式表 → 同选择器后者胜出。
 - 变量齐全性：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。
 - **共享骨架 `plugin/assets/typography.css` 只引用变量，不含写死色值** —— 主题切换 = 换变量，骨架不动。
+- **变量分层（v1.4.0 起统一契约，见 `docs/unified-variables.md`）**：L0 平台 token（13 个固定名单）→ L1 身份色（`--mdvr-*` 与 `--hl-*`，浅/深成对，写在 ① ② 两档）→ L2 排版/形状常量（行高/字号/圆角/内距等，单值）→ L3 功能旋钮（`--mdvr-mm` 等）→ 字体栈（单值）。L2/L3/字体放 `:root` 声明一次，不再在 body 两档重复。
+- 参考实现：`themes/strawberry-mocha.css` 是带**完整 ③ 元素段**（近 80 条规则、全量消费 `--mdvr-*`/`--hl-*`）的内置主题；其余三套以变量为主、各带 0~1 条 `:where` 增强（lobeui 无、inkpaper/qingci 各 1 条），元素观感主要走产品兜底。
 
 
 ## 三、选择模型（v0.9.0）
@@ -73,6 +75,7 @@ body[data-ds-dark-theme] { ... }
 | `themes/lobeui-emphasis.css` | LobeUI 风格（强调） | LobeUI 中性灰阶 + 靛蓝强调系统 |
 | `themes/inkpaper.css` | 墨纸 · InkPaper | 暖纸：米白纸底 + 墨褐 accent + 琥珀 highlight |
 | `themes/qingci.css` | 青瓷 | 青绿灰阶 + 青瓷绿 accent + 12px 圆角釉感 |
+| `themes/strawberry-mocha.css` | 草莓猛男粉 | 丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量（全变量化参考实现，变量分层见 `docs/unified-variables.md`） |
 
 ## 四、demo.css 维护规则（铁律）
 
@@ -86,7 +89,7 @@ body[data-ds-dark-theme] { ... }
 - **构建（v1.2.0 起）**：`node scripts/build-client.js` = 拷贝 `plugin/src/client.core.js` → `plugin/client.js` + 资产完整性检查。CSS 资产不再内联：Host 经 `themes.builtin.list` / `themeAssets.get` 从 `themes/*.css` 与 `plugin/assets/*.css` 读取（`sandboxPolicy.workspaceRoot` 定位）。
 - **define 传输**：`node scripts/minify.js` 生成精简双半（仅删注释/折叠空白，token 流等价校验），一次传 host+client 双半。
 - **发布门禁**：`node scripts/check-release.js` 自动核对 MANIFEST 一致性、构建产物、CSS 契约与 packageId 唯一性。
-- **切换（设置页/会话级）**：`applySelection(id)` 注入 `typography.css + 主题css + panel.css`（v1.3.0 起原子切换：先构建新样式成功后再卸载旧样式）。
+- **注入（v1.3.0+）**：`主题css + panel.css`（typography.css 已停用不注入，产品 `._markdown_*` 规则兜底排版），`applySelection(id)` 原子切换（先构建新样式成功后再卸载旧样式）。
 - **卸载**：`ctx.effect` 持有样式表 disposer，stop/update/undefine 自动还原。
 
 ## 六、如何新增一个主题

@@ -15,16 +15,16 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
    - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（新建用户主题模板）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
-   - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.core` / `themeAssets.template` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
-   - **⚠️ 消息通道单条上限 ~16KB（v1.2.3 分块解决）**：页面↔宿主的 RPC 消息超过 ~16KB 会失败/静默截断——`themeAssets.get` 返回 24KB → 设置面板错误占位（无样式）；`themes.user.save` 17KB → 文件写入被截断损坏。**所有大文本（主题/模板）走分块协议**：`8000 字符/片`，get 侧 `{index} → {ok, index, total, chunk}` 循环拉取（client `fetchChunks`），save 侧 client 依次上传 `{id, index, total, chunk}`、host `saveBuffers` 拼装后写盘。**任何新的大内容 RPC 都必须分块**。
-   - **CSS 语法校验（v1.2.3）**：保存前 `validateCss`（client 端，与 host 曾经的实现一致）检测注释/字符串/花括号/圆括号闭合，错误**拒绝保存**并在编辑器状态栏显示具体原因；超过 100KB 拒绝。
+   - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
+   - **⚠️ 消息通道单条上限 ~16KB（v1.2.3 分块解决，v1.3.0 全覆盖）**：页面↔宿主的 RPC 消息超过 ~16KB 会失败/静默截断——旧 `themeAssets.get` 单次返回 24KB → 设置面板错误占位（无样式）；`themes.user.save` 17KB → 文件写入被截断损坏。**所有大文本（主题/模板/资产）走分块协议**：`8000 字符/片`，get 侧 `{index} → {ok, index, total, chunk}` 循环拉取（client `fetchChunks` 校验 index/total 一致性），save 侧 client 上传 `{id, uploadId, index, total, chunk}`、host 按 uploadId 隔离缓冲、**分片全部到齐后**拼装并执行 Host 侧 CSS 校验再写盘（v1.3.0 事务化，杜绝缺片/并发混片）。**任何新的大内容 RPC 都必须分块**。
+   - **CSS 语法校验（v1.2.3 client / v1.3.0 host 双端）**：保存前 `validateCss`（client 端即时反馈 + Host 写盘前强制，双端同逻辑）检测注释/字符串/花括号/圆括号闭合，错误**拒绝保存**并在编辑器状态栏显示具体原因；超过 100KB 拒绝。
    - **项目根探测（v1.2.1→v1.2.2）**：⚠️ `sandboxPolicy.workspaceRoot` = **DSH 主进程启动目录**，不一定是插件项目目录（本环境 = `/home/lab/xyygithub/dsh-xyy-ui`）！Host 用 `resolveProjectRoot(ctx)` **按内容探测**：`workspaceRoot` → 其父目录及一级子目录（兄弟项目）→ `FALLBACK_PROJECT_DIR`（`/home/lab/xyygithub/dsh-markdown-xyy`）兜底，以同时存在 `plugin/assets/typography.css` + `panel.css` 为准，首次解析后缓存。**⚠️ fs 服务的 `stat/readText/listDir/writeText` 都要求 `resolve()` 返回的句柄对象（{targetKey}），绝不能传字符串路径**（v1.2.1 就栽在这里，探测全 miss）。
    - 用户主题目录**不硬编码**：`shell 读 $HOME` → `workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 三级解析（host.js `resolveUserThemesDir`）。
 2. **`plugin/client.js` = `plugin/src/client.core.js` 的拷贝（构建产物，禁止手改）**。改逻辑只改 `plugin/src/client.core.js`，然后：
    ```bash
    node scripts/build-client.js   # 拷贝 + 资产完整性检查
    ```
-   ⚠️ `scripts/extract-assets.js` 是 v1.2.0 的一次性迁移工具（从旧内联常量抽取资产文件），勿再运行。
+   `scripts/extract-assets.js` 已移除（v1.2.0 一次性迁移工具，历史在 git）；`plugin/assets/typography.css` 保留作 Host 项目根探测哨兵（resolveProjectRoot 以 typography.css + panel.css 并存为准）且客户端不再注入它（v1.3.0+ 后缀：第三方主题 = 主题 CSS + panelCss，产品 `._markdown_*` 兜底排版）。
 3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
 4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
 5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（模板来自 `plugin/assets/template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
@@ -60,16 +60,18 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 常见坑
 
 - **define 漏传 host 或 client**：先 inspect 确认双半都在再 run（本会话踩过 5 次）
-- 传输超长被截断：单条消息约 26KB 转义上限，超长会静默截断成残缺包 —— 永远用 minify 产物
+- 传输超长被截断：单条消息约 26KB 转义字节上限（经验值；v1.2.5 的 29.1KB 实测可传，v1.3.0 约 33.3KB 需实测验证）——超长会静默截断成残缺包。若 define 后 `cordis_inspect_self` 发现双半残缺：优先精简 MANIFEST/渲染 helper 压缩体积，或确认通道上限后重试；永远用 minify 产物
 - 浅档语义色要过 WCAG AA（参考 `docs/readability-a11y.md` 的实测值：error #c74330 / success #287b38 / warn #985d00）
 - `body[data-ds-dark-theme]` 选择器拼错 → 深色档不回退
 - 动态插件是内存态：进程重启后插件丢失，需用当前 `plugin/host.js` + `plugin/client.js`（minify 后）重新 define（台账历史在 `manifest/versions.json`）
+- **packageId 按进程分配、随重启重置**：新进程 define 可能拿到与旧进程条目相同的 id（v1.4.0 与 v1.2.0 同得 pkg-17）。`versions.json` 如实回填即可；`check-release` 第 9 项对「顶部最新条目跨进程复用」降级为警告（非顶部条目间重复仍判失败）
 - 审批被拒不要重复请求；技术失败读 `cordis_inspect_self` 诊断后修同一插件
 
-## 当前状态（2026-08-15）
+## 当前状态（2026-08-22）
 
-- 最新版本：v1.2.3（分块传输修复 ~16KB 消息上限 + CSS 语法校验禁止保存损坏文件 + 模板恢复完整版）
-- 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / 用户主题 `user:<id>`
-- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位）
-- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮无响应）；主题自身仍不调用 `overrideTokens`；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）
+- 最新版本：v1.4.0（新增内置主题「草莓猛男粉」`themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`）
+- 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / `strawberry-mocha` / 用户主题 `user:<id>`
+- 内置主题变量分层（v1.4.0 统一契约）：L0 平台 token（13 固定）→ L1 身份色（`--mdvr-*`/`--hl-*` 浅深成对，两档 body）→ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（`:root` 单值）。`strawberry-mocha` 是唯一带完整 ③ 元素段（近 80 条规则、全量消费变量）的内置主题；其余三套各带 0~1 条 `:where` 增强，元素观感主要走产品 `._markdown_*` 兜底
+- 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位；刷新失败有错误提示）
+- 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮禁用）；主题自身仍不调用 `overrideTokens`；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）
 - 路线图：gfm alert / 选择持久化 / 台账落盘

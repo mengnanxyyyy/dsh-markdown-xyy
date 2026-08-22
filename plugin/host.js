@@ -167,13 +167,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.3.0',
+  version: '1.4.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-16',
+  date: '2026-08-22',
   changes: [
-    '保存协议事务化（uploadId + 分片完整性 + Host 侧 CSS 校验 + TTL/容量上限）',
-    '资产分块统一（themeAssets.get）+ 主题选择原子化 + Run 生命周期隔离 + 无障碍 + 发布门禁（与 client v1.3.0 同源）',
+    '新增内置主题「草莓猛男粉」（strawberry-mocha）：第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化（13 token + 全量 --mdvr-* 身份色 + L2/L3 常量 + --hl-* 语法高亮）',
+    '统一变量契约盘点 docs/unified-variables.md（与 client v1.4.0 同源）',
   ],
 }
 

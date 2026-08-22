@@ -5,7 +5,7 @@
 它做三件事：
 
 1. **版本记录**：每次迭代都是一个不可变 Package，插件自动维护版本台账（版本号、日期、变更日志、主题名），并在 `cordis_run` 卡片内展示当前版本与历史。
-2. **主题**：内置/用户主题均为独立 CSS 文件，由 Host 运行时读取（`themes/*.css` + `~/.dsh/web-themes/*.css`），Client 以 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`（与产品挂载机制一致），不改动产品基线主题。
+2. **主题**：内置/用户主题均为独立 CSS 文件，由 Host 运行时读取（`themes/*.css` + `~/.dsh/web-themes/*.css`），Client 以 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`（与产品挂载机制一致），不改动产品基线主题。内置主题：`lobeui-emphasis` / `inkpaper` / `qingci` / `strawberry-mocha`（草莓猛男粉）。
 3. **Markdown 排版**：通过 `styles.insert` 注入零优先级排版层（`:where()`），为对话中的语义化 Markdown（标题、列表、代码块、引用、表格…）提供中文友好排版；产品自带样式的组件不会被覆盖。
 
 ## 项目结构
@@ -20,7 +20,9 @@ dsh-markdown-xyy/
 │   ├── lobeui-synthesis.md      # v0.2.0 对标 LobeUI 的合成改动方案
 │   ├── lobeui-compare.md        # 竞品研究：代码块 / Markdown 组件
 │   ├── lobeui-typography-competitive.md  # 竞品研究：字体与排版
-│   └── lobeui-theme-comparison.md        # 竞品研究：色彩体系
+│   ├── lobeui-theme-comparison.md        # 竞品研究：色彩体系
+│   ├── diagnosis-velvet-native-leak.md    # 诊断：Velvet 主题对原生排版的影响（整改依据）
+│   └── unified-variables.md              # 统一变量契约盘点（L0/L1/L2/L3 + panel 消费面）
 ├── manifest/
 │   └── versions.json            # 版本台账（持久态，与插件内存台账对应）
 ├── plugin/
@@ -45,6 +47,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
+- **v1.4.0「草莓猛男粉内置」**：新增内置主题 `themes/strawberry-mocha.css`（中文名 草莓猛男粉；第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化）——13 token + 全量 `--mdvr-*` 身份色（浅深成对） + L2/L3 排版常量 + `--hl-*` 语法高亮；元素段按诊断报告整改（去臆测类名/收作用域/收敛 `!important`）；统一变量契约盘点成文 `docs/unified-variables.md`。
 - **v1.3.0「可靠性收口 + 无障碍」**：分块保存协议事务化（uploadId + 分片完整性 + Host 侧 CSS 校验 + TTL/容量上限，杜绝缺片/并发混片写坏主题文件）；资产读取统一分块（`themeAssets.get`）；主题选择原子化 + Run 生命周期隔离；主题卡按钮化/aria 语义；格式化器字符串与 `url()` 保护；新增 `scripts/check-release.js` 发布门禁。
 - **v1.2.5「编辑器叠加根治」**：pre/textarea 不软换行 + 横向滚动，逐字符对齐杜绝叠字重叠（历史版本）。
 - **v1.2.3「分块传输」**：大文本 8000 字符/片分块，修复 ~16KB 消息上限导致的加载失败与保存截断（历史版本）。
