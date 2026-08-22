@@ -5,7 +5,7 @@
 它做三件事：
 
 1. **版本记录**：每次迭代都是一个不可变 Package，插件自动维护版本台账（版本号、日期、变更日志、主题名），并在 `cordis_run` 卡片内展示当前版本与历史。
-2. **主题**：通过 `theme.overrideTokens` 叠加全局 token 层（浅/深双套配色，当前为 LobeUI 原生风格），不改动产品基线主题。
+2. **主题**：内置/用户主题均为独立 CSS 文件，由 Host 运行时读取（`themes/*.css` + `~/.dsh/web-themes/*.css`），Client 以 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`（与产品挂载机制一致），不改动产品基线主题。
 3. **Markdown 排版**：通过 `styles.insert` 注入零优先级排版层（`:where()`），为对话中的语义化 Markdown（标题、列表、代码块、引用、表格…）提供中文友好排版；产品自带样式的组件不会被覆盖。
 
 ## 项目结构
@@ -45,10 +45,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
-- **v1.2.2「修复：fs stat 句柄」**：`resolveProjectRoot` 探测改用 fs 服务 `resolve()` 句柄（stat 不接受字符串路径）——v1.2.1 探测未生效的补丁，已实测命中项目根，恢复设置页面板样式。
-- **v1.2.1「修复：项目根按内容探测」**：Host 改用 `resolveProjectRoot`（workspaceRoot → 兄弟目录 → 显式兜底）定位项目根，修复 DSH 启动目录 ≠ 插件项目目录时资产读取失败的问题。
-- **v1.2.0「用户主题管理 + 资产文件化」**：设置页新增「🆕 新建用户主题」与每卡「✏️ 编辑」；编辑器带实时语法高亮 + 一键格式化 + 保存写回 `~/.dsh/web-themes`；内置主题只读；内置主题/骨架/面板样式/模板全部由 Host 从文件读取（改文件即生效，无需升级插件）。
-- **v1.1.0「动态用户目录」**：用户主题目录改为系统动态解析 `$HOME/.dsh/web-themes`（shell 读 `$HOME` 优先 → workspaceRoot 推导 → 硬编码回退，不写死路径）；目录已从 `mdvr-themes` 更名 `web-themes`。
-- v1.0.0「用户主题动态加载」：`~/.dsh/` 放 CSS 即新主题，无需打包升级（历史版本）。
-- v0.9.0 / v0.8.0 / v0.7.0 / v0.6.0 / v0.5.0 / v0.4.0 / v0.3.0 / v0.2.0 / v0.1.0：历史版本（见台账）。
-- 台账：[manifest/versions.json](manifest/versions.json)
+- **v1.3.0「可靠性收口 + 无障碍」**：分块保存协议事务化（uploadId + 分片完整性 + Host 侧 CSS 校验 + TTL/容量上限，杜绝缺片/并发混片写坏主题文件）；资产读取统一分块（`themeAssets.get`）；主题选择原子化 + Run 生命周期隔离；主题卡按钮化/aria 语义；格式化器字符串与 `url()` 保护；新增 `scripts/check-release.js` 发布门禁。
+- **v1.2.5「编辑器叠加根治」**：pre/textarea 不软换行 + 横向滚动，逐字符对齐杜绝叠字重叠（历史版本）。
+- **v1.2.3「分块传输」**：大文本 8000 字符/片分块，修复 ~16KB 消息上限导致的加载失败与保存截断（历史版本）。
+- 完整台账：[manifest/versions.json](manifest/versions.json)

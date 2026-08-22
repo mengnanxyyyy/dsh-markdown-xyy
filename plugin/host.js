@@ -1,16 +1,16 @@
 // ============================================================
-// Host half v1.2.3 — 版本台账 + 主题资产/用户主题读写（分块传输 + CSS 校验）
+// Host half v1.3.0 — 版本台账 + 主题资产/用户主题读写（分块传输 + Host 侧 CSS 校验）
 //
 // 【职责】
 //   维护内存台账（按 packageId 去重、最新在前）
 //   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
 //   versions.list —— 面板查询台账快照 { current, history }
 //   themes.builtin.list —— 列出内置主题（项目根 themes/*.css，文件即主题）
-//   themeAssets.core —— 排版骨架 + 面板样式（plugin/assets/{typography,panel}.css）
-//   themeAssets.template —— 新建模板（分块，8000 字符/片）
+//   themeAssets.get —— 共享资产分块读取（typography/panel/template，8000 字符/片）
 //   themes.user.list / get / save —— 用户主题（$HOME/.dsh/web-themes/*.css）
 //     get/save 均分块传输（页面↔宿主消息通道有 ~16KB 单条上限，v1.2.2 实测 24KB 返回失败、16.8KB 保存截断）
-//     save 附带 CSS 语法校验（注释/字符串/花括号/圆括号闭合），错误明确拒绝
+//     save 为事务化上传协议：uploadId 隔离 + 分片完整性检查 + TTL/容量上限，
+//     拼接后 Host 再执行 CSS 语法校验（注释/字符串/花括号/圆括号闭合），错误明确拒绝
 //   只传 JSON 标量，不序列化任何 Cordis/DSH 活对象
 // ============================================================
 
@@ -26,6 +26,16 @@ const FALLBACK_PROJECT_DIR = '/home/lab/xyygithub/dsh-markdown-xyy'
 const CHUNK_SIZE = 8000
 // 用户主题总大小上限（防滥用）
 const MAX_THEME_LEN = 100000
+// 单片数上限（100KB / 8000 字符 → 13 片封顶）
+const MAX_CHUNKS = Math.ceil(MAX_THEME_LEN / CHUNK_SIZE)
+// 同时存在的未完成上传事务上限（防内存滥用）
+const MAX_UPLOAD_BUFFERS = 16
+// 未完成上传 TTL（超时后惰性清理）
+const UPLOAD_TTL_MS = 5 * 60 * 1000
+// 用户主题 id 白名单（Host 与 Client 共用同一规则；拒绝控制字符/点文件/路径分隔符）
+const THEME_ID_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/
+// 上传事务 id 格式（Client 每次保存生成）
+const UPLOAD_ID_RE = /^[A-Za-z0-9_-]{8,64}$/
 let userThemesDir = null // 首次解析后缓存
 let projectRoot = null   // 首次探测后缓存
 
@@ -105,22 +115,65 @@ async function resolveProjectRoot(ctx) {
   return null
 }
 
-// 大文本按固定大小切片
+// 大文本按固定大小切片（空文本返回一个空片，保证读/写协议对称）
 function sliceChunks(text) {
+  if (text.length === 0) return ['']
   const chunks = []
   for (let i = 0; i < text.length; i += CHUNK_SIZE) chunks.push(text.slice(i, i + CHUNK_SIZE))
   return chunks
 }
 
+// CSS 语法校验（Host 写盘前强制执行；与 client 端 validateCss 同逻辑，双端一致）
+// 检测注释/字符串/花括号/圆括号闭合；返回错误信息或 null（通过）
+function validateCss(src) {
+  let depth = 0
+  let paren = 0
+  let inComment = false
+  let inStr = null
+  let i = 0
+  const n = src.length
+  while (i < n) {
+    const c = src[i]
+    const c2 = src[i + 1]
+    if (inComment) {
+      if (c === '*' && c2 === '/') { inComment = false; i += 2 }
+      else i++
+      continue
+    }
+    if (inStr !== null) {
+      if (c === '\\') i += 2
+      else if (c === inStr) { inStr = null; i++ }
+      else i++
+      continue
+    }
+    if (c === '/' && c2 === '*') { inComment = true; i += 2; continue }
+    if (c === '"' || c === "'") { inStr = c; i++; continue }
+    if (c === '{') depth++
+    else if (c === '}') {
+      depth--
+      if (depth < 0) return '出现多余的 }'
+    } else if (c === '(') paren++
+    else if (c === ')') {
+      paren--
+      if (paren < 0) return '出现多余的 )'
+    }
+    i++
+  }
+  if (inComment) return '注释未闭合（缺少 */）'
+  if (inStr !== null) return '字符串未闭合（缺少 ' + inStr + '）'
+  if (depth > 0) return '花括号未闭合（缺少 ' + depth + ' 个 }）'
+  if (paren > 0) return '圆括号未闭合（缺少 ' + paren + ' 个 )）'
+  return null
+}
+
 const MANIFEST = {
-  version: '1.2.3',
+  version: '1.3.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-15',
+  date: '2026-08-16',
   changes: [
-    '传输修复：所有主题内容走分块传输（8000 字符/片，单条消息 <8.5KB），解决页面↔宿主消息通道 ~16KB 上限导致的资产加载失败、主题保存静默截断',
-    'CSS 语法校验：保存前检测注释/字符串/花括号/圆括号闭合，错误明确拒绝并提示（不再写入损坏文件）',
-    'asset RPC 拆分：themeAssets.core（骨架+面板）+ themeAssets.template（分块）；模板恢复完整版（与 example.css 同源）',
+    '保存协议事务化（uploadId + 分片完整性 + Host 侧 CSS 校验 + TTL/容量上限）',
+    '资产分块统一（themeAssets.get）+ 主题选择原子化 + Run 生命周期隔离 + 无障碍 + 发布门禁（与 client v1.3.0 同源）',
   ],
 }
 
@@ -189,40 +242,25 @@ return {
       }
     })
 
-    // 共享资产核心：排版骨架 + 面板样式（单次返回 ~11.5KB，安全区）
-    harness.handle('themeAssets.core', async () => {
+    // 共享资产分块读取（typography/panel/template）：{name, index} → {ok, index, total, chunk}
+    // 统一分块协议（v1.3.0）：单次返回的 typography+panel 已接近 ~16KB 通道上限，全部资产走分块
+    harness.handle('themeAssets.get', async (args) => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
+      const name = args && args.name
       if (fsSvc === undefined || root === null) {
         return { ok: false, reason: 'fs or project root unavailable' }
       }
-      const read = async (name) => {
-        try {
-          return await fsSvc.readText(await fsSvc.resolve(root + '/plugin/assets/' + name))
-        } catch (e) {
-          return null
-        }
-      }
-      const typography = await read('typography.css')
-      const panel = await read('panel.css')
-      if (typography === null || panel === null) {
-        return { ok: false, reason: 'assets missing' }
-      }
-      return { ok: true, typography, panel }
-    })
-
-    // 新建模板（分块）：{index} → {ok, index, total, chunk}
-    harness.handle('themeAssets.template', async (args) => {
-      const fsSvc = ctx.get('fs')
-      const root = await resolveProjectRoot(ctx)
-      if (fsSvc === undefined || root === null) {
-        return { ok: false, reason: 'fs or project root unavailable' }
+      if (name !== 'typography' && name !== 'panel' && name !== 'template') {
+        return { ok: false, reason: 'bad name' }
       }
       try {
-        const text = await fsSvc.readText(await fsSvc.resolve(root + '/plugin/assets/template.css'))
+        const text = await fsSvc.readText(await fsSvc.resolve(root + '/plugin/assets/' + name + '.css'))
         const chunks = sliceChunks(text)
-        const index = Number((args && args.index) || 0)
-        if (index < 0 || index >= chunks.length) return { ok: false, reason: 'bad index' }
+        const index = Number(args && args.index)
+        if (!Number.isSafeInteger(index) || index < 0 || index >= chunks.length) {
+          return { ok: false, reason: 'bad index' }
+        }
         return { ok: true, index, total: chunks.length, chunk: chunks[index] }
       } catch (e) {
         return { ok: false, reason: String((e && e.message) || e) }
@@ -251,49 +289,79 @@ return {
       const fsSvc = ctx.get('fs')
       if (fsSvc === undefined) return { ok: false, reason: 'fs unavailable' }
       const id = args && args.id
-      if (!id || id.indexOf('/') >= 0 || id.indexOf('\\') >= 0 || id === '..') {
+      if (typeof id !== 'string' || !THEME_ID_RE.test(id)) {
         return { ok: false, reason: 'bad id' }
       }
       try {
         const target = await fsSvc.resolve((await resolveUserThemesDir(ctx)) + '/' + id + '.css')
         const text = await fsSvc.readText(target)
         const chunks = sliceChunks(text)
-        const index = Number((args && args.index) || 0)
-        if (index < 0 || index >= chunks.length) return { ok: false, reason: 'bad index' }
+        const index = Number(args && args.index)
+        if (!Number.isSafeInteger(index) || index < 0 || index >= chunks.length) {
+          return { ok: false, reason: 'bad index' }
+        }
         return { ok: true, id, index, total: chunks.length, chunk: chunks[index] }
       } catch (e) {
         return { ok: false, reason: String((e && e.message) || e) }
       }
     })
 
-    // 保存 / 新建用户主题（分块上传 + CSS 语法校验 + 大小上限）
-    // 协议：client 依次发送 {id, index, total, chunk}；最后一块到达时拼接、校验、写盘
+    // 保存 / 新建用户主题（事务化分块上传 + Host 侧 CSS 校验 + 大小/并发/TTL 上限）
+    // 协议：client 生成 uploadId，依次发送 {id, uploadId, index, total, chunk}；
+    // 所有分片完整到达后拼接 → Host validateCss → 写盘（v1.3.0：不再“最后一片即提交”）
     harness.handle('themes.user.save', async (args) => {
       const fsSvc = ctx.get('fs')
       if (fsSvc === undefined) return { ok: false, reason: 'fs unavailable' }
       const id = args && args.id
-      if (!id || id.indexOf('/') >= 0 || id.indexOf('\\') >= 0 || id === '..') {
-        return { ok: false, reason: 'bad id' }
+      const uploadId = args && args.uploadId
+      if (typeof id !== 'string' || !THEME_ID_RE.test(id)) return { ok: false, reason: 'bad id' }
+      if (typeof uploadId !== 'string' || !UPLOAD_ID_RE.test(uploadId)) {
+        return { ok: false, reason: 'bad uploadId' }
       }
       const chunk = String((args && args.chunk) || '')
-      const index = Number((args && args.index) || 0)
-      const total = Number((args && args.total) || 1)
-      if (index < 0 || index >= total) return { ok: false, reason: 'bad index' }
+      const index = Number(args && args.index)
+      const total = Number(args && args.total)
+      // 安全整数校验：拒绝 NaN/小数/Infinity/负数/越界（v1.3.0）
+      if (!Number.isSafeInteger(index) || !Number.isSafeInteger(total) ||
+          total < 1 || total > MAX_CHUNKS || index < 0 || index >= total) {
+        return { ok: false, reason: 'bad chunk metadata' }
+      }
       if (chunk.length > CHUNK_SIZE) return { ok: false, reason: '单块过大(>8000字符)' }
-      if (total > Math.ceil(MAX_THEME_LEN / CHUNK_SIZE)) return { ok: false, reason: '块数过多' }
-      // 覆盖重传：index 0 时重置缓冲区
-      let buf = saveBuffers.get(id)
-      if (!buf || buf.total !== total || index === 0) {
-        buf = { total, chunks: [] }
-        saveBuffers.set(id, buf)
+
+      // 惰性清理超时未完成的上传事务
+      const now = Date.now()
+      for (const [k, b] of saveBuffers) {
+        if (now - b.lastAt > UPLOAD_TTL_MS) saveBuffers.delete(k)
       }
+
+      const key = uploadId + ':' + id
+      let buf = saveBuffers.get(key)
+      if (!buf) {
+        if (saveBuffers.size >= MAX_UPLOAD_BUFFERS) {
+          return { ok: false, reason: '未完成的上传事务过多，请稍后重试' }
+        }
+        buf = { id, total, chunks: [], received: new Set(), bytes: 0, lastAt: now }
+        saveBuffers.set(key, buf)
+      } else if (buf.total !== total) {
+        return { ok: false, reason: 'total 与首片不一致' }
+      }
+      if (buf.received.has(index)) return { ok: false, reason: '重复分片' }
       buf.chunks[index] = chunk
-      if (index < total - 1) {
-        return { ok: true, pending: true }
+      buf.received.add(index)
+      buf.bytes += chunk.length
+      buf.lastAt = now
+      if (buf.bytes > MAX_THEME_LEN) {
+        saveBuffers.delete(key)
+        return { ok: false, reason: '主题过大(>100KB)' }
       }
-      // 最后一块：拼接 + 长度校验 + 写盘（CSS 语法校验由 client 端保存前执行）
+      // 分片未全部到达：继续等待（绝不提前提交）
+      if (buf.received.size < total) return { ok: true, pending: true }
+
+      // 全部到达：拼接 + Host 侧 CSS 校验 + 写盘
+      saveBuffers.delete(key)
       const css = buf.chunks.join('')
-      saveBuffers.delete(id)
+      const cssErr = validateCss(css)
+      if (cssErr) return { ok: false, reason: 'CSS 语法错误：' + cssErr }
       if (css.length > MAX_THEME_LEN) return { ok: false, reason: '主题过大(>100KB)' }
       try {
         const dir = await resolveUserThemesDir(ctx)

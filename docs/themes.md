@@ -2,7 +2,7 @@
 
 > 插件能控制的全部 CSS 收敛为「主题系统」：**每套主题 = `themes/` 下一个独立 CSS 文件**。
 > v1.2.0 起全部资产文件化：内置主题 + 共享资产（排版骨架/面板样式/新建模板）由 **Host 运行时从文件读取**
-> （`themes.builtin.list` / `themeAssets.get` RPC），**改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
+> （`themes.builtin.list` / `themeAssets.get` RPC，v1.3.0 起全部资产统一走分块协议），**改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
 > v1.2.1 起项目根按内容探测（`resolveProjectRoot`：workspaceRoot → 兄弟目录 → 显式兜底，⚠️ workspaceRoot 是 DSH 启动目录而非必然的项目目录）。
 > 项目约定见 `AGENTS.md`。
 
@@ -85,7 +85,8 @@ body[data-ds-dark-theme] { ... }
 
 - **构建（v1.2.0 起）**：`node scripts/build-client.js` = 拷贝 `plugin/src/client.core.js` → `plugin/client.js` + 资产完整性检查。CSS 资产不再内联：Host 经 `themes.builtin.list` / `themeAssets.get` 从 `themes/*.css` 与 `plugin/assets/*.css` 读取（`sandboxPolicy.workspaceRoot` 定位）。
 - **define 传输**：`node scripts/minify.js` 生成精简双半（仅删注释/折叠空白，token 流等价校验），一次传 host+client 双半。
-- **切换（设置页/会话级）**：`applySelection(id)` 注入 `typography.css + 主题css + panel.css`（先 dispose 旧表）；默认选择 `DEFAULT_SELECTION = 'system-native'`（资产就绪后应用）。
+- **发布门禁**：`node scripts/check-release.js` 自动核对 MANIFEST 一致性、构建产物、CSS 契约与 packageId 唯一性。
+- **切换（设置页/会话级）**：`applySelection(id)` 注入 `typography.css + 主题css + panel.css`（v1.3.0 起原子切换：先构建新样式成功后再卸载旧样式）。
 - **卸载**：`ctx.effect` 持有样式表 disposer，stop/update/undefine 自动还原。
 
 ## 六、如何新增一个主题

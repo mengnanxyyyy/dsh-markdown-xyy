@@ -22,8 +22,11 @@
 .mdvr-scheme-btn:hover:not(:disabled) { border-color: var(--mdvr-accent-faint, #b4b3ed); }
 .mdvr-scheme-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .mdvr-scheme-btn-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); font-weight: 650; }
-.mdvr-theme-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }
+/* v1.3.0：卡片容器自身不承载点击（内置 button 或 用户主题 容器+兄弟按钮），键盘可达 */
+.mdvr-theme-card { display: flex; align-items: center; gap: 0; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }
+button.mdvr-theme-card { padding: 8px 10px; }
 .mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
+.mdvr-theme-main { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 8px 10px; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); font-family: inherit; }
 .mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }
 .mdvr-theme-swatches { display: flex; gap: 4px; }
 .mdvr-theme-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--dsw-alias-border-l1); }
@@ -33,10 +36,11 @@
 .mdvr-user-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mdvr-refresh-btn { padding: 4px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; font-size: 12px; color: var(--dsw-alias-label-primary); }
 .mdvr-refresh-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
-.mdvr-theme-card { position: relative; }
-.mdvr-edit-btn { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); cursor: pointer; font-size: 11px; color: var(--dsw-alias-label-secondary); }
+/* v1.3.0：用户主题卡 = 容器 + 两个兄弟按钮（选择 / 编辑）；编辑按钮独立于选择按钮 */
+.mdvr-edit-btn { align-self: center; margin-right: 6px; padding: 2px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-2); cursor: pointer; font-size: 11px; color: var(--dsw-alias-label-secondary); flex: none; }
 .mdvr-edit-btn:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); color: var(--mdvr-accent-text, #3a3a4e); }
-.mdvr-theme-card-editable .mdvr-theme-info { padding-right: 44px; }
+.mdvr-user-error { font-size: 12px; color: var(--dsw-alias-state-error-primary, #c74330); }
+.mdvr-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .mdvr-editor { margin-top: 8px; border: 1px solid var(--mdvr-accent-faint, #b4b3ed); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); overflow: hidden; }
 .mdvr-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--dsw-alias-border-l1); }
 .mdvr-editor-title { font-weight: 650; font-size: 13px; }
@@ -69,3 +73,34 @@
 .mdvr-editor-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .mdvr-editor-btn-primary { background: var(--mdvr-accent, #5856d6); border-color: var(--mdvr-accent, #5856d6); color: #ffffff; }
 .mdvr-editor-btn-primary:hover:not(:disabled) { border-color: var(--mdvr-accent, #5856d6); filter: brightness(1.08); }
+
+/* ============ v1.3.0：键盘焦点环 / 窄屏 / 高对比降级 ============ */
+/* 统一 focus-visible：所有插件自有交互控件（浅/深主题下均可见） */
+:where(
+  .mdvr-scheme-btn,
+  .mdvr-theme-card,
+  .mdvr-theme-main,
+  .mdvr-refresh-btn,
+  .mdvr-edit-btn,
+  .mdvr-editor-close,
+  .mdvr-editor-input,
+  .mdvr-editor-ta,
+  .mdvr-editor-btn
+):focus-visible {
+  outline: 2px solid var(--mdvr-accent, #5856d6);
+  outline-offset: 2px;
+}
+
+/* 窄屏 / 高缩放：编辑器底部操作换行，高度限制为视口比例 */
+.mdvr-editor-foot { flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .mdvr-editor-body { height: min(50vh, 320px); }
+  .mdvr-editor-status { flex-basis: 100%; }
+  .mdvr-editor-hint { flex-basis: 100%; }
+}
+
+/* Windows Forced Colors / 高对比模式：隐藏高亮层，textarea 显示真实文字（透明叠层不可见） */
+@media (forced-colors: active) {
+  .mdvr-editor-pre { display: none; }
+  .mdvr-editor-ta { color: CanvasText; -webkit-text-fill-color: CanvasText; background: Canvas; }
+}

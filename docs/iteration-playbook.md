@@ -7,12 +7,13 @@
 | 步骤 | 动作 | 产出 |
 | --- | --- | --- |
 | 1 | 确定版本号（semver：`0.2.0` 新功能 / `0.2.1` 修复） | 版本号 |
-| 2 | 同步修改 `plugin/host.js` 与 `plugin/client.js` 内的 `MANIFEST`（version/name/palette/date/changes） | 双份一致的 MANIFEST |
+| 2 | 同步修改 `plugin/host.js` 与 `plugin/src/client.core.js` 内的 `MANIFEST`（version/name/palette/date/changes），然后 `node scripts/build-client.js` 生成 `plugin/client.js`（⚠️ 禁止手改构建产物） | 双份一致的 MANIFEST + 产物 |
 | 3 | `manifest/versions.json` 顶部插入新条目（`packageId` 先留空） | 台账新条目 |
-| 4 | 用 `cordis_define`（`kind: existing` + 原 pluginId）定义新 Package | 新 `packageId` |
-| 5 | 用 `cordis_run`（`mode: update`）激活；若失败，读诊断后修复并重试，或 `mode: run` 回滚到 `currentPackageId` | 激活成功 |
-| 6 | 浏览器刷新页面，验证：配色（浅/深）、排版、版本面板展示 | 验收 |
-| 7 | 把 `packageId` 回填进 `manifest/versions.json`，提交 git（`git commit -m "vX.Y.Z: ..."` + `git tag vX.Y.Z`） | 持久台账 + 版本标签 |
+| 4 | `node scripts/check-release.js` 跑发布门禁（MANIFEST 一致性/语法/资产/CSS 契约） | 门禁通过 |
+| 5 | 用 `cordis_define`（`kind: existing` + 原 pluginId）定义新 Package | 新 `packageId` |
+| 6 | 用 `cordis_run`（`mode: update`）激活；若失败，读诊断后修复并重试，或 `mode: run` 回滚到 `currentPackageId` | 激活成功 |
+| 7 | 浏览器刷新页面，验证：配色（浅/深）、排版、版本面板展示 | 验收 |
+| 8 | 把 `packageId` 回填进 `manifest/versions.json`，提交 git（`git commit -m "vX.Y.Z: ..."` + `git tag vX.Y.Z`） | 持久台账 + 版本标签 |
 
 ## 硬性约束
 

@@ -3,6 +3,22 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.3.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-16",
+      "changes": [
+        "保存协议事务化：themes.user.save 增加 uploadId 隔离 + 分片完整性检查（全部到齐才提交）+ Host 侧 CSS 校验 + TTL/容量上限——杜绝缺片/并发混片写坏用户主题文件（v1.2.3 分块修复的完整性收口）",
+        "资产读取统一分块：themeAssets.core/template 合并为 themeAssets.get（typography/panel/template），全部 8000 字符/片；空文件可读；index/total 安全整数校验；client fetchChunks 校验响应 index/total 一致性（文件中途变更即失败重试，不拼接错位）",
+        "主题选择原子化：applySelection 先构建新样式、成功后替换旧样式，目标缺失不再清空当前主题；用户主题缓存原子快照替换 + 刷新 latest-request-wins + 失败提示（不再静默显示空列表）",
+        "Run 生命周期隔离：apply() 增加 runSeq/disposed generation guard，stop/update 后迟到 Promise 不再注入幽灵样式；资产加载失败可重试；theme 服务缺失时外观按钮禁用而非假装成功",
+        "无障碍：用户主题卡改为容器 + 两个兄弟按钮（选择/编辑，键盘可达）、aria-pressed 选中语义、编辑器 aria-labelledby/role=status、pre aria-hidden、Escape 退出 Tab 捕获、统一 focus-visible、forced-colors 降级、窄屏布局",
+        "格式化器安全化：formatCss 先保护 url()/字符串/注释再排版，格式化结果必须过语法校验才覆盖原文（不再拆坏 data URI 与字符串内分号）",
+        "工程：新增 scripts/check-release.js 发布门禁（MANIFEST 三处一致/构建产物一致/JS 语法/资产完整性/CSS 闭合/深色挂载/panel fallback/packageId 唯一/minify 产物）"
+      ]
+    },
+    {
       "version": "1.2.5",
       "packageId": "pkg-25",
       "name": "LobeUI 风格 · 主题系统",

@@ -6,7 +6,7 @@
 | --- | --- |
 | 不可变版本 | 每个 Package 是一个不可变版本，`cordis_run update` 原子切换，失败可回滚到 `currentPackageId` |
 | 双半分工 | Host 管「版本台账」状态与 RPC；Client 管「主题 + 排版 + 面板 UI」 |
-| 不碰基线 | 主题用 `theme.overrideTokens` 叠加层，排版用 `styles.insert` 的 `:where()` 零优先级选择器，永不修改产品主题注册表或 DOM 结构 |
+| 不碰基线 | 主题 = CSS 文件（`themes/*.css` / `~/.dsh/web-themes/*.css`）经 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`，排版用 `styles.insert` 的 `:where()` 零优先级选择器，永不修改产品主题注册表或 DOM 结构 |
 | 一次迭代一个 Package | 修改必须追加新 Package，绝不覆盖旧版本；旧版本随时可 rollback |
 | 台账双写 | 插件内存台账（进程内）+ `manifest/versions.json`（工作区持久态，随 git 留存） |
 
@@ -17,26 +17,30 @@
 │  version ledger（内存台账，按 packageId 去重）           │
 │  harness.handle('versions.note')   ← Client 激活时上报   │
 │  harness.handle('versions.list')   → 返回台账快照        │
+│  harness.handle('themes.builtin.list') / themeAssets.get │
+│  harness.handle('themes.user.list|get|save')             │
 └─────────────────────────────────────────────────────────┘
               │  Package-private JSON RPC（host.call）
 ┌─ Client（浏览器页面）───────────────────────────────────┐
-│  theme.overrideTokens('md-lobeui', {token: {light,dark}})  ← 13 个 token 双套配色
-│  styles.insert(markdown 排版 CSS)                        │
+│  styles.insert(typography + 主题 CSS + panel CSS)        │
+│    └─ body / body[data-ds-dark-theme]（与产品挂载一致）   │
 │  tool.view.cordis (key: self)                            │
 │    └─ 版本卡片：当前版本徽标 + 变更日志 + 历史台账         │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Host 半职责（版本台账）
+### Host 半职责（版本台账 + 主题文件）
 
 - 持有内存台账 `ledger`：`{pluginId, packageId, version, name, palette, date, changes}`，按 `packageId` 去重、最新在前。
 - `versions.note`：Client 面板挂载时上报自身 Package 的 MANIFEST，Host 记账。
 - `versions.list`：返回 `{current, history}` 快照。
+- 内置主题 / 共享资产 / 用户主题全部从文件读取（`themes/*.css`、`plugin/assets/*.css`、`$HOME/.dsh/web-themes/*.css`）；大文本走分块协议（8000 字符/片）。
+- `themes.user.save` 为事务化上传（uploadId 隔离 + 分片完整性 + Host 侧 CSS 校验）。
 - 只传 JSON 标量，不序列化任何 Cordis/DSH 活对象。
 
 ### Client 半职责（主题 + 排版 + 面板）
 
-- **主题层**：`ctx.theme.overrideTokens(source, tokens)`，每个 token 必须给 `{light, dark}` 双值；disposer 交给 `ctx.effect`，随 Fiber 卸载自动撤销。
+- **主题层**：`styles.insert(typographyCss + 主题css + panelCss)`，浅色 `body` / 深色 `body[data-ds-dark-theme]`；切换 = 先构建新样式、成功后再替换旧样式（原子，v1.3.0）。
 - **排版层**：`styles.insert(css)`，包级样式表，卸载自动清理。
 - **版本面板**：`slots.inject('tool.view.cordis')` + `slots.register({name, key: 'self'})`，渲染在最新 `cordis_run` 卡片内。
 
@@ -55,9 +59,10 @@ Plugin（稳定实例，pluginId）
 
 ## 4. 主题管线（如何新增/调整配色）
 
-1. 在 `client.js` 的 `tokens` 对象里增删 token（token 名单以 `Theme.listTokens` 为准，当前 13 个）。
-2. 每个 token 提供 `{light, dark}`；只改一个也可（同层按 token 粒度合成）。
-3. 升级 Package → 页面刷新 → 旧层自动被替换（同 source 重新调用 = 整层替换并置顶）。
+1. 在 `themes/`（内置）或 `$HOME/.dsh/web-themes/`（用户）新建/修改 `.css`，浅色写 `body{...}`、深色写 `body[data-ds-dark-theme]{...}`，13 个 `--dsw-alias-*` + `--mdvr-*` 变量定义在 CSS 内。
+2. 内置主题在 `plugin/src/client.core.js` 的 `THEME_META` 加显示信息。
+3. 改资产/主题文件后刷新页面即生效（Host 每次 RPC 从文件读取）。
+4. 升级 Package → 页面刷新 → 新样式表替换旧样式表。
 
 ## 5. 排版策略
 
