@@ -167,13 +167,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.4.0',
+  version: '1.5.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '新增内置主题「草莓猛男粉」（strawberry-mocha）：第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化（13 token + 全量 --mdvr-* 身份色 + L2/L3 常量 + --hl-* 语法高亮）',
-    '统一变量契约盘点 docs/unified-variables.md（与 client v1.4.0 同源）',
+    '修复内置主题列表空白：themes.builtin.list 只返回 id，CSS 改走 themes.builtin.get 分块拉取（大主题叠加超 ~16KB 通道上限导致 v1.4.0 列表被截断为空，v1.5.0 根治）',
+    '新增模板资产 template-strawberry（草莓猛男粉）：themeAssets.get 白名单扩展，新建用户主题默认以 velvet 模板起步（与内置主题 themes/strawberry-mocha.css 同源）',
   ],
 }
 
@@ -216,7 +216,9 @@ return {
     // 面板查询台账快照
     harness.handle('versions.list', async () => snapshot())
 
-    // 列出内置主题（项目根 themes/*.css；文件即主题，改文件后刷新/重启插件即生效，无需升级）
+    // 列出内置主题 id（项目根 themes/*.css；文件即主题，改文件后刷新/重启插件即生效，无需升级）
+    // ⚠️ v1.5.0：只返回 id 列表；完整 CSS 走 themes.builtin.get 分块拉取——
+    //    单条 RPC 内联多份大主题 CSS 会超 ~16KB 通道上限被截断（v1.4.0 实测 48KB → 列表全空）。
     harness.handle('themes.builtin.list', async () => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
@@ -226,19 +228,38 @@ return {
       try {
         const dir = await fsSvc.resolve(root + '/themes')
         const entries = await fsSvc.listDir(dir)
-        const themes = []
-        for (const e of entries
+        const themes = entries
           .filter((x) => x.name && x.name.endsWith('.css'))
-          .sort((a, b) => (a.name < b.name ? -1 : 1))) {
-          const id = e.name.replace(/\.css$/, '')
-          try {
-            const css = await fsSvc.readText(await fsSvc.resolve(dir + '/' + e.name))
-            themes.push({ id, css })
-          } catch (err) { /* 单个文件读取失败则跳过 */ }
-        }
+          .map((x) => x.name.replace(/\.css$/, ''))
+          .sort()
         return { ok: true, themes }
       } catch (e) {
         return { ok: false, reason: String((e && e.message) || e), themes: [] }
+      }
+    })
+
+    // 读取指定内置主题（分块）：{id, index} → {ok, id, index, total, chunk}（v1.5.0 与用户主题同协议）
+    harness.handle('themes.builtin.get', async (args) => {
+      const fsSvc = ctx.get('fs')
+      const root = await resolveProjectRoot(ctx)
+      if (fsSvc === undefined || root === null) {
+        return { ok: false, reason: 'fs or project root unavailable' }
+      }
+      const id = args && args.id
+      if (typeof id !== 'string' || !THEME_ID_RE.test(id)) {
+        return { ok: false, reason: 'bad id' }
+      }
+      try {
+        const target = await fsSvc.resolve(root + '/themes/' + id + '.css')
+        const text = await fsSvc.readText(target)
+        const chunks = sliceChunks(text)
+        const index = Number(args && args.index)
+        if (!Number.isSafeInteger(index) || index < 0 || index >= chunks.length) {
+          return { ok: false, reason: 'bad index' }
+        }
+        return { ok: true, id, index, total: chunks.length, chunk: chunks[index] }
+      } catch (e) {
+        return { ok: false, reason: String((e && e.message) || e) }
       }
     })
 
@@ -251,7 +272,7 @@ return {
       if (fsSvc === undefined || root === null) {
         return { ok: false, reason: 'fs or project root unavailable' }
       }
-      if (name !== 'typography' && name !== 'panel' && name !== 'template') {
+      if (name !== 'typography' && name !== 'panel' && name !== 'template' && name !== 'template-strawberry') {
         return { ok: false, reason: 'bad name' }
       }
       try {

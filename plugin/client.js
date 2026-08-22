@@ -27,14 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.4.0',
+  version: '1.5.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '新增内置主题「草莓猛男粉」（strawberry-mocha）：第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化——13 token + 全量 --mdvr-* 身份色（浅深成对）+ L2/L3 排版常量（:root 单值）+ --hl-* 语法高亮',
-    '元素段按诊断报告整改：删除臆测产品类名、复选框收敛到任务列表、KaTeX 强制重排降级、!important 收敛（仅必须处保留）',
-    '统一变量契约盘点：docs/unified-variables.md —— L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮 / panel 消费面，新主题与现有内置主题共用同一变量命名',
+    '修复内置主题列表空白：themes.builtin.list 只返回 id，CSS 改走 themes.builtin.get 分块拉取（大主题叠加超 ~16KB 通道上限导致 v1.4.0 列表被截断为空，v1.5.0 根治）',
+    '新增模板资产 template-strawberry（草莓猛男粉）：themeAssets.get 白名单扩展；「🆕 新建用户主题」默认以 velvet 模板起步（与内置主题 themes/strawberry-mocha.css 同源，失败回退原 template）',
   ],
 }
 
@@ -86,29 +85,40 @@ let runSeq = 0                // 每次 apply() 递增；异步回调据此判�
 let disposed = false          // 当前 Run 是否已卸载（stop/update 后置 true，阻止迟到回调注入）
 
 // 加载内置主题（工作区 themes/*.css；文件即主题，无需打包升级）
+// ⚠️ v1.5.0：list 只返回 id，CSS 逐个分块拉取（themes.builtin.get）——
+//    旧版 list 内联全部 CSS（大主题 32KB+ 时合计超 ~16KB 通道上限被截断 → 内置列表空白）
 async function loadBuiltinThemes() {
   try {
     const res = await host.call('themes.builtin.list')
-    if (!res || !res.ok) return []
-    const themes = Array.isArray(res.themes) ? res.themes : []
+    if (!res || !res.ok || !Array.isArray(res.themes)) return []
+    const ids = res.themes
+    // 局部快照：全部加载完成后再一次性替换共享缓存
     const next = {}
-    for (const t of themes) {
-      if (t && typeof t.id === 'string' && typeof t.css === 'string') next[t.id] = { css: t.css }
+    const loaded = []
+    for (const id of ids) {
+      const css = await fetchChunks('themes.builtin.get', (index) => ({ id, index }))
+      if (css !== null) {
+        next[id] = { css }
+        loaded.push(id)
+      }
     }
     builtinThemes = next
-    return Object.keys(builtinThemes)
+    return loaded
   } catch (e) {
     return []
   }
 }
 
 // 加载共享资产（面板样式 + 新建模板；全部走分块协议 themeAssets.get，v1.3.0）
+// v1.5.0：新建用户主题默认模板 = template-strawberry（草莓猛男粉）；不可用时回退原 template（青瓷演示）
 async function loadAssets() {
   try {
     const pan = await fetchChunks('themeAssets.get', (index) => ({ name: 'panel', index }))
+    const sw = await fetchChunks('themeAssets.get', (index) => ({ name: 'template-strawberry', index }))
     const tpl = await fetchChunks('themeAssets.get', (index) => ({ name: 'template', index }))
     if (pan !== null) panelCss = pan
-    if (tpl !== null && tpl.length > 0) templateCss = tpl
+    if (sw !== null && sw.length > 0) templateCss = sw
+    else if (tpl !== null && tpl.length > 0) templateCss = tpl
   } catch (e) { /* 忽略：资产缺失时插件仍可用（仅无样式） */ }
 }
 

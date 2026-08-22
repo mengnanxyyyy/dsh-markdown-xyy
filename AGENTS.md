@@ -12,7 +12,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
    - 内置主题：仓库 `themes/*.css`（`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）
-   - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（新建用户主题模板）
+   - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，保留作回退）/ `template-strawberry.css`（**新建用户主题默认模板**，草莓猛男粉，v1.5.0）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
    - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
@@ -27,7 +27,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
    `scripts/extract-assets.js` 已移除（v1.2.0 一次性迁移工具，历史在 git）；`plugin/assets/typography.css` 保留作 Host 项目根探测哨兵（resolveProjectRoot 以 typography.css + panel.css 并存为准）且客户端不再注入它（v1.3.0+ 后缀：第三方主题 = 主题 CSS + panelCss，产品 `._markdown_*` 兜底排版）。
 3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
 4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
-5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（模板来自 `plugin/assets/template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
+5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（默认模板来自 `plugin/assets/template-strawberry.css` 草莓猛男粉，加载失败回退 `template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
 6. 主题 CSS 内同时定义：13 个 `--dsw-alias-*`（全局配色）+ `--mdvr-*`（强调变量：accent 系 5 个、quote/code/table 系 5 个、link/highlight 系 4 个）。**不再调用 `theme.overrideTokens`**。
 7. **panel.css 里的 `var(--mdvr-*)` 必须带默认回退值**（如 `var(--mdvr-accent, #5856d6)`），否则原生模式下插件自有 UI 样式失效。
 
@@ -64,12 +64,13 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - 浅档语义色要过 WCAG AA（参考 `docs/readability-a11y.md` 的实测值：error #c74330 / success #287b38 / warn #985d00）
 - `body[data-ds-dark-theme]` 选择器拼错 → 深色档不回退
 - 动态插件是内存态：进程重启后插件丢失，需用当前 `plugin/host.js` + `plugin/client.js`（minify 后）重新 define（台账历史在 `manifest/versions.json`）
-- **packageId 按进程分配、随重启重置**：新进程 define 可能拿到与旧进程条目相同的 id（v1.4.0 与 v1.2.0 同得 pkg-17）。`versions.json` 如实回填即可；`check-release` 第 9 项对「顶部最新条目跨进程复用」降级为警告（非顶部条目间重复仍判失败）
+- **packageId 按进程分配、随重启重置**：新进程 define 可能拿到与旧进程条目相同的 id（v1.4.0 与 v1.2.0 同得 pkg-17）。`versions.json` 如实回填即可；`check-release` 第 9 项对 v1.0.0+ 条目 packageId 重复**一律降级为警告提示**（无法机械区分"误抄"与"跨进程合法复用"）
 - 审批被拒不要重复请求；技术失败读 `cordis_inspect_self` 诊断后修同一插件
 
 ## 当前状态（2026-08-22）
 
-- 最新版本：v1.4.0（新增内置主题「草莓猛男粉」`themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`）
+- 最新版本：v1.5.0（新增模板资产 `plugin/assets/template-strawberry.css`——新建用户主题默认以草莓猛男粉 velvet 模板起步，`themeAssets.get` 白名单扩展，失败回退原 `template.css`）
+- v1.4.0（历史归档，tag 在 1e7bab9）：新增内置主题「草莓猛男粉」`themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`
 - 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / `strawberry-mocha` / 用户主题 `user:<id>`
 - 内置主题变量分层（v1.4.0 统一契约）：L0 平台 token（13 固定）→ L1 身份色（`--mdvr-*`/`--hl-*` 浅深成对，两档 body）→ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（`:root` 单值）。`strawberry-mocha` 是唯一带完整 ③ 元素段（近 80 条规则、全量消费变量）的内置主题；其余三套各带 0~1 条 `:where` 增强，元素观感主要走产品 `._markdown_*` 兜底
 - 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位；刷新失败有错误提示）

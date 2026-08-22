@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.5.0",
+      "packageId": "pkg-22",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-22",
+      "changes": [
+        "修复内置主题列表空白：themes.builtin.list 只返回 id，内置主题 CSS 改走 themes.builtin.get 分块拉取——大主题（strawberry-mocha 32KB）叠加使 v1.4.0 的 list 单条响应超 ~16KB 通道上限被截断，导致「内置主题」区一片空白（v1.5.0 根治，与用户主题同协议）",
+        "新增模板资产 plugin/assets/template-strawberry.css（草莓猛男粉）：themeAssets.get 白名单扩展；「🆕 新建用户主题」默认以 velvet 模板起步（与内置主题 themes/strawberry-mocha.css 同源，加载失败回退原 template.css 青瓷演示版）"
+      ]
+    },
+    {
       "version": "1.4.0",
       "packageId": "pkg-17",
       "name": "LobeUI 风格 · 主题系统",
