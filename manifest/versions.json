@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.6.0",
+      "packageId": "pkg-24",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-22",
+      "changes": [
+        "内置主题目录内聚：themes/*.css 全部迁入 plugin/assets/themes/*.css（插件目录内，打包/携带 plugin/ 即带上主题），Host themes.builtin.list/get 优先读 assets 下、旧 themes/ 兼容回退；check-release 内置主题检查同步新目录",
+        "打包模型确认：动态插件本体=内存态 host/client JS，主题/模板/面板均运行时从本地文件读取；分发须携带 plugin/ 目录（含 assets/themes + assets/模板 + 哨兵），仓库根 themes/ 不再需要"
+      ]
+    },
+    {
       "version": "1.5.0",
       "packageId": "pkg-22",
       "name": "LobeUI 风格 · 主题系统",

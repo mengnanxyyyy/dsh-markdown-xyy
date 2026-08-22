@@ -167,13 +167,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.5.0',
+  version: '1.6.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '修复内置主题列表空白：themes.builtin.list 只返回 id，CSS 改走 themes.builtin.get 分块拉取（大主题叠加超 ~16KB 通道上限导致 v1.4.0 列表被截断为空，v1.5.0 根治）',
-    '新增模板资产 template-strawberry（草莓猛男粉）：themeAssets.get 白名单扩展，新建用户主题默认以 velvet 模板起步（与内置主题 themes/strawberry-mocha.css 同源）',
+    '内置主题目录内聚到 plugin/assets/themes/（随 plugin/ 目录打包即携带，不再依赖仓库根 themes/）；Host 优先读 assets 下、旧 themes/ 兼容回退',
   ],
 }
 
@@ -216,7 +215,8 @@ return {
     // 面板查询台账快照
     harness.handle('versions.list', async () => snapshot())
 
-    // 列出内置主题 id（项目根 themes/*.css；文件即主题，改文件后刷新/重启插件即生效，无需升级）
+    // 列出内置主题 id（优先插件目录内 plugin/assets/themes/*.css，随插件包携带；兼容回退仓库根 themes/）
+    // 文件即主题，改文件后刷新/重启插件即生效，无需升级。
     // ⚠️ v1.5.0：只返回 id 列表；完整 CSS 走 themes.builtin.get 分块拉取——
     //    单条 RPC 内联多份大主题 CSS 会超 ~16KB 通道上限被截断（v1.4.0 实测 48KB → 列表全空）。
     harness.handle('themes.builtin.list', async () => {
@@ -226,7 +226,10 @@ return {
         return { ok: false, reason: 'fs or project root unavailable', themes: [] }
       }
       try {
-        const dir = await fsSvc.resolve(root + '/themes')
+        // v1.6.0：内置主题内聚到 plugin/assets/themes（打包 plugin/ 目录即携带）；旧布局 themes/ 回退
+        let dir = await fsSvc.resolve(root + '/plugin/assets/themes')
+        const st = await fsSvc.stat(dir)
+        if (!st) dir = await fsSvc.resolve(root + '/themes')
         const entries = await fsSvc.listDir(dir)
         const themes = entries
           .filter((x) => x.name && x.name.endsWith('.css'))
@@ -238,7 +241,7 @@ return {
       }
     })
 
-    // 读取指定内置主题（分块）：{id, index} → {ok, id, index, total, chunk}（v1.5.0 与用户主题同协议）
+    // 读取指定内置主题（分块）：{id, index} → {ok, id, index, total, chunk}（v1.5.0 与用户主题同协议；v1.6.0 assets 优先）
     harness.handle('themes.builtin.get', async (args) => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
@@ -250,8 +253,13 @@ return {
         return { ok: false, reason: 'bad id' }
       }
       try {
-        const target = await fsSvc.resolve(root + '/themes/' + id + '.css')
-        const text = await fsSvc.readText(target)
+        let text = null
+        try {
+          text = await fsSvc.readText(await fsSvc.resolve(root + '/plugin/assets/themes/' + id + '.css'))
+        } catch (e) { /* 回退旧布局 */ }
+        if (text === null) {
+          text = await fsSvc.readText(await fsSvc.resolve(root + '/themes/' + id + '.css'))
+        }
         const chunks = sliceChunks(text)
         const index = Number(args && args.index)
         if (!Number.isSafeInteger(index) || index < 0 || index >= chunks.length) {

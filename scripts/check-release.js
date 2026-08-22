@@ -151,17 +151,24 @@ for (const a of assets) {
   if (!st || st.size === 0) fail('plugin/assets/' + a + ' 缺失或为空')
   else ok('plugin/assets/' + a + ' (' + st.size + ' B)')
 }
-const themeDir = path.join(root, 'themes')
-const themes = fs.existsSync(themeDir)
-  ? fs.readdirSync(themeDir).filter((f) => f.endsWith('.css'))
+// v1.6.0：内置主题内聚到 plugin/assets/themes（随插件目录打包携带），旧布局 themes/ 兼容回退
+const themeDir = path.join(root, 'plugin', 'assets', 'themes')
+const themeDirFallback = path.join(root, 'themes')
+const themeDirUsed = fs.existsSync(themeDir) ? themeDir : themeDirFallback
+const themeSrc = (t) => {
+  const p = path.join(themeDir, t)
+  return fs.existsSync(p) ? p : path.join(themeDirFallback, t)
+}
+const themes = fs.existsSync(themeDirUsed)
+  ? fs.readdirSync(themeDirUsed).filter((f) => f.endsWith('.css'))
   : []
-if (themes.length === 0) fail('themes/ 下没有内置主题')
-else ok('内置主题 ' + themes.length + ' 个: ' + themes.join(', '))
+if (themes.length === 0) fail(themeDirUsed + ' 下没有内置主题（plugin/assets/themes 或 themes/）')
+else ok('内置主题 ' + themes.length + ' 个（' + themeDirUsed + '）: ' + themes.join(', '))
 
 // ---------- 6. CSS 结构闭合 ----------
 console.log('\n6) CSS 结构检查')
 const cssFiles = assets.map((a) => path.join(root, 'plugin', 'assets', a))
-  .concat(themes.map((t) => path.join(themeDir, t)))
+  .concat(themes.map(themeSrc))
 for (const f of cssFiles) {
   const src = fs.readFileSync(f, 'utf8')
   const err = cssError(src)
@@ -172,7 +179,7 @@ for (const f of cssFiles) {
 // ---------- 7. 内置主题深色挂载铁律 ----------
 console.log('\n7) 内置主题挂载选择器')
 for (const t of themes) {
-  const src = fs.readFileSync(path.join(themeDir, t), 'utf8')
+  const src = fs.readFileSync(themeSrc(t), 'utf8')
   const hasLight = /(^|[\n])\s*body\s*\{/.test(src)
   const hasDark = /body\[data-ds-dark-theme\]/.test(src)
   if (!hasLight || !hasDark) fail(t + ': 必须同时包含 body{...} 与 body[data-ds-dark-theme]{...}')

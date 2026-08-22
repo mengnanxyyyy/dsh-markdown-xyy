@@ -27,13 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.5.0',
+  version: '1.6.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '修复内置主题列表空白：themes.builtin.list 只返回 id，CSS 改走 themes.builtin.get 分块拉取（大主题叠加超 ~16KB 通道上限导致 v1.4.0 列表被截断为空，v1.5.0 根治）',
-    '新增模板资产 template-strawberry（草莓猛男粉）：themeAssets.get 白名单扩展；「🆕 新建用户主题」默认以 velvet 模板起步（与内置主题 themes/strawberry-mocha.css 同源，失败回退原 template）',
+    '内置主题目录内聚到 plugin/assets/themes/（随 plugin/ 目录打包即携带，不再依赖仓库根 themes/）；Host 优先读 assets 下、旧 themes/ 兼容回退（RPC 协议不变，客户端无感知）',
   ],
 }
 

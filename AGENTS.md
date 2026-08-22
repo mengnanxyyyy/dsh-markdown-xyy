@@ -11,7 +11,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 🔒 主题铁律（最重要）
 
 1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
-   - 内置主题：仓库 `themes/*.css`（`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css`）
+   - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；`lobeui-emphasis.css` / `inkpaper.css` / `qingci.css` / `strawberry-mocha.css`）
    - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，保留作回退）/ `template-strawberry.css`（**新建用户主题默认模板**，草莓猛男粉，v1.5.0）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
@@ -51,7 +51,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 标准迭代流程（每次版本）
 
 1. 决定版本号（semver），更新 `plugin/host.js` + `plugin/src/client.core.js` 的 `MANIFEST`（双份一致）
-2. 改 `themes/*.css` 或 `plugin/assets/*.css` 或逻辑 → `node scripts/build-client.js`
+2. 改 `plugin/assets/themes/*.css` 或 `plugin/assets/*.css` 或逻辑 → `node scripts/build-client.js`
 3. `manifest/versions.json` 顶部插入条目（packageId 留空）
 4. minify 双半 → `cordis_define`（kind: existing，pluginId 用当前实例；**双半一次传完**）→ 拿到新 packageId → `cordis_inspect_self` 核对双半完整
 5. `cordis_run`（update）→ 可能需用户审批 → 通过后验证
@@ -69,8 +69,9 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-22）
 
-- 最新版本：v1.5.0（新增模板资产 `plugin/assets/template-strawberry.css`——新建用户主题默认以草莓猛男粉 velvet 模板起步，`themeAssets.get` 白名单扩展，失败回退原 `template.css`）
-- v1.4.0（历史归档，tag 在 1e7bab9）：新增内置主题「草莓猛男粉」`themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`
+- 最新版本：v1.6.0（内置主题目录内聚：`themes/*.css` 迁入 `plugin/assets/themes/*.css`，随 `plugin/` 目录打包即携带；Host `themes.builtin.list/get` 优先读 assets 下、旧 `themes/` 兼容回退）
+- v1.5.0（历史归档，tag 在 c13cdf2）：新增模板资产 `plugin/assets/template-strawberry.css`（新建用户主题默认模板）+ 修复内置主题列表 ~16KB 通道截断（改分块拉取）
+- v1.4.0（历史归档，tag 在 1e7bab9）：新增内置主题「草莓猛男粉」`plugin/assets/themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`
 - 选择：`system-native`（系统自带，默认）/ 内置 `lobeui-emphasis` / `inkpaper` / `qingci` / `strawberry-mocha` / 用户主题 `user:<id>`
 - 内置主题变量分层（v1.4.0 统一契约）：L0 平台 token（13 固定）→ L1 身份色（`--mdvr-*`/`--hl-*` 浅深成对，两档 body）→ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（`:root` 单值）。`strawberry-mocha` 是唯一带完整 ③ 元素段（近 80 条规则、全量消费变量）的内置主题；其余三套各带 0~1 条 `:where` 增强，元素观感主要走产品 `._markdown_*` 兜底
 - 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位；刷新失败有错误提示）

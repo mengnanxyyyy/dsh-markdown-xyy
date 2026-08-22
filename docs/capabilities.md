@@ -21,11 +21,11 @@
 | B2 | 叠加层机制：不改基线主题，卸载即还原，同一 source 更新即整层替换 | ✅ v0.1.0 |
 | B3 | LobeUI 原生配色（v0.3.0）：中性灰阶（浅 #f8f8f8/#fff ↔ 深 #000/#0d0d0d）、主色中性黑 #222/#eee、边框/文字灰阶按 lobe 生成器映射 | ✅ v0.3.0 |
 | B4 | 语义色取 lobe step9（深档沿用）；浅档按 WCAG AA 实测加深 `#c74330`/`#287b38`/`#985d00`；链接信息蓝 `#005ae0`/`#60b1ff`（AA） | ✅ v0.4.0 |
-| B5 | 主题系统化：每主题一个独立 CSS 文件（`themes/*.css`），构建脚本内联；内置 lobeui-emphasis / inkpaper / qingci / strawberry-mocha（草莓猛男粉）四套主题 | ✅ v0.6.0（strawberry-mocha v1.4.0） |
+| B5 | 主题系统化：每主题一个独立 CSS 文件（`plugin/assets/themes/*.css`），构建脚本内联；内置 lobeui-emphasis / inkpaper / qingci / strawberry-mocha（草莓猛男粉）四套主题 | ✅ v0.6.0（strawberry-mocha v1.4.0） |
 | B6 | 设置页「主题设置」（`settings.section`）：选择模型——「系统自带」默认（零干预）+ 内置/用户主题卡片（互斥单选）；外观三档按钮在第三方/用户主题激活时变灰禁用 | ✅ v0.9.0 |
 | B7 | 用户主题动态加载：`$HOME/.dsh/web-themes/`（v1.1.0 起系统动态解析：shell 读 `$HOME` → workspaceRoot 推导 → 硬编码回退）放 CSS 文件即新主题（无需打包升级），Host fs 读取 + 设置页一键刷新 | ✅ v1.0.0 → v1.1.0 |
 | B11 | 用户主题管理（v1.2.0）：设置页「🆕 新建用户主题」+ 每卡「✏️ 编辑」；内置主题只读（无编辑按钮）；编辑器 = 实时语法高亮（透明 textarea 叠彩色 pre）+「🧹 格式化」+「💾 保存」（Host `themes.user.save` RPC，沙箱放开 `danger-full-access`）。v1.5.0 起新建默认模板 = `plugin/assets/template-strawberry.css`（草莓猛男粉，与内置主题同源，失败回退 template.css） | ✅ v1.2.0（模板 v1.5.0） |
-| B12 | 资产文件化（v1.2.0）：内置主题/排版骨架/面板样式/新建模板由 Host 从文件读取（themes/*.css + plugin/assets/*.css，基于 workspaceRoot），改文件刷新即生效无需升级插件；Host 新增 themes.builtin.list / themeAssets.get RPC；构建脚本改为源码拷贝 | ✅ v1.2.0 |
+| B12 | 资产文件化（v1.2.0）：内置主题/排版骨架/面板样式/新建模板由 Host 从文件读取（plugin/assets/themes/*.css + plugin/assets/*.css，基于 workspaceRoot），改文件刷新即生效无需升级插件；Host 新增 themes.builtin.list / themeAssets.get RPC；构建脚本改为源码拷贝 | ✅ v1.2.0 |
 | B13 | 统一变量契约（v1.4.0）：`--mdvr-*` 扩展为完整分层体系——L1 身份色（标题/文本/accent/组件/列表 + `--hl-*` 语法高亮，浅深成对）+ L2 排版/形状常量 + L3 功能旋钮（`:root` 单值），`strawberry-mocha` 成为全量消费的参考实现；盘点见 `docs/unified-variables.md` | ✅ v1.4.0 |
 | B8 | 「系统自带」选项：插件零干预（不注入 token/排版/变量），深浅跟随系统，默认选择 | ✅ v0.9.0 |
 | B9 | 外观三档切换（v0.8.0）：设置页 ☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统（产品 `theme.setTheme` 官方接口，实时生效 + 偏好持久化） | ✅ v0.8.0 |
