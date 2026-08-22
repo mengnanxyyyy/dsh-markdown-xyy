@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.7.0',
+  version: '1.8.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '内置主题精简：移除 lobeui-emphasis / inkpaper / qingci 三套早期纯配色主题，仅保留全变量化完整主题「草莓猛男粉」（历史在 git）',
+    '移除排版骨架文件 plugin/assets/typography.css（v1.3.0 起已不注入）；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件（客户端无感知）',
   ],
 }
 

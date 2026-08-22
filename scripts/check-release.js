@@ -144,7 +144,7 @@ for (const f of ['plugin/host.js', 'plugin/src/client.core.js', 'plugin/client.j
 
 // ---------- 5. 资产与内置主题存在且非空 ----------
 console.log('\n5) 资产与内置主题完整性')
-const assets = ['typography.css', 'panel.css', 'template.css', 'template-strawberry.css']
+const assets = ['panel.css', 'template.css', 'template-strawberry.css']
 for (const a of assets) {
   const p = path.join(root, 'plugin', 'assets', a)
   const st = fs.existsSync(p) ? fs.statSync(p) : null

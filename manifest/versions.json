@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.8.0",
+      "packageId": "pkg-31",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-22",
+      "changes": [
+        "删除排版骨架文件 plugin/assets/typography.css（v1.3.0 起已不注入）：项目根探测哨兵改为 panel.css + plugin/assets/themes/strawberry-mocha.css 双文件并存，themeAssets.get 白名单去掉 typography",
+        "文档/台账同步（AGENTS/README/themes/architecture/check-release 资产清单）；页面排版维持产品 ._markdown_* 兜底 + 主题③段增量"
+      ]
+    },
+    {
       "version": "1.7.0",
       "packageId": "pkg-26",
       "name": "LobeUI 风格 · 主题系统",

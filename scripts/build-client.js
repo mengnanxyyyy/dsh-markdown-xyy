@@ -14,12 +14,21 @@ const core = path.join(root, 'plugin', 'src', 'client.core.js')
 const out = path.join(root, 'plugin', 'client.js')
 
 // 资产完整性检查（运行时由 Host 读取，缺文件会导致面板无样式）
-const assets = ['typography.css', 'panel.css', 'template.css']
+// v1.8.0：typography.css 已删除（排版骨架停用），哨兵改为 panel.css + themes/strawberry-mocha.css
+const assets = ['panel.css', 'template.css', 'template-strawberry.css']
+const assetRoot = path.join(root, 'plugin', 'assets')
 let missing = 0
 for (const a of assets) {
-  const p = path.join(root, 'plugin', 'assets', a)
+  const p = path.join(assetRoot, a)
   if (!fs.existsSync(p)) {
     console.error(`[build] ⚠️ 缺少资产文件 plugin/assets/${a}`)
+    missing++
+  }
+}
+// 项目根探测哨兵双文件（与 host.js resolveProjectRoot 保持一致）
+for (const s of ['panel.css', 'themes/strawberry-mocha.css']) {
+  if (!fs.existsSync(path.join(assetRoot, s))) {
+    console.error(`[build] ⚠️ 缺少项目根探测哨兵 plugin/assets/${s}`)
     missing++
   }
 }

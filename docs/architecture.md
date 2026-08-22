@@ -22,7 +22,7 @@
 └─────────────────────────────────────────────────────────┘
               │  Package-private JSON RPC（host.call）
 ┌─ Client（浏览器页面）───────────────────────────────────┐
-│  styles.insert(typography + 主题 CSS + panel CSS)        │
+│  styles.insert(主题 CSS + panel CSS)（v1.3.0+ 不再注入排版骨架）│
 │    └─ body / body[data-ds-dark-theme]（与产品挂载一致）   │
 │  tool.view.cordis (key: self)                            │
 │    └─ 版本卡片：当前版本徽标 + 变更日志 + 历史台账         │
@@ -34,13 +34,13 @@
 - 持有内存台账 `ledger`：`{pluginId, packageId, version, name, palette, date, changes}`，按 `packageId` 去重、最新在前。
 - `versions.note`：Client 面板挂载时上报自身 Package 的 MANIFEST，Host 记账。
 - `versions.list`：返回 `{current, history}` 快照。
-- 内置主题 / 共享资产 / 用户主题全部从文件读取（`themes/*.css`、`plugin/assets/*.css`、`$HOME/.dsh/web-themes/*.css`）；大文本走分块协议（8000 字符/片）。
+- 内置主题 / 共享资产 / 用户主题全部从文件读取（`plugin/assets/themes/*.css`、`plugin/assets/*.css`、`$HOME/.dsh/web-themes/*.css`）；大文本走分块协议（8000 字符/片）。
 - `themes.user.save` 为事务化上传（uploadId 隔离 + 分片完整性 + Host 侧 CSS 校验）。
 - 只传 JSON 标量，不序列化任何 Cordis/DSH 活对象。
 
 ### Client 半职责（主题 + 排版 + 面板）
 
-- **主题层**：`styles.insert(typographyCss + 主题css + panelCss)`，浅色 `body` / 深色 `body[data-ds-dark-theme]`；切换 = 先构建新样式、成功后再替换旧样式（原子，v1.3.0）。
+- **主题层**：`styles.insert(主题css + panelCss)`（v1.3.0+ 不注入排版骨架，v1.8.0 已删除 typography.css），浅色 `body` / 深色 `body[data-ds-dark-theme]`；切换 = 先构建新样式、成功后再替换旧样式（原子，v1.3.0）。
 - **排版层**：`styles.insert(css)`，包级样式表，卸载自动清理。
 - **版本面板**：`slots.inject('tool.view.cordis')` + `slots.register({name, key: 'self'})`，渲染在最新 `cordis_run` 卡片内。
 

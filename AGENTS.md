@@ -12,19 +12,19 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
    - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；v1.7.0 起仅保留 `strawberry-mocha.css`，lobeui-emphasis/inkpaper/qingci 已移除，历史在 git）
-   - 共享资产：`plugin/assets/typography.css`（排版骨架）/ `panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，保留作回退）/ `template-strawberry.css`（**新建用户主题默认模板**，草莓猛男粉，v1.5.0）
+   - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，保留作回退）/ `template-strawberry.css`（**新建用户主题默认模板**，草莓猛男粉，v1.5.0）/ `themes/strawberry-mocha.css`（内置主题，兼作项目根探测哨兵之一）。排版骨架 `typography.css` 已随 v1.8.0 删除
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
    - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
    - **⚠️ 消息通道单条上限 ~16KB（v1.2.3 分块解决，v1.3.0 全覆盖）**：页面↔宿主的 RPC 消息超过 ~16KB 会失败/静默截断——旧 `themeAssets.get` 单次返回 24KB → 设置面板错误占位（无样式）；`themes.user.save` 17KB → 文件写入被截断损坏。**所有大文本（主题/模板/资产）走分块协议**：`8000 字符/片`，get 侧 `{index} → {ok, index, total, chunk}` 循环拉取（client `fetchChunks` 校验 index/total 一致性），save 侧 client 上传 `{id, uploadId, index, total, chunk}`、host 按 uploadId 隔离缓冲、**分片全部到齐后**拼装并执行 Host 侧 CSS 校验再写盘（v1.3.0 事务化，杜绝缺片/并发混片）。**任何新的大内容 RPC 都必须分块**。
    - **CSS 语法校验（v1.2.3 client / v1.3.0 host 双端）**：保存前 `validateCss`（client 端即时反馈 + Host 写盘前强制，双端同逻辑）检测注释/字符串/花括号/圆括号闭合，错误**拒绝保存**并在编辑器状态栏显示具体原因；超过 100KB 拒绝。
-   - **项目根探测（v1.2.1→v1.2.2）**：⚠️ `sandboxPolicy.workspaceRoot` = **DSH 主进程启动目录**，不一定是插件项目目录（本环境 = `/home/lab/xyygithub/dsh-xyy-ui`）！Host 用 `resolveProjectRoot(ctx)` **按内容探测**：`workspaceRoot` → 其父目录及一级子目录（兄弟项目）→ `FALLBACK_PROJECT_DIR`（`/home/lab/xyygithub/dsh-markdown-xyy`）兜底，以同时存在 `plugin/assets/typography.css` + `panel.css` 为准，首次解析后缓存。**⚠️ fs 服务的 `stat/readText/listDir/writeText` 都要求 `resolve()` 返回的句柄对象（{targetKey}），绝不能传字符串路径**（v1.2.1 就栽在这里，探测全 miss）。
+   - **项目根探测（v1.2.1→v1.2.2）**：⚠️ `sandboxPolicy.workspaceRoot` = **DSH 主进程启动目录**，不一定是插件项目目录（本环境 = `/home/lab/xyygithub/dsh-xyy-ui`）！Host 用 `resolveProjectRoot(ctx)` **按内容探测**：`workspaceRoot` → 其父目录及一级子目录（兄弟项目）→ `FALLBACK_PROJECT_DIR`（`/home/lab/xyygithub/dsh-markdown-xyy`）兜底，以同时存在 `plugin/assets/panel.css` + `plugin/assets/themes/strawberry-mocha.css` 为准，首次解析后缓存。**⚠️ fs 服务的 `stat/readText/listDir/writeText` 都要求 `resolve()` 返回的句柄对象（{targetKey}），绝不能传字符串路径**（v1.2.1 就栽在这里，探测全 miss）。
    - 用户主题目录**不硬编码**：`shell 读 $HOME` → `workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 三级解析（host.js `resolveUserThemesDir`）。
 2. **`plugin/client.js` = `plugin/src/client.core.js` 的拷贝（构建产物，禁止手改）**。改逻辑只改 `plugin/src/client.core.js`，然后：
    ```bash
    node scripts/build-client.js   # 拷贝 + 资产完整性检查
    ```
-   `scripts/extract-assets.js` 已移除（v1.2.0 一次性迁移工具，历史在 git）；`plugin/assets/typography.css` 保留作 Host 项目根探测哨兵（resolveProjectRoot 以 typography.css + panel.css 并存为准）且客户端不再注入它（v1.3.0+ 后缀：第三方主题 = 主题 CSS + panelCss，产品 `._markdown_*` 兜底排版）。
+   `scripts/extract-assets.js` 已移除（v1.2.0 一次性迁移工具，历史在 git）；v1.3.0 起排版骨架停用（第三方主题 = 主题 CSS + panelCss，产品 `._markdown_*` 兜底排版）；v1.8.0 已删除 typography.css，项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 并存。
 3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
 4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
 5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（默认模板来自 `plugin/assets/template-strawberry.css` 草莓猛男粉，加载失败回退 `template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
@@ -45,7 +45,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 能力边界（详见 docs/themes.md）
 
-- 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（typography.css 约 30 条）④ 面板 UI（panel.css）
+- 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（v1.3.0 起：产品 `._markdown_*` 兜底 + 主题 ③ 段 `:where()` 增量覆盖；排版骨架 typography.css 已随 v1.8.0 删除）④ 面板 UI（panel.css）
 - 不能：改产品 DOM、token 名单固定 13 个、`:where()` 零优先级（产品显式样式优先）、无持久化（内存态，刷新恢复 `DEFAULT_SELECTION`）
 
 ## 标准迭代流程（每次版本）
@@ -69,7 +69,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-22）
 
-- 最新版本：v1.7.0（内置主题精简：删除早期纯配色主题 lobeui-emphasis / inkpaper / qingci，仅保留全变量化完整主题「草莓猛男粉」；历史在 git）
+- 最新版本：v1.8.0（删除排版骨架文件 `plugin/assets/typography.css`；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，`themeAssets.get` 白名单去掉 typography）
+- v1.7.0（历史归档，tag 在 17315bb）：内置主题精简，仅保留全变量化完整主题「草莓猛男粉」（lobeui/inkpaper/qingci 移除，历史在 git）
 - v1.6.0（历史归档，tag 在 93801f6）：内置主题目录内聚 `plugin/assets/themes/*.css`（随 `plugin/` 打包即携带；Host 优先读 assets、旧 `themes/` 兼容回退）
 - v1.5.0（历史归档，tag 在 c13cdf2）：新增模板资产 `plugin/assets/template-strawberry.css`（新建用户主题默认模板）+ 修复内置主题列表 ~16KB 通道截断（改分块拉取）
 - v1.4.0（历史归档，tag 在 1e7bab9）：新增内置主题「草莓猛男粉」`plugin/assets/themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`

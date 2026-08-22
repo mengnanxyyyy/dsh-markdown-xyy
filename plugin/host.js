@@ -6,7 +6,7 @@
 //   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
 //   versions.list —— 面板查询台账快照 { current, history }
 //   themes.builtin.list —— 列出内置主题（项目根 themes/*.css，文件即主题）
-//   themeAssets.get —— 共享资产分块读取（typography/panel/template，8000 字符/片）
+//   themeAssets.get —— 共享资产分块读取（panel/template/template-strawberry，8000 字符/片）
 //   themes.user.list / get / save —— 用户主题（$HOME/.dsh/web-themes/*.css）
 //     get/save 均分块传输（页面↔宿主消息通道有 ~16KB 单条上限，v1.2.2 实测 24KB 返回失败、16.8KB 保存截断）
 //     save 为事务化上传协议：uploadId 隔离 + 分片完整性检查 + TTL/容量上限，
@@ -79,9 +79,11 @@ async function resolveProjectRoot(ctx) {
   if (fsSvc === undefined) return null
   const hasAssets = async (root) => {
     try {
+      // v1.8.0：哨兵对 = plugin/assets/panel.css + plugin/assets/themes/strawberry-mocha.css
+      // （typography.css 已删除；两者均为插件目录内随包携带的稳定文件）
       // ⚠️ fs 服务要求 resolve() 句柄（{targetKey}），不能直接传字符串路径
-      const a = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/typography.css'))
-      const b = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/panel.css'))
+      const a = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/panel.css'))
+      const b = await fsSvc.stat(await fsSvc.resolve(root + '/plugin/assets/themes/strawberry-mocha.css'))
       return !!(a && b)
     } catch (e) {
       return false
@@ -167,12 +169,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.7.0',
+  version: '1.8.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-22',
   changes: [
-    '内置主题精简：移除 lobeui-emphasis / inkpaper / qingci 三套早期纯配色主题，仅保留全变量化完整主题「草莓猛男粉」（历史在 git）',
+    '移除排版骨架文件 plugin/assets/typography.css（v1.3.0 起已不注入）；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，themeAssets.get 白名单同步去掉 typography',
   ],
 }
 
@@ -271,8 +273,8 @@ return {
       }
     })
 
-    // 共享资产分块读取（typography/panel/template）：{name, index} → {ok, index, total, chunk}
-    // 统一分块协议（v1.3.0）：单次返回的 typography+panel 已接近 ~16KB 通道上限，全部资产走分块
+    // 共享资产分块读取（panel/template/template-strawberry）：{name, index} → {ok, index, total, chunk}
+    // 统一分块协议（v1.3.0）；v1.8.0 移除 typography（已删除）
     harness.handle('themeAssets.get', async (args) => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
@@ -280,7 +282,7 @@ return {
       if (fsSvc === undefined || root === null) {
         return { ok: false, reason: 'fs or project root unavailable' }
       }
-      if (name !== 'typography' && name !== 'panel' && name !== 'template' && name !== 'template-strawberry') {
+      if (name !== 'panel' && name !== 'template' && name !== 'template-strawberry') {
         return { ok: false, reason: 'bad name' }
       }
       try {

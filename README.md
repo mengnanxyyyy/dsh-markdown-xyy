@@ -6,7 +6,7 @@
 
 1. **版本记录**：每次迭代都是一个不可变 Package，插件自动维护版本台账（版本号、日期、变更日志、主题名），并在 `cordis_run` 卡片内展示当前版本与历史。
 2. **主题**：内置/用户主题均为独立 CSS 文件，由 Host 运行时读取（`plugin/assets/themes/*.css` + `~/.dsh/web-themes/*.css`），Client 以 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`（与产品挂载机制一致），不改动产品基线主题。内置主题仅 `strawberry-mocha`（草莓猛男粉，v1.7.0 起唯一内置）。
-3. **Markdown 排版**：通过 `styles.insert` 注入零优先级排版层（`:where()`），为对话中的语义化 Markdown（标题、列表、代码块、引用、表格…）提供中文友好排版；产品自带样式的组件不会被覆盖。
+3. **Markdown 排版**：v1.3.0 起排版骨架停用（v1.8.0 删除 typography.css）——对话排版由产品 `._markdown_*` 规则兜底，主题通过自身 ③ 段（`:where()` 零优先级）做中文友好的增量覆盖（如草莓猛男粉的全套元素排版）；产品显式样式不会被覆盖。
 
 ## 项目结构
 
