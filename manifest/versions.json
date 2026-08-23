@@ -3,8 +3,20 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
-      "version": "1.12.0",
+      "version": "1.13.0",
       "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "设置页主题卡统一：内置主题卡片从单 button 改为与用户主题同构的「.mdvr-theme-card 容器 + .mdvr-theme-main 选择按钮」（panel.css 移除 button.mdvr-theme-card 专用规则），两列表样式像素级一致；区块文案「无深浅之分」改「浅深两档」",
+        "外观三档跟随：☀️/🌙/🖥️ 对任意选中主题可用（disabled 仅绑 themeService 缺失）——主题 CSS 自带 body/body[data-ds-dark-theme] 两档即随切换生效，单档主题另一档保持原样",
+        "AGENTS/themes.md/capabilities/template.css/example.css 清理「无深浅之分·按钮禁用」旧说法（v1.13.0 口径）"
+      ]
+    },
+    {
+      "version": "1.12.0",
+      "packageId": "pkg-9",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-23",

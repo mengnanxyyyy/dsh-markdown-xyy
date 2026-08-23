@@ -22,9 +22,8 @@
 .mdvr-scheme-btn:hover:not(:disabled) { border-color: var(--mdvr-accent-faint, #b4b3ed); }
 .mdvr-scheme-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .mdvr-scheme-btn-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); font-weight: 650; }
-/* v1.3.0：卡片容器自身不承载点击（内置 button 或 用户主题 容器+兄弟按钮），键盘可达 */
+/* v1.13.0：内置/用户主题卡片统一结构 = .mdvr-theme-card 容器 + .mdvr-theme-main 选择按钮（用户卡另加编辑按钮），键盘可达 */
 .mdvr-theme-card { display: flex; align-items: center; gap: 0; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }
-button.mdvr-theme-card { padding: 8px 10px; }
 .mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
 .mdvr-theme-main { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 8px 10px; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); font-family: inherit; }
 .mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }

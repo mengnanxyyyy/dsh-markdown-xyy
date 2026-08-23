@@ -169,13 +169,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.12.0',
+  version: '1.13.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '删除独立模板资产 template-strawberry.css：新建用户主题默认模板改取内置主题猛男粉内容（client newThemeStarter 从 builtinThemes 取 CSS，回退 template.css）',
-    'host themeAssets.get 白名单/注释、构建与门禁资产清单、文档同步移除 template-strawberry',
+    '设置页统一：内置/用户主题卡片同构（容器 + 选择按钮，panel.css 移除 button 专用规则）；外观 ☀️/🌙/🖥️ 对任意选中主题可用（主题自带浅深两档即跟随切换）',
+    'AGENTS/themes/capabilities/template.css/example.css 清理「无深浅之分·按钮禁用」旧说法',
   ],
 }
 

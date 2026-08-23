@@ -27,13 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.12.0',
+  version: '1.13.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '删除独立模板资产 template-strawberry.css：新建用户主题默认模板改取内置主题猛男粉内容（newThemeStarter 从 builtinThemes 取 CSS，回退 template.css）',
-    'host themeAssets.get 白名单/注释、构建与门禁资产清单、文档同步移除 template-strawberry',
+    '设置页统一：内置/用户主题卡片同构（容器 + 选择按钮，panel.css 移除 button 专用规则）；外观 ☀️/🌙/🖥️ 对任意选中主题可用（主题自带浅深两档即跟随切换）',
+    'AGENTS/themes/capabilities/template.css/example.css 清理「无深浅之分·按钮禁用」旧说法',
   ],
 }
 
@@ -646,7 +646,7 @@ function ThemeSettings() {
           key: mode,
           type: 'button',
           className: 'mdvr-scheme-btn' + (selMode ? ' mdvr-scheme-btn-active' : ''),
-          disabled: !isSystem || !themeService, // 第三方/用户主题激活或 theme 服务缺失时禁用（v1.3.0）
+          disabled: !themeService, // 第三方/用户主题激活或 theme 服务缺失时禁用（v1.3.0）
           'aria-pressed': selMode,
           onClick: () => { if (applyScheme(mode)) setSchemeState(mode) },
         }, label)
@@ -664,18 +664,22 @@ function ThemeSettings() {
       themeInfo('系统自带' + (isSystem ? ' ✓' : ''), 'DSH 出厂观感：深浅跟随系统，插件零干预'),
     ),
     // 内置第三方主题（无深浅之分；只读，不可编辑）
-    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题（无深浅之分 · 只读）'),
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题（浅深两档 · 只读）'),
     entries.map(({ id, meta }) => {
       const selTheme = sel === id
-      return React.createElement('button', {
+      return React.createElement('div', {
         key: id,
-        type: 'button',
         className: 'mdvr-theme-card' + (selTheme ? ' mdvr-theme-card-active' : ''),
-        'aria-pressed': selTheme,
-        onClick: () => { if (applySelection(rootCtx, id)) setSel(id) },
       },
-        swatchRow(meta.swatches || []),
-        themeInfo(meta.name + (selTheme ? ' ✓' : ''), meta.desc),
+        React.createElement('button', {
+          type: 'button',
+          className: 'mdvr-theme-main',
+          'aria-pressed': selTheme,
+          onClick: () => { if (applySelection(rootCtx, id)) setSel(id) },
+        },
+          swatchRow(meta.swatches || []),
+          themeInfo(meta.name + (selTheme ? ' ✓' : ''), meta.desc),
+        ),
       )
     }),
     // 用户主题（~/.dsh/web-themes/：放 CSS 文件即新主题，点刷新生效；可编辑）
