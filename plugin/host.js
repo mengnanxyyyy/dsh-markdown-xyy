@@ -169,13 +169,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.10.0',
+  version: '1.11.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '三层作用域体系（纯 CSS）：第 0 层全站=body 字体/基色变量共享；第 1 层 markdown 限定全面铺开（标题/段落/行内/代码块/表格/引用/链接/图片 36 条混用规则补 [class*=_markdown_] 前缀）；删除 body>pre 死规则、418 拆分、272 前缀化',
-    'template-strawberry.css 同步 v1.10.0；selection/滚动条/焦点环 保持全局签名',
+    '深浅模式整改（纯 CSS）：选区白字浅档不可读已修（深丁香紫）、阴影拆浅深两档（浅=紫 tint/深=黑 0.45）、行内代码浅档拆燕麦粉底+深草莓字（深档保留墨夜紫签名）；7 个单值变量移入两档 body 成对定义',
+    'template-strawberry.css 同步；docs/unified-variables.md 分层账更新',
   ],
 }
 

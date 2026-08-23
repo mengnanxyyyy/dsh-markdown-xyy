@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.11.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "深浅模式审核整改（纯 CSS，subagent 交叉核验）：③ 元素段零裸色、L0/L1/--hl-* 两档变量零缺失；高优缺陷=选区白字在浅档几乎不可读；中优=黑 rgba 阴影深档隐形、行内代码墨夜底在浅档写死",
+        "单值拆档：inline-code-bg/text、selection-bg/text、shadow-code-inline/kbd/img-drop 共 7 个变量从 :root 移入浅/深两档 body 成对定义——浅档行内代码改燕麦粉底+深草莓字、选区字改深丁香紫（AA≈4.6:1）、阴影改紫 tint；深档墨夜紫签名保留、阴影加深至黑 0.45；check-mark 留单值；template-strawberry.css 同步",
+        "docs/unified-variables.md 分层账同步（L2 阴影移出、L1 派生色拆档说明、L2 计数 43）"
+      ]
+    },
+    {
       "version": "1.10.0",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

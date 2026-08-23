@@ -47,6 +47,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
+- **v1.11.0「深浅模式整改」**：subagent 交叉审核确认 ③ 段零裸色、两档变量零缺失；修复浅档选区白字不可读（改深丁香紫 AA≈4.6:1）、阴影拆浅深两档（浅=紫 tint / 深=黑 0.45）、行内代码浅档拆燕麦粉底+深草莓字（深档保留墨夜紫签名）；7 个单值变量移入两档 body 成对定义，模板同步。
 - **v1.10.0「三层作用域体系」**：猛男粉主题彻底区分 markdown 与全站——第 0 层全站仅 body 字体/基色（走 `--mdvr-sans` + `--dsw-alias-label-primary` 变量共享）；第 1 层标题/段落/行内修饰/上下标/代码块/表格/引用/分割线/链接/图片全部收敛到 `[class*="_markdown_"]`（UI 同名元素不再被染）；删除 `body > pre` 死规则、拆分 pre 双规格、selection/滚动条/焦点环保持全局签名；模板同步。
 - **v1.9.0「列表 markdown 限定 + padding 对齐」**：草莓猛男粉（及新建模板）的列表基座/嵌套/任务清单全部收敛到 `[class*="_markdown_"]`（设置面板等 UI 列表/checkbox 不再受影响）；新增 `--mdvr-list-pad`（顶层 ul/ol/任务列表统一 1.6em）+ `--mdvr-list-pad-nested`（嵌套每层 1.2em），修复 ul 18px / ol 2.4em / 任务 0.8em 三值错位。
 - **v1.7.0「内置主题精简」**：移除早期纯配色主题 lobeui-emphasis / inkpaper / qingci，内置主题仅保留「草莓猛男粉」（全变量化完整主题；历史在 git）。

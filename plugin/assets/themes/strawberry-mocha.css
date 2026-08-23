@@ -68,10 +68,7 @@
   --mdvr-code-size: 0.85em;
   --mdvr-table-size: 0.9em;
 
-  /* ===== L2 阴影 ===== */
-  --mdvr-shadow-code-inline: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --mdvr-shadow-kbd: 0 2px 4px rgba(0, 0, 0, 0.2);
-  --mdvr-shadow-img-drop: 0 8px 20px rgba(0, 0, 0, 0.2);
+  /* ===== L2 阴影（v1.11.0 起拆浅深两档，见 ① 浅色档 / ② 深色档） ===== */
 
   /* ===== L2 滚动条 / 焦点 / 上下标 ===== */
   --mdvr-scrollbar-size: 6px;
@@ -84,12 +81,11 @@
   --mdvr-mono: "JetBrains Mono", SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --mdvr-math-font: "KaTeX_Math", "Latin Modern Math", "Cambria Math", STIXGeneral, "Times New Roman", serif;
 
-  /* ===== 浅深同值的硬编码色 → 变量（单值，可独立调） ===== */
-  --mdvr-inline-code-bg: #14121E;          /* 行内代码底（主题签名：墨夜紫底） */
-  --mdvr-inline-code-text: #F472B6;        /* 行内代码字（草莓粉） */
-  --mdvr-selection-bg: rgba(203, 166, 247, 0.35); /* 选区底（丁香紫半透明） */
-  --mdvr-selection-text: #F5E0DC;          /* 选区字 */
-  --mdvr-check-mark: #FFFFFF;              /* 复选框对勾色 */
+  /* ===== 单值拆档说明（v1.11.0） =====
+   * inline-code / selection / shadow 属颜色·光影类，已拆浅深两档
+   * （见 ① 浅色档与 ② 深色档对应的「单值拆档」小节）；此处仅剩
+   * 两档通用的纯色单值 */
+  --mdvr-check-mark: #FFFFFF;              /* 复选框对勾色（浅深通用：白勾两端均成立） */
 }
 
 /* ------------------------------------------------------------
@@ -158,6 +154,15 @@ body {
   --hl-property: #B45309;                  /* 属性/键：焦糖金 */
   --hl-function: #BE185D;                  /* 函数：丝绒草莓 */
   --hl-comment: #8C7E87;                   /* 注释：柔灰 */
+
+  /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆浅色档） ===== */
+  --mdvr-inline-code-bg: #F4E8EE;          /* 行内代码底（浅档：燕麦粉） */
+  --mdvr-inline-code-text: #9F1239;        /* 行内代码字（浅档：深草莓） */
+  --mdvr-selection-bg: rgba(203, 166, 247, 0.35); /* 选区底（半透明丁香紫） */
+  --mdvr-selection-text: #6D28D9;          /* 选区字（浅档：深丁香紫，AA≈4.6:1） */
+  --mdvr-shadow-code-inline: 0 1px 2px rgba(203, 166, 247, 0.35); /* 行内代码阴影（紫 tint） */
+  --mdvr-shadow-kbd: 0 2px 4px rgba(203, 166, 247, 0.3);          /* kbd 阴影（紫 tint） */
+  --mdvr-shadow-img-drop: 0 8px 20px rgba(203, 166, 247, 0.25);   /* 图片投影（紫 tint，弱于深档） */
 }
 
 /* ------------------------------------------------------------
@@ -227,6 +232,15 @@ body[data-ds-dark-theme] {
   --hl-property: #FAB387;                  /* 属性/键：焦糖桃杏 */
   --hl-function: #F472B6;                  /* 函数名：泡泡糖草莓粉 */
   --hl-comment: #6C7086;                   /* 注释：暮霭冷灰 */
+
+  /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆深色档） ===== */
+  --mdvr-inline-code-bg: #14121E;          /* 行内代码底（深档：墨夜紫签名） */
+  --mdvr-inline-code-text: #F472B6;        /* 行内代码字（深档：草莓粉） */
+  --mdvr-selection-bg: rgba(203, 166, 247, 0.35); /* 选区底 */
+  --mdvr-selection-text: #F5E0DC;          /* 选区字（深档：奶油白） */
+  --mdvr-shadow-code-inline: 0 1px 2px rgba(0, 0, 0, 0.45); /* 行内代码阴影（深档加深） */
+  --mdvr-shadow-kbd: 0 2px 4px rgba(0, 0, 0, 0.45);         /* kbd 阴影（深档加深） */
+  --mdvr-shadow-img-drop: 0 8px 20px rgba(0, 0, 0, 0.45);   /* 图片投影（深档加深） */
 }
 
 /* ============================================================

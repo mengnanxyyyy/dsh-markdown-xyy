@@ -13,9 +13,9 @@
 |---|---|---|---|---|
 | **L0 平台 token** | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | ✅ 成对（body / body[data-ds-dark-theme]） | ✅ 内置主题全量定义（固定名单不可增删；v1.7.0 起仅草莓猛男粉） | 已统一 |
 | **L1 身份色 · 核心** | accent 系 5 + link/highlight 系 4 + quote/code/table 系 5 + 字体 2 + `--mdvr-mm` = **17 个** | ✅ 色彩成对；字体/mm 单值 | ✅ 内置主题 + template + example 全定义（唯一强制集；v1.7.0 起由草莓猛男粉承载） | 已统一 |
-| **L1 身份色 · 扩展** | 标题梯度 h1~h6（6）、文本排印 strong/italic/bold-italic/subsup/del（5）、列表 bullet-l1/2/3 + checkbox-checked（4）、派生色 accent-rgb + inline-code/selection/check-mark（6） | 色彩成对；派生色 5 个当前单值 | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
+| **L1 身份色 · 扩展** | 标题梯度 h1~h6（6）、文本排印 strong/italic/bold-italic/subsup/del（5）、列表 bullet-l1/2/3 + checkbox-checked（4）、派生色 accent-rgb + inline-code（2）+ selection（2）+ check-mark（1） | 色彩成对；派生色仅 check-mark 留单值（inline-code/selection 已随 v1.11.0 拆浅深两档） | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增+拆档 |
 | **L1 语法高亮** | `--hl-keyword/string/number/property/function/comment`（6） | ✅ 成对 | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
-| **L2 排版/形状常量** | 行高/段距/字号/圆角/边框/内距/阴影/滚动条/焦点（40 个，`--mdvr-*` 单值） | ❌ 单值（`:root` 一次） | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
+| **L2 排版/形状常量** | 行高/段距/字号/圆角/边框/内距/滚动条/焦点（43 个，`--mdvr-*` 单值；阴影已随 v1.11.0 拆浅深两档） | ❌ 单值（`:root` 一次，阴影除外） | ❌ 仅 strawberry-mocha 定义（可选扩展） | 新增 |
 | **L3 功能旋钮** | `--mdvr-mm`（间距倍率） | ❌ 单值 | ⚠️ 内置主题均定义但 **0 处消费**（休眠旋钮） | 待激活 |
 
 > 统一变量名证据：inkpaper / qingci / template.css / example.css 的 `--mdvr-*` 名单与 lobeui-emphasis **完全一致**（16 个色彩常量 + sans + mono + mm），说明核心 17 个是事实上的跨主题契约。
@@ -99,7 +99,7 @@
 
 ---
 
-## 六、L2 排版/形状常量（40 个，`:root` 单值）——strawberry-mocha 专属
+## 六、L2 排版/形状常量（43 个，`:root` 单值）——strawberry-mocha 专属
 
 | 子组 | 变量（默认值） |
 |---|---|
@@ -108,7 +108,7 @@
 | 列表 5 | `list-gap` 0.8em / `li-gap` 0.35em / `mark-font-size` 0.95em / `list-pad` 1.6em / `list-pad-nested` 1.2em（v1.9.0 顶层/嵌套缩进 token 化；v1.8.0 曾移除嵌套 token、回归原生，v1.9.0 恢复为显式层级增量） |
 | 圆角 4 | `radius-card` 8px / `radius-chip` 4.5px / `radius-table` 10px / `radius-check` 4px |
 | 边框/内距/字号 10 | `border-code` 1px / `ribbon-code` 3.5px / `border-quote` 4px / `gap-block` 0.8em / `pad-pre` 8px 12px / `pad-code-inline` 0.15em 0.38em / `pad-cell` 0.68em 1em / `pad-quote` 0.6em 1.1em / `code-size` 0.85em / `table-size` 0.9em |
-| 阴影 3 | `shadow-code-inline` / `shadow-kbd` / `shadow-img-drop`（⚠️ 值内嵌黑色 rgba，不分浅深——深档立体感偏弱，未来可拆档） |
+| ~~阴影 3~~ | 已随 v1.11.0 拆浅深两档（移出 L2，见 L1 派生色：浅档紫 tint / 深档黑 0.45，修复深档投影隐形与浅档行内代码写死墨夜底） |
 | 滚动条/焦点/上下标 4 | `scrollbar-size` 6px / `focus-width` 2px / `focus-offset` 3px / `supsub-size` 0.76em |
 
 > 设计意图：L2 全部进 `:root` 单值，供 `calc(var(--mdvr-mm) * …)` 之类派生；用户只调 L3 旋钮即可整体调密度/圆角（当前 mm 尚未被引用，属「休眠旋钮」）。
