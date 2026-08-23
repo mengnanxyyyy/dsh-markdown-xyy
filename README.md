@@ -47,6 +47,7 @@ dsh-markdown-xyy/
 
 ## 当前版本
 
+- **v1.9.0「列表 markdown 限定 + padding 对齐」**：草莓猛男粉（及新建模板）的列表基座/嵌套/任务清单全部收敛到 `[class*="_markdown_"]`（设置面板等 UI 列表/checkbox 不再受影响）；新增 `--mdvr-list-pad`（顶层 ul/ol/任务列表统一 1.6em）+ `--mdvr-list-pad-nested`（嵌套每层 1.2em），修复 ul 18px / ol 2.4em / 任务 0.8em 三值错位。
 - **v1.7.0「内置主题精简」**：移除早期纯配色主题 lobeui-emphasis / inkpaper / qingci，内置主题仅保留「草莓猛男粉」（全变量化完整主题；历史在 git）。
 - **v1.6.0「内置主题目录内聚」**：`themes/*.css` 迁入 `plugin/assets/themes/*.css`（插件目录内，打包/携带 `plugin/` 即带上全部主题；Host 优先读 assets、旧 `themes/` 兼容回退）。
 - **v1.5.0「草莓猛男粉模板化 + 列表分块修复」**：新增模板资产 `plugin/assets/template-strawberry.css`（「🆕 新建用户主题」默认起步）；修复内置主题列表因 ~16KB 通道超限被截断为空（改 `themes.builtin.get` 分块拉取）。

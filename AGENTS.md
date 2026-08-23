@@ -67,9 +67,10 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - **packageId 按进程分配、随重启重置**：新进程 define 可能拿到与旧进程条目相同的 id（v1.4.0 与 v1.2.0 同得 pkg-17）。`versions.json` 如实回填即可；`check-release` 第 9 项对 v1.0.0+ 条目 packageId 重复**一律降级为警告提示**（无法机械区分"误抄"与"跨进程合法复用"）
 - 审批被拒不要重复请求；技术失败读 `cordis_inspect_self` 诊断后修同一插件
 
-## 当前状态（2026-08-22）
+## 当前状态（2026-08-23）
 
-- 最新版本：v1.8.0（删除排版骨架文件 `plugin/assets/typography.css`；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，`themeAssets.get` 白名单去掉 typography）
+- 最新版本：v1.9.0（纯 CSS 资产版：strawberry-mocha §9 列表基座/嵌套与 §10 任务清单全部 markdown 限定 `[class*="_markdown_"]`，padding-left 统一 token `--mdvr-list-pad` 1.6em / `--mdvr-list-pad-nested` 1.2em；template-strawberry.css 同步。CSS 改文件即生效，无需 build/define）
+- v1.8.0（历史归档，tag 在 v1.8.0）：删除排版骨架文件 `plugin/assets/typography.css`；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，`themeAssets.get` 白名单去掉 typography
 - v1.7.0（历史归档，tag 在 17315bb）：内置主题精简，仅保留全变量化完整主题「草莓猛男粉」（lobeui/inkpaper/qingci 移除，历史在 git）
 - v1.6.0（历史归档，tag 在 93801f6）：内置主题目录内聚 `plugin/assets/themes/*.css`（随 `plugin/` 打包即携带；Host 优先读 assets、旧 `themes/` 兼容回退）
 - v1.5.0（历史归档，tag 在 c13cdf2）：新增模板资产 `plugin/assets/template-strawberry.css`（新建用户主题默认模板）+ 修复内置主题列表 ~16KB 通道截断（改分块拉取）

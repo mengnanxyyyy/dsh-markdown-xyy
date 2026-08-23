@@ -27,12 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.8.0',
+  version: '1.9.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-22',
+  date: '2026-08-23',
   changes: [
-    '移除排版骨架文件 plugin/assets/typography.css（v1.3.0 起已不注入）；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件（客户端无感知）',
+    '列表规则全面 markdown 限定（纯 CSS 资产）：strawberry-mocha §9 基座（::before 屏蔽 / ul,ol / li / li p / 嵌套缩进）与 §10 任务清单全部收敛到 [class*=_markdown_] 作用域',
+    'padding-left 对齐：新增 --mdvr-list-pad（1.6em，顶层 ul/ol/任务列表统一）+ --mdvr-list-pad-nested（1.2em，嵌套每层增量）；template-strawberry.css 同步',
   ],
 }
 

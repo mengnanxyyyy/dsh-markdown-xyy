@@ -41,9 +41,10 @@
 
   /* ===== L2 列表 ===== */
   --mdvr-list-gap: 0.8em;
-  --mdvr-list-indent-nested: 1.25em;
   --mdvr-li-gap: 0.35em;
   --mdvr-mark-font-size: 0.95em;
+  --mdvr-list-pad: 1.6em;        /* 顶层列表缩进（ul/ol/任务列表统一，v1.9.0） */
+  --mdvr-list-pad-nested: 1.2em; /* 嵌套列表每层缩进增量（v1.9.0 显式化） */
 
   /* ===== L2 圆角（风格开关） ===== */
   --mdvr-radius-card: 8px;
@@ -554,10 +555,11 @@ body[data-ds-dark-theme] {
 
 /* ------------------------------------------------------------
  * 9. 列表：原生符号 + 分层着色（::marker，不做伪元素图形）
+ *    v1.9.0 起基座/嵌套/缩进全部 markdown 限定（哨兵说明同下）；
  *    !important：产品 ._markdown_ li::marker 显式着色必须压过；
  *    ::before 屏蔽防御骨架可能注入的伪元素符号（破折号等）
  * ---------------------------------------------------------- */
-:where(ul > li::before, ol > li::before) {
+[class*="_markdown_"] :where(ul > li::before, ol > li::before) {
   content: none !important;
   position: static !important;
   left: auto !important;
@@ -573,59 +575,72 @@ body[data-ds-dark-theme] {
   transform: none !important;
   opacity: 1 !important;
 }
-:where(ul, ol) {
+/* 列表基座：容器间距 + 文字色（仅 markdown 对话内容） */
+[class*="_markdown_"] :where(ul, ol) {
   margin: var(--mdvr-list-gap) 0 !important;
   color: var(--dsw-alias-label-primary) !important;
 }
-:where(li) {
+[class*="_markdown_"] :where(li) {
   margin: var(--mdvr-li-gap) 0 !important;
   line-height: var(--mdvr-lineheight-list) !important;
 }
-:where(li p:first-child) { display: inline !important; }
-:where(li > ul, li > ol) {
+[class*="_markdown_"] :where(li p:first-child) { display: inline !important; }
+/* 嵌套列表：每层固定增量（v1.9.0 起显式化；v1.8.0 曾回归原生缩进，现配顶层
+ * token 实现整体对齐；产品对嵌套 ol 的 inside 定位不影响 padding 生效） */
+[class*="_markdown_"] :where(li > ul, li > ol) {
   margin: 0.2em 0 0.3em !important;
-  padding-left: var(--mdvr-list-indent-nested) !important;
+  padding-left: var(--mdvr-list-pad-nested) !important;
 }
-/* 无序符号分层着色（原生 disc，仅改 marker 颜色；随 h1/h3/h5 同步） */
-:where(ul > li)::marker {
+/* 无序符号分层着色（原生 disc，仅改 marker 颜色；随 h1/h3/h5 同步）
+ * 作用域收敛 v2：[class*="_markdown_"] = 产品对话 Markdown 容器的 CSS Modules
+ * 稳定子串（哈希跨构建会变、"_markdown_" 前缀不变，实测构建产物中唯一）。
+ * 规则仅命中 markdown 对话内容，设置面板等 UI 列表不再被波及；
+ * 若产品未来改名则失配 → 安全退化为原生观感，无破坏 */
+[class*="_markdown_"] :where(ul > li)::marker {
   color: var(--mdvr-bullet-l1) !important;
   font-size: var(--mdvr-mark-font-size) !important;
 }
-:where(ul > li > ul > li)::marker {
+[class*="_markdown_"] :where(ul > li > ul > li)::marker {
   color: var(--mdvr-bullet-l2) !important;
 }
-:where(ul > li > ul > li > ul > li)::marker {
+[class*="_markdown_"] :where(ul > li > ul > li > ul > li)::marker {
   color: var(--mdvr-bullet-l3) !important;
 }
-/* 有序符号分层着色（原生 decimal，等宽数字） */
-:where(ol > li)::marker {
+/* 有序符号分层着色（原生 decimal，等宽数字）
+ * 作用域收敛 v2：仅 markdown 对话内容生效（哨兵说明同上）
+ * 溢出控制：① 数字 0.82em 无加粗收窄 ② 顶层 ol 缩进统一为
+ * --mdvr-list-pad（1.6em，见段末）——等宽 "10."≈23.6px 放得下，三位数擦边可接受 */
+[class*="_markdown_"] :where(ol > li)::marker {
   color: var(--mdvr-bullet-l1) !important;
   font-family: var(--mdvr-mono) !important;
-  font-weight: 700 !important;
-  font-size: var(--mdvr-mark-font-size) !important;
+  font-size: 0.82em !important;
 }
-:where(ol > li > ol > li)::marker {
+[class*="_markdown_"] :where(ol > li > ol > li)::marker {
   color: var(--mdvr-bullet-l2) !important;
   font-family: var(--mdvr-mono) !important;
-  font-weight: 700 !important;
+  font-size: 0.82em !important;
 }
-:where(ol > li > ol > li > ol > li)::marker {
+[class*="_markdown_"] :where(ol > li > ol > li > ol > li)::marker {
   color: var(--mdvr-bullet-l3) !important;
   font-family: var(--mdvr-mono) !important;
-  font-weight: 600 !important;
+  font-size: 0.82em !important;
+}
+/* 顶层列表缩进统一：产品兜底 18px 与任务列表 0.8em 互相错位（12.8/18/38.4px），
+ * v1.9.0 起 ul/ol/任务列表同值 --mdvr-list-pad；:not(li) > ul/ol 不碰嵌套列表
+ * （嵌套走 --mdvr-list-pad-nested 增量）；!important 压产品的 padding-left:18px */
+[class*="_markdown_"] :where(:not(li) > ul, :not(li) > ol) {
+  padding-left: var(--mdvr-list-pad) !important;
 }
 
 /* ------------------------------------------------------------
  * 10. 任务清单：丝绒草莓复选框
- *     作用域已收敛到任务列表（不再全站重绘，产品 UI checkbox 不受影响）
+ *     v1.9.0 起全部 markdown 限定（UI checkbox 不再被重绘）；
+ *     顶层缩进并入 §9 统一 token（:not(li) > ul 已覆盖），原 0.8em 移除
  * ---------------------------------------------------------- */
-:where(li.task-list-item, li:has(input[type="checkbox"])) {
+[class*="_markdown_"] :where(li.task-list-item, li:has(input[type="checkbox"])) {
   list-style-type: none !important;
 }
-:where(ul.contains-task-list, ul:has(input[type="checkbox"])) {
-  padding-left: 0.8em !important;
-}
-:where(ul.contains-task-list input[type="checkbox"],
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"],
        li.task-list-item input[type="checkbox"]) {
   appearance: none !important;
   -webkit-appearance: none !important;
@@ -642,20 +657,20 @@ body[data-ds-dark-theme] {
   transition: all 0.2s ease !important;
   position: relative !important;
 }
-:where(ul.contains-task-list input[type="checkbox"]:hover,
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:hover,
        li.task-list-item input[type="checkbox"]:hover) {
   border-color: var(--mdvr-accent) !important;
   background: rgba(var(--mdvr-accent-rgb), 0.08) !important;
   box-shadow: 0 0 6px rgba(var(--mdvr-accent-rgb), 0.2) !important;
 }
-:where(ul.contains-task-list input[type="checkbox"]:checked,
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:checked,
        li.task-list-item input[type="checkbox"]:checked) {
   background: var(--mdvr-checkbox-checked) !important;
   border-color: var(--mdvr-checkbox-checked) !important;
   box-shadow: 0 0 8px rgba(var(--mdvr-accent-rgb), 0.45) !important;
 }
-:where(ul.contains-task-list input[type="checkbox"]:checked)::after,
-:where(li.task-list-item input[type="checkbox"]:checked)::after {
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:checked)::after,
+[class*="_markdown_"] :where(li.task-list-item input[type="checkbox"]:checked)::after {
   content: "" !important;
   width: 8px !important;
   height: 4.5px !important;
@@ -664,7 +679,7 @@ body[data-ds-dark-theme] {
   transform: rotate(-45deg) translate(0.5px, -0.5px) !important;
 }
 /* 完成态文字自然降级 */
-:where(li:has(input[type="checkbox"]:checked)) {
+[class*="_markdown_"] :where(li:has(input[type="checkbox"]:checked)) {
   color: var(--dsw-alias-label-secondary) !important;
   opacity: 0.8;
 }

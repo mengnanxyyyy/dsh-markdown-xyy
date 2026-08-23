@@ -3,8 +3,20 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.9.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "列表规则全面 markdown 限定（纯 CSS 资产，改文件即生效，无需重建插件）：strawberry-mocha §9 基座（::before 屏蔽 / ul,ol / li / li p / 嵌套缩进）与 §10 任务清单全部收敛到 [class*=_markdown_] 作用域——设置面板等 UI 列表/checkbox 不再被主题波及，收敛诊断报告「整站列表越界」残留",
+        "padding-left 对齐：新增 --mdvr-list-pad（1.6em，顶层 ul/ol/任务列表统一，取代产品 18px / ol 2.4em / 任务 0.8em 三值错位）+ --mdvr-list-pad-nested（1.2em，嵌套每层增量，v1.8.0 原生回归后显式化）；ol marker 保持 0.82em 等宽无加粗",
+        "template-strawberry.css 同步 v1.9.0（补齐 v2 marker 作用域收敛 + ol 收窄 + 顶层缩进 token），新建用户主题与内置主题行为一致"
+      ]
+    },
+    {
       "version": "1.8.0",
-      "packageId": "pkg-31",
+      "packageId": "pkg-1",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-22",

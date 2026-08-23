@@ -105,7 +105,7 @@
 |---|---|
 | 文本节奏 9 | `lineheight-body` 1.6 / `lineheight-list` 1.65 / `lineheight-heading` 1.25 / `lineheight-code` 1.45 / `para-gap` 0.45em / `para-letterspacing` 0.01em / `heading-gap-top` 1.7em / `heading-gap-bottom` 0.55em / `heading-letterspacing` -0.01em |
 | 标题字号 6 | `h1-size` 1.9em ～ `h6-size` 0.88em |
-| 列表 4 | `list-gap` 0.8em / `list-indent-nested` 1.25em / `li-gap` 0.35em / `mark-font-size` 0.95em |
+| 列表 5 | `list-gap` 0.8em / `li-gap` 0.35em / `mark-font-size` 0.95em / `list-pad` 1.6em / `list-pad-nested` 1.2em（v1.9.0 顶层/嵌套缩进 token 化；v1.8.0 曾移除嵌套 token、回归原生，v1.9.0 恢复为显式层级增量） |
 | 圆角 4 | `radius-card` 8px / `radius-chip` 4.5px / `radius-table` 10px / `radius-check` 4px |
 | 边框/内距/字号 10 | `border-code` 1px / `ribbon-code` 3.5px / `border-quote` 4px / `gap-block` 0.8em / `pad-pre` 8px 12px / `pad-code-inline` 0.15em 0.38em / `pad-cell` 0.68em 1em / `pad-quote` 0.6em 1.1em / `code-size` 0.85em / `table-size` 0.9em |
 | 阴影 3 | `shadow-code-inline` / `shadow-kbd` / `shadow-img-drop`（⚠️ 值内嵌黑色 rgba，不分浅深——深档立体感偏弱，未来可拆档） |
