@@ -3,8 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
-      "version": "1.13.4",
+      "version": "1.13.5",
       "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "内置主题卡恢复显示描述行（与用户卡完全同构：双行浅深色板 + 名称 + 描述，THEME_META desc 全量展示；系统自带卡补描述「DSH 出厂观感：深浅跟随系统，插件零干预」）"
+      ]
+    },
+    {
+      "version": "1.13.4",
+      "packageId": "pkg-14",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-23",

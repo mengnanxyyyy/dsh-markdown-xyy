@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.13.4',
+  version: '1.13.5',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '新增 3 个内置主题：旧用户主题 Cyber-Titanium（钛影）/ High-Vis-Clarity（高清晰）/ Pine-Smoke-Ink（松烟墨黛）按猛男粉规范升级内置——结构/99 变量名单/三层作用域逐项对齐，浅档分界色提对比 ≥2.1:1；THEME_META 注册显示名与双档色卡',
+    '内置主题卡恢复显示描述行（与用户卡同构：双行色板 + 名称 + 描述），THEME_META desc 全量展示；系统自带卡补充描述',
   ],
 }
 
@@ -681,11 +681,11 @@ function ThemeSettings() {
         }, label)
       }),
     ),
-    // v1.13.2：内置主题列表与用户主题同构（色板 + 名称，仅去掉描述行），系统自带并入其中
+    // v1.13.5：内置主题列表与用户主题同构（色板双行 + 名称 + 描述），系统自带并入其中
     React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题'),
-    [{ id: 'system-native', name: '系统自带', light: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'], dark: ['#0f1115', '#1b1e24', '#5686fe', '#3d6df4'] }]
-      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id, light: meta.swatches || [], dark: meta.swatchesDark || [] })))
-      .map(({ id, name, light, dark }) => {
+    [{ id: 'system-native', name: '系统自带', desc: 'DSH 出厂观感：深浅跟随系统，插件零干预', light: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'], dark: ['#0f1115', '#1b1e24', '#5686fe', '#3d6df4'] }]
+      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id, desc: meta.desc || '', light: meta.swatches || [], dark: meta.swatchesDark || [] })))
+      .map(({ id, name, desc, light, dark }) => {
         const selTheme = sel === id
         return React.createElement('div', {
           key: id,
@@ -698,7 +698,7 @@ function ThemeSettings() {
             onClick: () => { if (applySelection(rootCtx, id)) setSel(id) },
           },
             swatchGrid(light, dark),
-            React.createElement('span', { className: 'mdvr-theme-name' }, name + (selTheme ? ' ✓' : '')),
+            themeInfo(name + (selTheme ? ' ✓' : ''), desc),
           ),
         )
       }),
