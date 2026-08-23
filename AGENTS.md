@@ -69,7 +69,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-23）
 
-- 最新版本：v1.9.0（纯 CSS 资产版：strawberry-mocha §9 列表基座/嵌套与 §10 任务清单全部 markdown 限定 `[class*="_markdown_"]`，padding-left 统一 token `--mdvr-list-pad` 1.6em / `--mdvr-list-pad-nested` 1.2em；template-strawberry.css 同步。CSS 改文件即生效，无需 build/define）
+- 最新版本：v1.10.0（三层作用域体系，纯 CSS 资产：第 0 层全站=body 字体/基色走变量共享；第 1 层全部元素规则 markdown 限定 `[class*="_markdown_"]`——标题/段落/行内/上下标数学/代码块体系/行内 code/表格/引用/hr/链接/图片 36 条混用规则收口；删 body>pre 死规则、pre 拆双规格、272 前缀化；第 2 层 selection/滚动条/焦点环保持全局签名；template-strawberry.css 同步）
+- v1.9.0（历史归档，tag 在 v1.9.0）：列表规则全面 markdown 限定 + padding-left 统一 token（`--mdvr-list-pad` 1.6em / `--mdvr-list-pad-nested` 1.2em）
 - v1.8.0（历史归档，tag 在 v1.8.0）：删除排版骨架文件 `plugin/assets/typography.css`；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，`themeAssets.get` 白名单去掉 typography
 - v1.7.0（历史归档，tag 在 17315bb）：内置主题精简，仅保留全变量化完整主题「草莓猛男粉」（lobeui/inkpaper/qingci 移除，历史在 git）
 - v1.6.0（历史归档，tag 在 93801f6）：内置主题目录内聚 `plugin/assets/themes/*.css`（随 `plugin/` 打包即携带；Host 优先读 assets、旧 `themes/` 兼容回退）

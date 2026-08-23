@@ -169,13 +169,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.9.0',
+  version: '1.10.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '列表规则全面 markdown 限定（纯 CSS 资产）：strawberry-mocha §9 基座（::before 屏蔽 / ul,ol / li / li p / 嵌套缩进）与 §10 任务清单全部收敛到 [class*=_markdown_] 作用域',
-    'padding-left 对齐：新增 --mdvr-list-pad（1.6em，顶层 ul/ol/任务列表统一）+ --mdvr-list-pad-nested（1.2em，嵌套每层增量）；template-strawberry.css 同步',
+    '三层作用域体系（纯 CSS）：第 0 层全站=body 字体/基色变量共享；第 1 层 markdown 限定全面铺开（标题/段落/行内/代码块/表格/引用/链接/图片 36 条混用规则补 [class*=_markdown_] 前缀）；删除 body>pre 死规则、418 拆分、272 前缀化',
+    'template-strawberry.css 同步 v1.10.0；selection/滚动条/焦点环 保持全局签名',
   ],
 }
 

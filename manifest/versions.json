@@ -3,6 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.10.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "三层作用域体系（纯 CSS 资产）：第 0 层全站通用仅剩 body 字体/基色（走 --mdvr-sans + --dsw-alias-label-primary 变量共享）；第 1 层全部 markdown 限定——标题/段落/行内修饰/上下标数学/代码块体系(.md-code-block + token + KaTeX)/行内 code/表格/引用/分割线/链接/图片 36 条混用规则统一补 [class*=_markdown_] 前缀（!important 保留，机制同 v1.9.0 列表），UI 同名元素不再被主题波及",
+        "结构修正：删除 body > pre 死规则（被容器 pre 的 !important 压制从未生效）；418 拆为 .md-code-block pre（强规格）+ 裸 pre 兜底（降为无 !important）；272 紧咬正文加前缀保留；selection/滚动条/焦点环标注为第 2 层全局签名刻意不收口",
+        "template-strawberry.css 同步 v1.10.0 全套，新建用户主题与内置主题行为一致"
+      ]
+    },
+    {
       "version": "1.9.0",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",
