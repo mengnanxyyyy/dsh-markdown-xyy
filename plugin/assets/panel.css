@@ -26,8 +26,6 @@
 .mdvr-theme-card { display: flex; align-items: center; gap: 0; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); }
 .mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
 .mdvr-theme-main { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 8px 10px; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); font-family: inherit; }
-/* v1.13.1：内置主题名称卡（仅显示标题；系统自带并入内置列表） */
-.mdvr-theme-main-name { font-weight: 600; letter-spacing: 0.01em; }
 .mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }
 .mdvr-theme-swatches { display: flex; gap: 4px; }
 .mdvr-theme-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--dsw-alias-border-l1); }

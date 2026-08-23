@@ -169,12 +169,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.13.1',
+  version: '1.13.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '主题设置布局：系统自带并入「内置主题」栏，内置列表仅显示名称（.mdvr-theme-main-name）',
+    '修正 v1.13.1 误改：内置主题列表恢复与用户主题同构（色板 + 名称，仅去掉描述行；系统自带保留其 DSH 出厂色板）',
   ],
 }
 

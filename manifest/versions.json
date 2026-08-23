@@ -3,8 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
-      "version": "1.13.1",
+      "version": "1.13.2",
       "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "修正 v1.13.1 误改：内置主题列表恢复与用户主题同构——色板 + 名称（仅去掉描述行），撤销纯名称卡样式（.mdvr-theme-main-name 已从 panel.css 移除）；系统自带保留 DSH 出厂色板并入其中"
+      ]
+    },
+    {
+      "version": "1.13.1",
+      "packageId": "pkg-11",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-23",

@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.13.1',
+  version: '1.13.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '主题设置布局：系统自带并入「内置主题」栏，内置列表仅显示名称（.mdvr-theme-main-name）',
+    '修正 v1.13.1 误改：内置主题列表恢复与用户主题同构（色板 + 名称，仅去掉描述行；系统自带保留其 DSH 出厂色板）',
   ],
 }
 
@@ -556,7 +556,7 @@ function ThemeSettings() {
   const [refreshing, setRefreshing] = React.useState(false)
   // 编辑器状态：null = 关闭；{ isNew, id, css } = 新建 / 编辑中
   const [editor, setEditor] = React.useState(null)
-  // v1.13.1：内置主题列表 = 系统自带（并入）+ 各内置主题，仅显示名称
+  // v1.13.2：内置主题列表 = 系统自带（并入）+ 各内置主题（色板 + 名称，无描述行）
   const entries = builtinIds.map((id) => ({ id, meta: THEME_META[id] || { name: id, desc: '', swatches: [] } }))
   const schemeOptions = [
     ['light', '☀️ 浅色'],
@@ -649,11 +649,11 @@ function ThemeSettings() {
         }, label)
       }),
     ),
-    // v1.13.1：内置主题列表 = 系统自带（并入）+ 内置主题，仅显示名称（无色板/描述）
+    // v1.13.2：内置主题列表与用户主题同构（色板 + 名称，仅去掉描述行），系统自带并入其中
     React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题'),
-    [{ id: 'system-native', name: '系统自带' }]
-      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id })))
-      .map(({ id, name }) => {
+    [{ id: 'system-native', name: '系统自带', swatches: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'] }]
+      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id, swatches: meta.swatches || [] })))
+      .map(({ id, name, swatches }) => {
         const selTheme = sel === id
         return React.createElement('div', {
           key: id,
@@ -661,10 +661,13 @@ function ThemeSettings() {
         },
           React.createElement('button', {
             type: 'button',
-            className: 'mdvr-theme-main mdvr-theme-main-name',
+            className: 'mdvr-theme-main',
             'aria-pressed': selTheme,
             onClick: () => { if (applySelection(rootCtx, id)) setSel(id) },
-          }, name + (selTheme ? ' ✓' : '')),
+          },
+            swatchRow(swatches),
+            React.createElement('span', { className: 'mdvr-theme-name' }, name + (selTheme ? ' ✓' : '')),
+          ),
         )
       }),
     // 用户主题（~/.dsh/web-themes/：放 CSS 文件即新主题，点刷新生效；可编辑）
