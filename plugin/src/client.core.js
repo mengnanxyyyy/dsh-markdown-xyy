@@ -27,12 +27,13 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.11.1',
+  version: '1.12.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '浅色分界色提对比（浅档单改）：border-l1/l2、code-border 三值微调（1.26~1.63→2.07~2.63:1），灰阶差显示器可辨；注意事项固化于 template 警告区/strawberry 注释/docs/themes.md',
+    '删除独立模板资产 template-strawberry.css：新建用户主题默认模板改取内置主题猛男粉内容（newThemeStarter 从 builtinThemes 取 CSS，回退 template.css）',
+    'host themeAssets.get 白名单/注释、构建与门禁资产清单、文档同步移除 template-strawberry',
   ],
 }
 
@@ -94,17 +95,23 @@ async function loadBuiltinThemes() {
   }
 }
 
-// 加载共享资产（面板样式 + 新建模板；全部走分块协议 themeAssets.get，v1.3.0）
-// v1.5.0：新建用户主题默认模板 = template-strawberry（草莓猛男粉）；不可用时回退原 template（青瓷演示）
+// 加载共享资产（面板样式 + 回退模板；全部走分块协议 themeAssets.get，v1.3.0）
+// v1.12.0：新建用户主题默认 = 内置主题 猛男粉 内容（见 newThemeStarter），
+// 不再维护独立模板资产 template-strawberry.css；template.css（青瓷）仅作回退
 async function loadAssets() {
   try {
     const pan = await fetchChunks('themeAssets.get', (index) => ({ name: 'panel', index }))
-    const sw = await fetchChunks('themeAssets.get', (index) => ({ name: 'template-strawberry', index }))
     const tpl = await fetchChunks('themeAssets.get', (index) => ({ name: 'template', index }))
     if (pan !== null) panelCss = pan
-    if (sw !== null && sw.length > 0) templateCss = sw
-    else if (tpl !== null && tpl.length > 0) templateCss = tpl
+    if (tpl !== null && tpl.length > 0) templateCss = tpl
   } catch (e) { /* 忽略：资产缺失时插件仍可用（仅无样式） */ }
+}
+
+// v1.12.0：新建用户主题起步内容 = 内置 猛男粉（strawberry-mocha）CSS；
+// 未加载到时回退 template.css（青瓷）→ 内联兜底
+function newThemeStarter() {
+  const builtin = builtinThemes['strawberry-mocha']
+  return (builtin && builtin.css) || templateCss || FALLBACK_TEMPLATE_CSS
 }
 
 // 确保资产与内置主题已加载（幂等；失败重置 Promise，下次调用可重试，v1.3.0）
@@ -683,7 +690,7 @@ function ThemeSettings() {
       React.createElement('button', {
         className: 'mdvr-refresh-btn',
         type: 'button',
-        onClick: () => setEditor({ isNew: true, id: null, css: templateCss || FALLBACK_TEMPLATE_CSS }),
+        onClick: () => ensureAssets().then(() => setEditor({ isNew: true, id: null, css: newThemeStarter() })),
       }, '🆕 新建用户主题'),
       React.createElement('span', { className: 'mdvr-themes-title' }, '放入 CSS 文件后点刷新即生效'),
     ),

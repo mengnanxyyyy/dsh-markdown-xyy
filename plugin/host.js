@@ -6,7 +6,7 @@
 //   versions.note —— Client 面板挂载时上报自身 MANIFEST → 记账
 //   versions.list —— 面板查询台账快照 { current, history }
 //   themes.builtin.list —— 列出内置主题（项目根 themes/*.css，文件即主题）
-//   themeAssets.get —— 共享资产分块读取（panel/template/template-strawberry，8000 字符/片）
+//   themeAssets.get —— 共享资产分块读取（panel/template，8000 字符/片）
 //   themes.user.list / get / save —— 用户主题（$HOME/.dsh/web-themes/*.css）
 //     get/save 均分块传输（页面↔宿主消息通道有 ~16KB 单条上限，v1.2.2 实测 24KB 返回失败、16.8KB 保存截断）
 //     save 为事务化上传协议：uploadId 隔离 + 分片完整性检查 + TTL/容量上限，
@@ -169,12 +169,13 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.11.1',
+  version: '1.12.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '浅色分界色提对比（浅档单改）：border-l1/l2、code-border 三值微调（1.26~1.63→2.07~2.63:1），灰阶差显示器可辨；注意事项固化于 template 警告区/strawberry 注释/docs/themes.md',
+    '删除独立模板资产 template-strawberry.css：新建用户主题默认模板改取内置主题猛男粉内容（client newThemeStarter 从 builtinThemes 取 CSS，回退 template.css）',
+    'host themeAssets.get 白名单/注释、构建与门禁资产清单、文档同步移除 template-strawberry',
   ],
 }
 
@@ -273,8 +274,9 @@ return {
       }
     })
 
-    // 共享资产分块读取（panel/template/template-strawberry）：{name, index} → {ok, index, total, chunk}
-    // 统一分块协议（v1.3.0）；v1.8.0 移除 typography（已删除）
+    // 共享资产分块读取（panel/template）：{name, index} → {ok, index, total, chunk}
+    // 统一分块协议（v1.3.0）；v1.8.0 移除 typography、v1.12.0 移除 template-strawberry（已删除，
+    // 新建用户主题改取内置主题内容）
     harness.handle('themeAssets.get', async (args) => {
       const fsSvc = ctx.get('fs')
       const root = await resolveProjectRoot(ctx)
@@ -282,7 +284,7 @@ return {
       if (fsSvc === undefined || root === null) {
         return { ok: false, reason: 'fs or project root unavailable' }
       }
-      if (name !== 'panel' && name !== 'template' && name !== 'template-strawberry') {
+      if (name !== 'panel' && name !== 'template') {
         return { ok: false, reason: 'bad name' }
       }
       try {

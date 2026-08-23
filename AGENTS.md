@@ -12,7 +12,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
    - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；v1.7.0 起仅保留 `strawberry-mocha.css`，lobeui-emphasis/inkpaper/qingci 已移除，历史在 git）
-   - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，保留作回退）/ `template-strawberry.css`（**新建用户主题默认模板**，草莓猛男粉，v1.5.0）/ `themes/strawberry-mocha.css`（内置主题，兼作项目根探测哨兵之一）。排版骨架 `typography.css` 已随 v1.8.0 删除
+   - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，仅作新建回退）/ `themes/strawberry-mocha.css`（内置主题，兼作项目根探测哨兵之一）。排版骨架 `typography.css` 已随 v1.8.0 删除；**独立模板 `template-strawberry.css` 已随 v1.12.0 删除**（新建用户主题默认取内置主题内容，见铁律 5）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
    - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
@@ -27,7 +27,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
    `scripts/extract-assets.js` 已移除（v1.2.0 一次性迁移工具，历史在 git）；v1.3.0 起排版骨架停用（第三方主题 = 主题 CSS + panelCss，产品 `._markdown_*` 兜底排版）；v1.8.0 已删除 typography.css，项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 并存。
 3. **选择模型（v0.9.0）**：设置页顶部「系统自带」= 默认（`DEFAULT_SELECTION = 'system-native'`，插件零干预、深浅跟随系统、外观三档可用）；第三方主题无深浅之分（选中后 ☀️/🌙/🖥️ 变灰禁用，回到「系统自带」重新可用）；两组互斥单选。`demo.css` / `native.css` 已移除（历史在 git）。
 4. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`！我们的样式注入晚于产品样式表，同选择器后者胜出）。
-5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（默认模板来自 `plugin/assets/template-strawberry.css` 草莓猛男粉，加载失败回退 `template.css`）；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。内置主题卡片无编辑按钮。
+5. **用户主题可编辑（v1.2.0），内置主题只读**：设置页用户主题卡片有「✏️ 编辑」，动作行有「🆕 新建用户主题」（**v1.12.0 起默认模板 = 内置主题 `strawberry-mocha`（猛男粉）内容本身**——不再维护独立模板资产，加载失败回退 `template.css` 青瓷版；编辑器 = 透明 textarea 叠彩色 pre 实时语法高亮（`highlightCss`）+「🧹 格式化」（`formatCss`）+「💾 保存」（`saveUserTheme` → Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`））。内置主题卡片无编辑按钮。
 6. 主题 CSS 内同时定义：13 个 `--dsw-alias-*`（全局配色）+ `--mdvr-*`（强调变量：accent 系 5 个、quote/code/table 系 5 个、link/highlight 系 4 个）。**不再调用 `theme.overrideTokens`**。
 7. **panel.css 里的 `var(--mdvr-*)` 必须带默认回退值**（如 `var(--mdvr-accent, #5856d6)`），否则原生模式下插件自有 UI 样式失效。
 
@@ -69,7 +69,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-23）
 
-- 最新版本：v1.11.1（浅色分界色提对比，浅档单改：border-l1/l2、code-border 三值 1.26~1.63→2.07~2.63:1；注意事项固化：template ⚠️[浅色层次]、strawberry ① 注释、docs/themes.md——WCAG 1.4.11 非文本 ≥3:1、粉调至少 ≥2:1）
+- 最新版本：v1.12.0（模板瘦身：删除 template-strawberry.css 独立模板资产——「🆕 新建用户主题」默认取内置主题猛男粉内容（client newThemeStarter 从 builtinThemes 取 CSS），回退 template.css 青瓷版；host 白名单/构建与门禁清单/文档同步）
 - v1.11.0（历史归档，tag 在 v1.11.0）：深浅模式整改——单值拆档（inline-code/selection/shadow 7 变量移入两档 body 成对定义）、选区白字浅档修复、阴影浅紫 tint/深黑 0.45、docs/unified-variables.md 分层账更新
 - v1.10.0（历史归档，tag 在 v1.10.0）：三层作用域体系——0 全站=body 字体/基色变量共享；1 元素规则全 markdown 限定 `[class*="_markdown_"]`（36 条收口）；2 selection/滚动条/焦点环保持全局签名；删 body>pre 死规则、pre 拆双规格、272 前缀化
 - v1.9.0（历史归档，tag 在 v1.9.0）：列表规则全面 markdown 限定 + padding-left 统一 token（`--mdvr-list-pad` 1.6em / `--mdvr-list-pad-nested` 1.2em）

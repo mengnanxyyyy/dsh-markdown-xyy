@@ -62,7 +62,7 @@ body[data-ds-dark-theme] { ... }
 - 目录：`$HOME/.dsh/web-themes/`（v1.1.0 起**系统动态解析**，不硬编码：shell 读 `$HOME` → `sandboxPolicy.workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 回退，见 host.js `resolveUserThemesDir`）
 - 添加方式三选一：
   1. 手动放入任意 `*.css`（三段式格式，参考 `$HOME/.dsh/web-themes/example.css` 或仓库 `plugin/assets/themes/*.css`）→ 设置页「🔄 刷新用户主题」即生效，**无需打包/升级插件**；
-  2. 设置页「🆕 新建用户主题」：默认以**草莓猛男粉模板起步**（内容来自 `plugin/assets/template-strawberry.css`，与内置主题 `plugin/assets/themes/strawberry-mocha.css` 同源；该资产加载失败回退 `plugin/assets/template.css` 青瓷演示版），浅色档 / 深色档 / 元素定制全注释，填文件名保存；
+  2. 设置页「🆕 新建用户主题」：**v1.12.0 起默认以内置主题 `strawberry-mocha`（猛男粉）内容起步**（即 `plugin/assets/themes/strawberry-mocha.css` 全文；独立模板资产已删除，加载失败回退 `plugin/assets/template.css` 青瓷演示版），浅色档 / 深色档 / 元素定制全注释，填文件名保存；
   3. 已有主题点卡片右上「✏️ 编辑」：改 CSS 后「💾 保存」写回原文件（Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。
 - 编辑器能力（v1.2.0）：**实时语法高亮**（透明 textarea 叠彩色 pre：注释/字符串/选择器/变量/at 规则/颜色/数值/属性名分色，跟随主题变量配色）；「🧹 格式化」一键排版（补分号、花括号换行、2 空格缩进、注释保留）；「Tab」插入缩进；保存成功后若该主题正被使用则自动重新应用（修改即时生效）。
 - **内置主题只读**：仓库 `plugin/assets/themes/*.css` 的卡片无「编辑」按钮；但 v1.2.0 起内置主题与面板样式由 Host 从文件读取，**改 `plugin/assets/themes/*.css` 或 `plugin/assets/*.css` 后刷新/重启插件即生效**（无需重新打包）。
@@ -99,5 +99,5 @@ body[data-ds-dark-theme] { ... }
 
 - **`$HOME/.dsh/web-themes/example.css`** 是"完整参考主题"：涵盖全部可控面并逐条注释影响范围——
   ① 13 全局 token（官方语义注释）② 15 个 `--mdvr-*` 变量（每个标注影响哪些元素）③ 全部可控元素规则（标题/段落/列表/任务框/行内代码/代码块/引用/表格/分割线/链接/粗体/高亮/删除线/上下标/kbd/图片，`:where()` 零优先级覆盖产品兜底）④ 扩展示例（选区/滚动条/斑马纹/焦点轮廓）⑤ 头部警告区（挂载机制、零优先级、固定名单、无深浅之分、WCAG AA、生效方式）+ 尾部配色速查（tint 配方、AA 实测值）。
-- **`plugin/assets/template-strawberry.css`**（v1.5.0 起「🆕 新建用户主题」的**默认起点模板**）：草莓猛男粉（Velvet Strawberry Mocha）全量模板——警告区 + L0/L1/L2/L3/`--hl-*` 分层变量 + ③ 元素段（与内置主题 `plugin/assets/themes/strawberry-mocha.css` 同源）；加载失败回退 `template.css`。`template.css` 与 example.css 同源完整版（青瓷演示），保留作回退。
+- **「🆕 新建用户主题」起点（v1.12.0 起）= 内置主题 `plugin/assets/themes/strawberry-mocha.css`（猛男粉）内容本身**——独立模板资产 `plugin/assets/template-strawberry.css` 已随 v1.12.0 删除，不再双维护；加载失败回退 `plugin/assets/template.css`。`template.css` 与 example.css 同源完整版（青瓷演示），保留作回退。
 - 编写时警告要点：浅色 `body` / 深色 `body[data-ds-dark-theme]`（属性选择器，**非** `prefers-color-scheme`）；元素定制一律 `:where()`；`--dsw-alias-*` 固定 13 个不可新增；正文对比度 ≥4.5:1。

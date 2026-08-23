@@ -15,7 +15,8 @@ const out = path.join(root, 'plugin', 'client.js')
 
 // 资产完整性检查（运行时由 Host 读取，缺文件会导致面板无样式）
 // v1.8.0：typography.css 已删除（排版骨架停用），哨兵改为 panel.css + themes/strawberry-mocha.css
-const assets = ['panel.css', 'template.css', 'template-strawberry.css']
+// v1.12.0：template-strawberry.css 已删除（新建用户主题改取内置主题内容）
+const assets = ['panel.css', 'template.css']
 const assetRoot = path.join(root, 'plugin', 'assets')
 let missing = 0
 for (const a of assets) {

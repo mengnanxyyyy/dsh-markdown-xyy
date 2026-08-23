@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.12.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "删除独立模板资产 plugin/assets/template-strawberry.css（消除双维护）：「🆕 新建用户主题」默认模板改取内置主题 strawberry-mocha（猛男粉）内容本身——client newThemeStarter() 从 builtinThemes 缓存取 CSS，未加载回退 template.css（青瓷）→ 内联兜底",
+        "host themeAssets.get 白名单/注释、build-client/check-release 资产清单、AGENTS/README/themes/capabilities 文档同步移除 template-strawberry"
+      ]
+    },
+    {
       "version": "1.11.1",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",
