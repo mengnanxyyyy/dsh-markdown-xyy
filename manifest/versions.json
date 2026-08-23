@@ -3,6 +3,17 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.11.1",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "浅色分界色提对比（纯 CSS，浅档单改，深档不动）：border-l1 #EBD5DF→#D9A6BC（1.30→2.07:1）、border-l2 #D8BDCB→#C192AC（1.63→2.63:1）、code-border #E8CCD6→#C492AA（浅档行内胶囊边 1.26→2.19:1）——灰阶差显示器不再糊片",
+        "注意事项固化：template ⚠️ 警告区新增 [浅色层次] 条目、strawberry ① 浅色档注释、docs/themes.md 浅色分界色注意（WCAG 1.4.11 非文本 ≥3:1 / 粉调审美至少 ≥2:1）"
+      ]
+    },
+    {
       "version": "1.11.0",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

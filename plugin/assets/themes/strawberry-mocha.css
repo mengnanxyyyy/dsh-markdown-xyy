@@ -90,6 +90,9 @@
 
 /* ------------------------------------------------------------
  * ① 浅色档 —— 草莓燕麦奶盖（Strawberry Oat Foam）
+ * ⚠️ 浅色分界色注意：边框/分层底 vs 背景的对比是灰阶差显示器的重灾区
+ *    （WCAG 1.4.11 非文本 ≥3:1；粉调审美受约束时至少 ≥2:1 肉眼可辨）。
+ *    v1.11.1 已把 border-l1/l2 提到 2.07/2.63:1；新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
   /* ===== 13 个全局 token（平台固定名单） ===== */
@@ -97,8 +100,8 @@ body {
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #F4E8EE;         /* 代码块/嵌套表面 */
   --dsw-alias-bg-overlay: #FFFFFF;         /* 浮层面板 */
-  --dsw-alias-border-l1: #EBD5DF;          /* 主边框 */
-  --dsw-alias-border-l2: #D8BDCB;          /* 次边框 */
+  --dsw-alias-border-l1: #D9A6BC;          /* 主边框（v1.11.1 提对比 1.30→2.07:1） */
+  --dsw-alias-border-l2: #C192AC;          /* 次边框（v1.11.1 提对比 1.63→2.63:1） */
   --dsw-alias-brand-primary: #D93B68;      /* 品牌主色：浓缩树莓红 */
   --dsw-alias-label-primary: #23181C;      /* 主文字：深焙黑巧色 */
   --dsw-alias-label-secondary: #6B5560;    /* 次文字：豆沙灰褐 */
@@ -137,7 +140,7 @@ body {
   /* ===== 身份色：组件系 ===== */
   --mdvr-quote-border: #D93B68;            /* 引用边条 */
   --mdvr-quote-bg: #FAF0F4;                /* 引用衬底 */
-  --mdvr-code-border: #E8CCD6;             /* 行内代码描边 */
+  --mdvr-code-border: #C492AA;             /* 行内代码描边（v1.11.1 提对比：胶囊边 1.26→2.19:1） */
   --mdvr-table-head-bg: #F7E4EC;           /* 表头背景 */
   --mdvr-table-head-text: #881337;         /* 表头文字 */
 

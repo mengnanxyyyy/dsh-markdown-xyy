@@ -19,6 +19,10 @@
  *  [名单] --dsw-alias-* 只有 13 个（平台固定名单）；新颜色走 --mdvr-*。
  *  [深浅] 用户主题无深浅之分：选中后外观三档禁用，浅/深两档由本文件自定。
  *  [对比度] 正文 ≥4.5:1、大号字 ≥3:1（WCAG AA）。
+ *  [浅色层次] 浅色档边框/分层底色 vs 背景 ≥3:1（WCAG 1.4.11 非文本）；
+ *         灰阶差的显示器上 1.x:1 会糊成一片——border、代码块底、引用衬底、
+ *         表头底这类「分界色」发布前请肉眼可辨（粉调审美下至少 ≥2:1）。
+ *         参考实测：内置浅档 border-l1/l2 已提到 2.07/2.63:1（v1.11.1）。
  *  [生效] 改本文件后到设置页点「🔄 刷新用户主题」即生效。
  *  [变量分层] L0 平台 token → L1 身份色（/--hl-* 浅深成对）
  *           → L2 排版/形状常量 + L3 旋钮 + 字体栈（:root 单值）。
@@ -108,8 +112,8 @@ body {
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #F4E8EE;         /* 代码块/嵌套表面 */
   --dsw-alias-bg-overlay: #FFFFFF;         /* 浮层面板 */
-  --dsw-alias-border-l1: #EBD5DF;          /* 主边框 */
-  --dsw-alias-border-l2: #D8BDCB;          /* 次边框 */
+  --dsw-alias-border-l1: #D9A6BC;          /* 主边框（v1.11.1 提对比 1.30→2.07:1） */
+  --dsw-alias-border-l2: #C192AC;          /* 次边框（v1.11.1 提对比 1.63→2.63:1） */
   --dsw-alias-brand-primary: #D93B68;      /* 品牌主色：浓缩树莓红 */
   --dsw-alias-label-primary: #23181C;      /* 主文字：深焙黑巧色 */
   --dsw-alias-label-secondary: #6B5560;    /* 次文字：豆沙灰褐 */
@@ -148,7 +152,7 @@ body {
   /* ===== 身份色：组件系 ===== */
   --mdvr-quote-border: #D93B68;            /* 引用边条 */
   --mdvr-quote-bg: #FAF0F4;                /* 引用衬底 */
-  --mdvr-code-border: #E8CCD6;             /* 行内代码描边 */
+  --mdvr-code-border: #C492AA;             /* 行内代码描边（v1.11.1 提对比：胶囊边 1.26→2.19:1） */
   --mdvr-table-head-bg: #F7E4EC;           /* 表头背景 */
   --mdvr-table-head-text: #881337;         /* 表头文字 */
 

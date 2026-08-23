@@ -69,7 +69,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-23）
 
-- 最新版本：v1.11.0（深浅模式整改，纯 CSS：③ 段零裸色、两档变量零缺失（subagent 交叉核验）；选区白字浅档不可读已修、阴影拆浅深两档（浅=紫 tint/深=黑 0.45）、行内代码浅档拆燕麦粉底+深草莓字（深档保留墨夜紫签名）；7 个单值变量移入两档 body 成对定义；template-strawberry.css 同步）
+- 最新版本：v1.11.1（浅色分界色提对比，浅档单改：border-l1/l2、code-border 三值 1.26~1.63→2.07~2.63:1；注意事项固化：template ⚠️[浅色层次]、strawberry ① 注释、docs/themes.md——WCAG 1.4.11 非文本 ≥3:1、粉调至少 ≥2:1）
+- v1.11.0（历史归档，tag 在 v1.11.0）：深浅模式整改——单值拆档（inline-code/selection/shadow 7 变量移入两档 body 成对定义）、选区白字浅档修复、阴影浅紫 tint/深黑 0.45、docs/unified-variables.md 分层账更新
 - v1.10.0（历史归档，tag 在 v1.10.0）：三层作用域体系——0 全站=body 字体/基色变量共享；1 元素规则全 markdown 限定 `[class*="_markdown_"]`（36 条收口）；2 selection/滚动条/焦点环保持全局签名；删 body>pre 死规则、pre 拆双规格、272 前缀化
 - v1.9.0（历史归档，tag 在 v1.9.0）：列表规则全面 markdown 限定 + padding-left 统一 token（`--mdvr-list-pad` 1.6em / `--mdvr-list-pad-nested` 1.2em）
 - v1.8.0（历史归档，tag 在 v1.8.0）：删除排版骨架文件 `plugin/assets/typography.css`；项目根探测哨兵改为 panel.css + themes/strawberry-mocha.css 双文件，`themeAssets.get` 白名单去掉 typography

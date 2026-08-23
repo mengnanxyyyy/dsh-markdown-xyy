@@ -79,15 +79,17 @@
 
 `--mdvr-bullet-l1/l2/l3`（1/2/3 级符号色，**同步 h1/h3/h5**）、`--mdvr-checkbox-checked`（勾选色，同步 accent）。
 
-### 4.4 派生/杂项（6，声明成对；其中 5 个当前两档同值）
+### 4.4 派生/杂项（5，声明成对；check-mark 留单值——v1.11.0 起 inline-code/selection 真拆档）
 
 | 变量 | 浅 | 深 | 说明 |
 |---|---|---|---|
-| `--mdvr-accent-rgb` | 217, 59, 104 | 251, 113, 133 | 唯一真成对，rgba() 光晕派生用 |
-| `--mdvr-inline-code-bg` | #14121E | 同 | 行内代码底（浅档刻意深底亮字胶囊） |
-| `--mdvr-inline-code-text` | #F472B6 | 同 | 行内代码字 |
-| `--mdvr-selection-bg` / `selection-text` | rgba(203,166,247,.35) / #F5E0DC | 同 | 选区色 |
-| `--mdvr-check-mark` | #FFFFFF | 同 | 复选框对勾 |
+| `--mdvr-accent-rgb` | 217, 59, 104 | 251, 113, 133 | 真成对，rgba() 光晕派生用 |
+| `--mdvr-inline-code-bg` | #F4E8EE | #14121E | 行内代码底（v1.11.0 拆档：浅=燕麦粉底、深=墨夜紫签名） |
+| `--mdvr-inline-code-text` | #9F1239 | #F472B6 | 行内代码字（浅=深草莓字配浅底） |
+| `--mdvr-selection-bg` / `selection-text` | rgba(203,166,247,.35) / #6D28D9 | 同 bg / #F5E0DC | 选区色（v1.11.0 修浅档白字不可读：浅=深丁香紫 AA≈4.6:1） |
+| `--mdvr-check-mark` | #FFFFFF 单值 | 同 | 复选框对勾（两档成立，留 :root 单值） |
+
+> ⚠️ v1.11.0 起 shadow-code-inline/kbd/img-drop 三个阴影也已真拆档（浅=紫 tint / 深=黑 0.45），见 §六说明。
 
 ---
 
@@ -137,7 +139,7 @@
 1. **L0 名单固定**：13 个 platform token 不能增减，只能统一"每套主题都定义且浅深成对"。
 2. **核心 17 个 = 统一变量**：accent/highlight/link/quote/code/table 系 + sans/mono/mm——**同名同义同消费方**，任何主题缺一个都会造成面板/元素回退不一致。
 3. **扩展变量不强制统一**：`--mdvr-h1..h6`、`--hl-*`、L2 常量只属于「带 ③ 元素段的全量主题」；纯色主题可完全不定义（现有 3 套就是例子）。
-4. **同值不重排档**：两档同值的派生色（inline-code/selection/check-mark）建议放 `:root` 单值、仅 `accent-rgb` 真成对留 body 两档——strawberry-mocha 已按此落地。
+4. **同值不重排档**：两档同值的纯色派生色（如 check-mark）放 `:root` 单值即可；一旦某档需要不同值（v1.11.0 的 inline-code/selection/shadow 就是例子：浅档观感/对比度要求迫使拆档）→ 移入 body 两档定义，变量名不变、引用零改动。
 5. **命名冲突检查**：全仓 grep `--mdvr-*` / `--hl-*` / `--dsw-alias-*` 应无同名不同义；本盘点未发现同名不同值。
 
 ---
