@@ -1,0 +1,793 @@
+/* ============================================================
+ * 主题：Pine-Smoke-Ink —— 松烟墨黛（Pine Smoke & Ink）
+ * ------------------------------------------------------------
+ * 风格：2026 中文文人作家/小说家/诗人专属 —— 徽墨沉香 × 矿物朱砂
+ *       × 远山黛蓝 × 宣纸冷白（书卷气文人美学）。
+ * 来源：由旧用户主题 Pine-Smoke-Ink-native 按猛男粉规范升级内置
+ *       （v1.13.4；原生列表符号 + 全变量化，排版/形状常量抽 L2/L3，
+ *       结构/变量名单/选择器架构 100% 对齐 strawberry-mocha）。
+ * 挂载机制：浅色 body / 深色 body[data-ds-dark-theme]（与产品一致）。
+ * 作用域（v1.10.0 三层体系）：0 全站=body 字体/基色（--mdvr-sans + L0 token
+ *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
+ *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
+ *   保持全局签名（见 §13，勿收口）。
+ * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
+ *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
+ *   → 语法高亮 --hl-*（浅深成对）。见 docs/unified-variables.md。
+ * ============================================================ */
+
+/* ============================================================
+ * 📐 L2/L3 单值常量区 —— :root 声明一次，不随浅深变化
+ *   L3 功能旋钮：--mdvr-mm 间距倍率（休眠，供 calc 派生）
+ *   L2 排版/形状：行高/段距/字号/圆角/边框/内距/阴影/滚动条/焦点
+ *   字体栈 + 浅深同值的硬编码色（可独立调）
+ * ============================================================ */
+:root {
+  /* ===== L3 功能旋钮 ===== */
+  --mdvr-mm: 2;
+
+  /* ===== L2 文本节奏 ===== */
+  --mdvr-lineheight-body: 1.6;
+  --mdvr-lineheight-list: 1.65;
+  --mdvr-lineheight-heading: 1.25;
+  --mdvr-lineheight-code: 1.45;
+  --mdvr-para-gap: 0.45em;
+  --mdvr-para-letterspacing: 0.01em;
+  --mdvr-heading-gap-top: 1.7em;
+  --mdvr-heading-gap-bottom: 0.55em;
+  --mdvr-heading-letterspacing: -0.01em;
+
+  /* ===== L2 标题字号 ===== */
+  --mdvr-h1-size: 1.9em;
+  --mdvr-h2-size: 1.45em;
+  --mdvr-h3-size: 1.25em;
+  --mdvr-h4-size: 1.1em;
+  --mdvr-h5-size: 1.0em;
+  --mdvr-h6-size: 0.88em;
+
+  /* ===== L2 列表 ===== */
+  --mdvr-list-gap: 0.8em;
+  --mdvr-li-gap: 0.35em;
+  --mdvr-mark-font-size: 0.95em;
+  --mdvr-list-pad: 1.6em;        /* 顶层列表缩进（ul/ol/任务列表统一，v1.9.0） */
+  --mdvr-list-pad-nested: 1.2em; /* 嵌套列表每层缩进增量（v1.9.0 显式化） */
+
+  /* ===== L2 圆角（风格开关） ===== */
+  --mdvr-radius-card: 8px;
+  --mdvr-radius-chip: 4.5px;
+  --mdvr-radius-table: 10px;
+  --mdvr-radius-check: 4px;
+
+  /* ===== L2 边框 / 间距 / 字号 ===== */
+  --mdvr-border-code: 1px;
+  --mdvr-ribbon-code: 3.5px;
+  --mdvr-border-quote: 4px;
+  --mdvr-gap-block: 0.8em;
+  --mdvr-pad-pre: 8px 12px;
+  --mdvr-pad-code-inline: 0.15em 0.38em;
+  --mdvr-pad-cell: 0.68em 1em;
+  --mdvr-pad-quote: 0.6em 1.1em;
+  --mdvr-code-size: 0.85em;
+  --mdvr-table-size: 0.9em;
+
+  /* ===== L2 阴影（v1.11.0 起拆浅深两档，见 ① 浅色档 / ② 深色档） ===== */
+
+  /* ===== L2 滚动条 / 焦点 / 上下标 ===== */
+  --mdvr-scrollbar-size: 6px;
+  --mdvr-focus-width: 2px;
+  --mdvr-focus-offset: 3px;
+  --mdvr-supsub-size: 0.76em;
+
+  /* ===== 字体栈（L1 单值，不分浅深） ===== */
+  --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mdvr-mono: "JetBrains Mono", SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --mdvr-math-font: "KaTeX_Math", "Latin Modern Math", "Cambria Math", STIXGeneral, "Times New Roman", serif;
+
+  /* ===== 单值拆档说明（v1.11.0） =====
+   * inline-code / selection / shadow 属颜色·光影类，已拆浅深两档
+   * （见 ① 浅色档与 ② 深色档对应的「单值拆档」小节）；此处仅剩
+   * 两档通用的纯色单值 */
+  --mdvr-check-mark: #FFFFFF;              /* 复选框对勾色（浅深通用：白勾两端均成立） */
+}
+
+/* ------------------------------------------------------------
+ * ① 浅色档 —— 燕麦古宣（Oat Rice Paper）
+ * ⚠️ 浅色分界色注意：边框/分层底 vs 背景的对比是灰阶差显示器的重灾区
+ *    （WCAG 1.4.11 非文本 ≥3:1；宣纸暖调审美受约束时至少 ≥2:1 肉眼可辨）。
+ *    v1.13.4 已把 border-l1/l2 提到 2.09/2.59:1（居 2:1 之上的犟档）；新配色分界色先过对比再发布，勿直接加深共用 token。
+ * ---------------------------------------------------------- */
+body {
+  /* ===== 13 个全局 token（平台固定名单） ===== */
+  --dsw-alias-bg-base: #FAF7F2;            /* 燕麦古宣米白底色 */
+  --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
+  --dsw-alias-bg-layer-2: #F2ECE4;         /* 代码块/嵌套表面 */
+  --dsw-alias-bg-overlay: #FFFFFF;         /* 浮层面板 */
+  --dsw-alias-border-l1: #C1AA90;          /* 主边框（v1.13.4 提对比 1.30→2.09:1） */
+  --dsw-alias-border-l2: #AF9783;          /* 次边框（v1.13.4 提对比 1.60→2.59:1） */
+  --dsw-alias-brand-primary: #B23D35;      /* 品牌主色：矿物朱砂 */
+  --dsw-alias-label-primary: #24201D;      /* 主文字：深松烟焦墨 */
+  --dsw-alias-label-secondary: #6E6862;    /* 次文字：暮霭淡墨 */
+  --dsw-alias-state-error-primary: #B23D35; /* 错误状态色 */
+  --dsw-alias-state-success-primary: #4A7A61; /* 成功状态色 */
+  --dsw-alias-state-warn-primary: #B87E3B; /* 警告状态色 */
+  --dsw-specific-sidebar-fill: #F4EFEA;    /* 侧边栏底色 */
+
+  /* ===== 标题梯度色系（L1 身份色，浅深成对） ===== */
+  --mdvr-h1: #B23D35;                      /* H1 矿物朱砂 */
+  --mdvr-h2: #4A7A61;                      /* H2 竹青苔绿 */
+  --mdvr-h3: #4E6E85;                      /* H3 远山黛蓝 */
+  --mdvr-h4: #B87E3B;                      /* H4 沉香琥珀 */
+  --mdvr-h5: #5E6D59;                      /* H5 浅松针灰 */
+  --mdvr-h6: #70757B;                      /* H6 湿石冷灰 */
+
+  /* ===== 文本排印专属色（浅色） ===== */
+  --mdvr-strong: #1A1715;                  /* 粗体：浓焦墨 */
+  --mdvr-italic: #4A7A61;                  /* 斜体：竹青 */
+  --mdvr-bold-italic: #B23D35;             /* 粗斜体：朱砂 */
+  --mdvr-link: #3B728C;                    /* 链接：霁蓝 */
+  --mdvr-link-hover: #B23D35;              /* 链接 Hover：朱砂红 */
+  --mdvr-highlight: #8A4F1D;               /* 高亮字 */
+  --mdvr-highlight-soft: #F7EBD9;          /* 高亮衬底 */
+  --mdvr-subsup: #4E6E85;                  /* 公式/上下标：黛蓝 */
+  --mdvr-del: #9C9791;                     /* 删除线 */
+
+  /* ===== 身份色：accent 系 ===== */
+  --mdvr-accent: #B23D35;                  /* 主强调色 */
+  --mdvr-accent-text: #8C2922;             /* tint 面强调字 */
+  --mdvr-accent-soft: #F9EBEA;             /* 强调衬底（12% tint） */
+  --mdvr-accent-faint: #DDA29E;            /* 45% 预混 */
+  --mdvr-accent-fainter: #EECAC7;          /* 30% 预混 */
+  --mdvr-accent-rgb: 178, 61, 53;          /* accent RGB 三元组（光晕派生） */
+
+  /* ===== 身份色：组件系 ===== */
+  --mdvr-quote-border: #B23D35;            /* 引用边条 */
+  --mdvr-quote-bg: #F7F0ED;                /* 引用衬底 */
+  --mdvr-code-border: #C0988D;             /* 行内代码描边（v1.13.4 提对比：胶囊边 1.34→2.20:1） */
+  --mdvr-table-head-bg: #F5EAE8;           /* 表头背景 */
+  --mdvr-table-head-text: #7A241E;         /* 表头文字 */
+
+  /* ===== 列表统一色阶 ===== */
+  --mdvr-bullet-l1: #B23D35;               /* 1级：朱砂红 (同步 H1) */
+  --mdvr-bullet-l2: #4E6E85;               /* 2级：黛蓝 (同步 H3) */
+  --mdvr-bullet-l3: #4A7A61;               /* 3级：竹青 (同步 H2) */
+  --mdvr-checkbox-checked: #B23D35;        /* 勾选框激活色 */
+
+  /* ===== 语法高亮体系（浅色） ===== */
+  --hl-keyword: #4E6E85;                   /* 关键字：黛蓝 */
+  --hl-string: #4A7A61;                    /* 字符串：竹青 */
+  --hl-number: #B87E3B;                    /* 数值/布尔：沉香 */
+  --hl-property: #9C5B42;                  /* 属性/键：陶土褐 */
+  --hl-function: #B23D35;                  /* 函数：朱砂 */
+  --hl-comment: #8A857F;                   /* 注释：松烟灰 */
+
+  /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆浅色档） ===== */
+  --mdvr-inline-code-bg: #F2ECE4;          /* 行内代码底（浅档：燕麦古宣） */
+  --mdvr-inline-code-text: #8C2922;        /* 行内代码字（浅档：深朱砂墨） */
+  --mdvr-selection-bg: rgba(178, 61, 53, 0.35); /* 选区底（半透明矿物朱砂） */
+  --mdvr-selection-text: #8C2922;          /* 选区字（浅档：深朱砂墨，AA≈8.0:1） */
+  --mdvr-shadow-code-inline: 0 1px 2px rgba(78, 110, 133, 0.35); /* 行内代码阴影（黛蓝 tint） */
+  --mdvr-shadow-kbd: 0 2px 4px rgba(78, 110, 133, 0.3);         /* kbd 阴影（黛蓝 tint） */
+  --mdvr-shadow-img-drop: 0 8px 20px rgba(78, 110, 133, 0.25);  /* 图片投影（黛蓝 tint，弱于深档） */
+}
+
+/* ------------------------------------------------------------
+ * ② 深色档 —— 松烟墨黛（Pine Smoke & Ink）
+ *   选择器：body[data-ds-dark-theme]
+ * ---------------------------------------------------------- */
+body[data-ds-dark-theme] {
+  /* ===== 13 个全局 token（松烟深黑水墨底） ===== */
+  --dsw-alias-bg-base: #141618;            /* 应用底色：松烟深墨冷黑 */
+  --dsw-alias-bg-layer-1: #1B1E21;         /* 卡片抬升：墨核层级表面 */
+  --dsw-alias-bg-layer-2: #101214;         /* 代码块深度嵌套：纯净墨底 */
+  --dsw-alias-bg-overlay: #23272B;         /* 浮层面板 */
+  --dsw-alias-border-l1: #2B3036;          /* 主边框：石板深灰 */
+  --dsw-alias-border-l2: #3E454D;          /* 次边框：暮云冷灰 */
+  --dsw-alias-brand-primary: #C34A42;      /* 品牌主色：矿物朱砂 */
+  --dsw-alias-label-primary: #D8D6D0;      /* 主文字：宣纸冷白 */
+  --dsw-alias-label-secondary: #8B9096;    /* 次文字：暮雨冷灰 */
+  --dsw-alias-state-error-primary: #C34A42; /* 错误：朱砂红 */
+  --dsw-alias-state-success-primary: #5E8B72; /* 成功：竹青绿 */
+  --dsw-alias-state-warn-primary: #C99355; /* 警告：沉香金 */
+  --dsw-specific-sidebar-fill: #101214;    /* 侧栏：深邃纯墨 */
+
+  /* ===== 标题梯度色系（深色） ===== */
+  --mdvr-h1: #D2584E;                      /* H1 矿物朱砂红 */
+  --mdvr-h2: #7AA68F;                      /* H2 竹青苔绿 */
+  --mdvr-h3: #7592A8;                      /* H3 远山黛蓝 */
+  --mdvr-h4: #D39E62;                      /* H4 琥珀古宣 */
+  --mdvr-h5: #8C9987;                      /* H5 浅松针灰 */
+  --mdvr-h6: #70757B;                      /* H6 湿石冷灰 */
+
+  /* ===== 文本排印专属色（深色） ===== */
+  --mdvr-strong: #E6D7B8;                  /* 粗体：泥金温润白 */
+  --mdvr-italic: #A3B899;                  /* 斜体：苍艾绿 */
+  --mdvr-bold-italic: #D2584E;             /* 粗斜体：绯红朱砂 */
+  --mdvr-link: #82AAB8;                    /* 链接：晴岚青 */
+  --mdvr-link-hover: #D2584E;              /* 链接 Hover：朱砂红 */
+  --mdvr-highlight: #F5D399;               /* 高亮字 */
+  --mdvr-highlight-soft: #38291F;          /* 高亮衬底 */
+  --mdvr-subsup: #88A6B8;                  /* 上下标/公式符号：黛蓝冷玉 */
+  --mdvr-del: #5C6269;                     /* 删除线：松烟冷灰 */
+
+  /* ===== 身份色：accent 系（深色） ===== */
+  --mdvr-accent: #C34A42;                  /* 主强调色 */
+  --mdvr-accent-text: #E57368;             /* tint 面强调字 */
+  --mdvr-accent-soft: #291B1A;             /* 强调衬底（14% tint） */
+  --mdvr-accent-faint: #5E2A27;            /* 45% 预混 */
+  --mdvr-accent-fainter: #3E1E1C;          /* 30% 预混 */
+  --mdvr-accent-rgb: 195, 74, 66;          /* accent RGB 三元组（光晕派生） */
+
+  /* ===== 身份色：组件系（深色） ===== */
+  --mdvr-quote-border: #C34A42;            /* 引用边条 */
+  --mdvr-quote-bg: #1C1919;                /* 引用衬底 */
+  --mdvr-code-border: #442F2D;             /* 行内代码晶透描边 */
+  --mdvr-table-head-bg: #201D1E;           /* 表头轻质背景 */
+  --mdvr-table-head-text: #E57368;         /* 表头文字 */
+
+  /* ===== 列表统一色阶（深色） ===== */
+  --mdvr-bullet-l1: #C34A42;               /* 1级：朱砂红 (同步 H1) */
+  --mdvr-bullet-l2: #7592A8;               /* 2级：黛蓝 (同步 H3) */
+  --mdvr-bullet-l3: #7AA68F;               /* 3级：竹青 (同步 H2) */
+  --mdvr-checkbox-checked: #C34A42;        /* 勾选框激活色 */
+
+  /* ===== 松烟墨黛·极客文人语法高亮（深色） ===== */
+  --hl-keyword: #82AAB8;                   /* 关键字：晴岚青 */
+  --hl-string: #7AA68F;                    /* 字符串：竹青苔绿 */
+  --hl-number: #D39E62;                    /* 数字/布尔：琥珀金 */
+  --hl-property: #C9886E;                  /* 属性/键：陶土褐 */
+  --hl-function: #C34A42;                  /* 函数名：朱砂红 */
+  --hl-comment: #5C6269;                   /* 注释：松烟冷灰 */
+
+  /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆深色档） ===== */
+  --mdvr-inline-code-bg: #0E1113;          /* 行内代码底（深档：纯墨签名） */
+  --mdvr-inline-code-text: #E57368;        /* 行内代码字（深档：朱砂亮红） */
+  --mdvr-selection-bg: rgba(195, 74, 66, 0.4); /* 选区底（矿物朱砂 tint，微强于浅档） */
+  --mdvr-selection-text: #E6D7B8;          /* 选区字（深档：泥金宣纸白） */
+  --mdvr-shadow-code-inline: 0 1px 2px rgba(0, 0, 0, 0.45); /* 行内代码阴影（深档加深） */
+  --mdvr-shadow-kbd: 0 2px 4px rgba(0, 0, 0, 0.45);         /* kbd 阴影（深档加深） */
+  --mdvr-shadow-img-drop: 0 8px 20px rgba(0, 0, 0, 0.45);   /* 图片投影（深档加深） */
+}
+
+/* ============================================================
+ * ③ 元素级精细定制（:where() 包选择器，零优先级兜底）
+ *   为什么需要 !important：产品对对话 Markdown 有显式样式
+ *   （._markdown_* 类规则，特异性 ≥ (0,2,x)，实测见
+ *   @deepseek-ai/dsh-web-frontend/dist/assets/index-*.css）。
+ *   :where() 特异性归零后必然输给产品，因此主题身份属性必须
+ *   用 !important 取胜（与源主题一致，保证视觉与原版完全一致）。
+ *   整改（docs/diagnosis-velvet-native-leak.md）：
+ *   - 删除臆测产品类名（.dsw-code-block/.markdown-body 等），
+ *     代码块只余真实类名 .md-code-block + 裸 pre 兜底
+ *   - 复选框收敛到任务列表（不再全站重绘）
+ *   - 移除 KaTeX 显示块强制重排与子树透明化（仅留内联公式配色）
+ *   - 去重弱/强双份规则
+ * v1.10.0 三层作用域体系：0 全站通用（body 字体/基色走变量共享）/
+ *   1 仅 markdown（全部 [class*="_markdown_"] 前缀）/ 2 全局签名（选区/滚动条/焦点环）
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * 0. 全站通用（第 0 层，仅此层作用于全站——走变量共享）
+ *    body 字体栈/基色：UI 与 markdown 共用同一变量（--mdvr-sans、
+ *    --dsw-alias-label-primary）；markdown 装饰类不再全站泄漏
+ * ---------------------------------------------------------- */
+body {
+  font-family: var(--mdvr-sans);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* ------------------------------------------------------------
+ * 1. 标题系统：紧凑有力的高级节奏（混排签名，v1.10.0 起仅 markdown）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(h1, h2, h3, h4, h5, h6) {
+  line-height: var(--mdvr-lineheight-heading) !important;
+  font-weight: 700 !important;
+  margin-top: var(--mdvr-heading-gap-top) !important;
+  margin-bottom: var(--mdvr-heading-gap-bottom) !important;
+  letter-spacing: var(--mdvr-heading-letterspacing) !important;
+}
+[class*="_markdown_"] :where(h1) {
+  font-size: var(--mdvr-h1-size) !important;
+  color: var(--mdvr-h1) !important;
+  padding-bottom: 0.3em;
+  /* 签名：h1 下划线 = 45% 预混 accent（换 accent 自动跟随） */
+  border-bottom: 1.5px solid var(--mdvr-accent-faint) !important;
+}
+[class*="_markdown_"] :where(h2) { font-size: var(--mdvr-h2-size) !important; color: var(--mdvr-h2) !important; padding-bottom: 0.15em; }
+[class*="_markdown_"] :where(h3) { font-size: var(--mdvr-h3-size) !important; color: var(--mdvr-h3) !important; }
+[class*="_markdown_"] :where(h4) { font-size: var(--mdvr-h4-size) !important; color: var(--mdvr-h4) !important; }
+[class*="_markdown_"] :where(h5) { font-size: var(--mdvr-h5-size) !important; color: var(--mdvr-h5) !important; font-weight: 600 !important; }
+[class*="_markdown_"] :where(h6) {
+  font-size: var(--mdvr-h6-size) !important;
+  color: var(--mdvr-h6) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* 紧咬正文：标题后的首个块不再额外累加上间距（v1.10.0 前缀限定，
+ * 实际仅 heading+div 组生效，p/blockquote/ul/ol 被各自规则覆盖） */
+[class*="_markdown_"] :where(h1, h2, h3, h4, h5, h6) + :where(p, ul, ol, blockquote, div) {
+  margin-top: 0.2em !important;
+}
+
+/* ------------------------------------------------------------
+ * 2. 正文段落：紧凑凝练节奏（行高 1.6，段距 0.45em；v1.10.0 起仅 markdown）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(p) {
+  margin: var(--mdvr-para-gap) 0 !important;
+  line-height: var(--mdvr-lineheight-body) !important;
+  color: var(--dsw-alias-label-primary) !important;
+  letter-spacing: var(--mdvr-para-letterspacing) !important;
+}
+
+/* ------------------------------------------------------------
+ * 3. 行内修饰：粗体/斜体/粗斜体/删除线（L1 身份色；v1.10.0 起仅 markdown）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(strong, b) {
+  font-weight: 700 !important;
+  color: var(--mdvr-strong) !important;
+  letter-spacing: var(--mdvr-para-letterspacing);
+}
+[class*="_markdown_"] :where(em, i) {
+  color: var(--mdvr-italic) !important;
+  font-style: italic !important;
+  padding-inline: 0.05em;
+}
+[class*="_markdown_"] :where(strong em, em strong, b i, i b) {
+  color: var(--mdvr-bold-italic) !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  padding-inline: 0.05em;
+}
+[class*="_markdown_"] :where(del, s) {
+  color: var(--mdvr-del) !important;
+  text-decoration: line-through 1.5px var(--mdvr-accent) !important;
+  opacity: 0.65;
+}
+
+/* ------------------------------------------------------------
+ * 4. 上下标 / 行内公式：等宽粗体 + 零行高膨胀（数学排版签名；v1.10.0 起仅 markdown）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(sup, sub) {
+  font-size: var(--mdvr-supsub-size) !important;
+  line-height: 0 !important;
+  vertical-align: baseline;
+  position: relative;
+  color: var(--mdvr-subsup) !important;
+  font-weight: 700 !important;
+  font-family: var(--mdvr-mono) !important;
+  padding: 0 0.1em;
+}
+[class*="_markdown_"] :where(sup) { top: -0.45em; }
+[class*="_markdown_"] :where(sub) { bottom: -0.25em; }
+
+/* 数学变量 / 内联公式：math 字体 + 主题色（仅配色，不做显示块重排） */
+[class*="_markdown_"] :where(var) {
+  font-family: var(--mdvr-math-font);
+  font-style: italic;
+  color: var(--mdvr-subsup) !important;
+  font-weight: 700;
+  padding: 0 0.15em;
+}
+[class*="_markdown_"] :where(.katex, .MathJax, .math-inline, span.math, mjx-container) {
+  color: var(--mdvr-subsup) !important;
+  font-family: var(--mdvr-math-font);
+}
+
+/* ------------------------------------------------------------
+ * 5. 代码块：松烟墨黛缎带（左缎带 + 超紧凑头部 + 迷你胶囊按钮）
+ *    仅命中真实产品类名 .md-code-block（实测存在于 DSH 产物）；
+ *    !important：代码块内部由产品显式样式控制，必须压过才能重塑；
+ *    v1.10.0 起全部 markdown 限定（代码块属带背景装饰，不适用全站）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(.md-code-block) {
+  position: relative !important;
+  background: var(--dsw-alias-bg-layer-2) !important;
+  border: var(--mdvr-border-code) solid var(--dsw-alias-border-l1) !important;
+  border-left: var(--mdvr-ribbon-code) solid var(--mdvr-accent) !important;
+  border-radius: 0 var(--mdvr-radius-card) var(--mdvr-radius-card) 0 !important;
+  margin: var(--mdvr-gap-block) 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+/* 清除代码块内部"幽灵层"：防止内陷嵌套边框 */
+[class*="_markdown_"] :where(.md-code-block > div:not(:first-child)) {
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+/* 头部工具栏：极限压扁（28px）+ accent 微光底 */
+[class*="_markdown_"] :where(.md-code-block > div:first-child) {
+  background: rgba(var(--mdvr-accent-rgb), 0.04) !important;
+  border-bottom: 1px solid var(--dsw-alias-border-l1) !important;
+  min-height: 28px !important;
+  padding: 2px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+[class*="_markdown_"] :where(.md-code-block > div:first-child > div) {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* 语言标识：等宽大写小字号，锁定左侧 */
+[class*="_markdown_"] :where(.md-code-block > div:first-child span) {
+  color: var(--mdvr-accent) !important;
+  font-weight: 700 !important;
+  font-family: var(--mdvr-mono) !important;
+  font-size: 0.75em !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  margin-right: auto !important;
+}
+/* 复制按钮：迷你圆润胶囊，锁定右侧 */
+[class*="_markdown_"] :where(.md-code-block button) {
+  margin-left: auto !important;
+  padding: 0 8px !important;
+  height: 18px !important;
+  font-size: 0.75em !important;
+  font-family: var(--mdvr-sans) !important;
+  color: var(--dsw-alias-label-secondary) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 20px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+[class*="_markdown_"] :where(.md-code-block button:hover) {
+  color: var(--mdvr-accent) !important;
+  background: rgba(var(--mdvr-accent-rgb), 0.12) !important;
+  box-shadow: 0 0 6px rgba(var(--mdvr-accent-rgb), 0.15) !important;
+}
+/* 代码主体 pre：内距收紧 + 紧凑行高（容器内，强规格） */
+[class*="_markdown_"] :where(.md-code-block pre) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: var(--mdvr-pad-pre) !important;
+  box-shadow: none !important;
+  overflow-x: auto !important;
+  font-family: var(--mdvr-mono) !important;
+  font-size: var(--mdvr-code-size) !important;
+  line-height: var(--mdvr-lineheight-code) !important;
+  font-variant-ligatures: normal;
+  tab-size: 2;
+}
+/* 裸 pre 兜底：孤立代码块也获得松烟墨黛缎带观感（v1.10.0 起 markdown 限定、
+ * 降为无 !important 的兜底皮肤，产品显式 pre 样式优先）。
+ * 原 body > pre 死规则已废除——旧规则被上方容器 pre 的 !important 压制从未生效 */
+[class*="_markdown_"] :where(pre) {
+  background: var(--dsw-alias-bg-layer-2);
+  border: var(--mdvr-border-code) solid var(--dsw-alias-border-l1);
+  border-left: var(--mdvr-ribbon-code) solid var(--mdvr-accent);
+  border-radius: 0 var(--mdvr-radius-card) var(--mdvr-radius-card) 0;
+  margin: var(--mdvr-gap-block) 0;
+  padding: var(--mdvr-pad-pre);
+}
+[class*="_markdown_"] :where(pre code) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--dsw-alias-label-primary) !important;
+  font-size: inherit !important;
+  font-weight: normal !important;
+  white-space: pre !important;
+}
+
+/* ------------------------------------------------------------
+ * 6. 代码语法高亮（Prism / Highlight.js / Shiki 通用，--hl-* 成对；
+ *    v1.10.0 起 markdown 限定，防产品对话外复用同一高亮库被连带换肤）
+ *    !important：高亮 token 由产品/高亮库显式着色，必须压过
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(.token.keyword, .hljs-keyword, .token.tag, .hljs-tag) {
+  color: var(--hl-keyword) !important;
+  font-weight: 600;
+}
+[class*="_markdown_"] :where(.token.string, .hljs-string, .token.char, .hljs-symbol) {
+  color: var(--hl-string) !important;
+}
+[class*="_markdown_"] :where(.token.number, .hljs-number, .token.boolean, .hljs-literal, .token.constant) {
+  color: var(--hl-number) !important;
+}
+[class*="_markdown_"] :where(.token.property, .hljs-attr, .token.attr-name, .token.key) {
+  color: var(--hl-property) !important;
+}
+[class*="_markdown_"] :where(.token.function, .hljs-function, .token.class-name, .hljs-title) {
+  color: var(--hl-function) !important;
+}
+[class*="_markdown_"] :where(.token.comment, .hljs-comment, .token.prolog, .token.doctype) {
+  color: var(--hl-comment) !important;
+  font-style: italic !important;
+}
+[class*="_markdown_"] :where(.token.operator, .hljs-operator, .token.punctuation, .hljs-punctuation) {
+  color: var(--dsw-alias-label-secondary) !important;
+}
+
+/* ------------------------------------------------------------
+ * 7. 行内代码：晶透胶囊（燕麦古宣底 + 朱砂墨字，零行高膨胀签名；
+ *    v1.10.0 起仅 markdown——带背景的内联块不适用全站）
+ *    !important：产品 :not(pre)>code 显式规则（inline-flex 等），
+ *    必须压过才能回到纯流式行内克隆
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(code:not(pre code), samp) {
+  font-family: var(--mdvr-mono);
+  font-size: var(--mdvr-code-size) !important;
+  /* 纯流式行内克隆：绝对不产生任何上下跳动 */
+  display: inline !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
+  padding: var(--mdvr-pad-code-inline) !important;
+  margin: 0 0.15em !important;
+  vertical-align: baseline !important;
+  line-height: inherit !important;
+  /* 经典原版视觉（单值变量，可独立调） */
+  background: var(--mdvr-inline-code-bg) !important;
+  color: var(--mdvr-inline-code-text) !important;
+  border: var(--mdvr-border-code) solid var(--mdvr-code-border) !important;
+  border-radius: var(--mdvr-radius-chip) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--mdvr-shadow-code-inline) !important;
+  white-space: break-spaces;
+}
+
+/* 键盘键帽：low-key 胶囊（v1.10.0 起仅 markdown，UI 快捷键提示不再被换肤） */
+[class*="_markdown_"] :where(kbd) {
+  font-family: var(--mdvr-mono);
+  font-size: 0.82em !important;
+  display: inline !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
+  padding: 0.12em 0.4em !important;
+  margin: 0 0.15em !important;
+  vertical-align: baseline !important;
+  line-height: inherit !important;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  border: var(--mdvr-border-code) solid var(--dsw-alias-border-l2);
+  border-bottom: 2px solid var(--mdvr-accent-faint);
+  border-radius: var(--mdvr-radius-chip);
+  box-shadow: var(--mdvr-shadow-kbd);
+}
+
+/* ------------------------------------------------------------
+ * 8. 表格：现代卡片式（Linear / Notion 极简风；v1.10.0 起仅 markdown）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(table) {
+  display: table !important;
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  margin: 1.1em 0 !important;
+  border-radius: var(--mdvr-radius-table) !important;
+  border: var(--mdvr-border-code) solid var(--dsw-alias-border-l1) !important;
+  background: var(--dsw-alias-bg-layer-1) !important;
+  overflow: hidden !important;
+  font-size: var(--mdvr-table-size) !important;
+}
+[class*="_markdown_"] :where(th, td) {
+  padding: var(--mdvr-pad-cell) !important;
+  vertical-align: middle !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--dsw-alias-border-l1) !important;
+}
+[class*="_markdown_"] :where(th) {
+  background: var(--mdvr-table-head-bg) !important;
+  color: var(--mdvr-table-head-text) !important;
+  font-weight: 700 !important;
+  border-bottom: 1.5px solid var(--dsw-alias-border-l2) !important;
+  letter-spacing: 0.02em;
+}
+[class*="_markdown_"] :where(tr:last-child td) { border-bottom: none !important; }
+[class*="_markdown_"] :where(tbody tr:hover) { background: rgba(var(--mdvr-accent-rgb), 0.04) !important; }
+
+/* ------------------------------------------------------------
+ * 9. 列表：原生符号 + 分层着色（::marker，不做伪元素图形）
+ *    v1.9.0 起基座/嵌套/缩进全部 markdown 限定（哨兵说明同下）；
+ *    !important：产品 ._markdown_ li::marker 显式着色必须压过；
+ *    ::before 屏蔽防御骨架可能注入的伪元素符号（破折号等）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(ul > li::before, ol > li::before) {
+  content: none !important;
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+/* 列表基座：容器间距 + 文字色（仅 markdown 对话内容） */
+[class*="_markdown_"] :where(ul, ol) {
+  margin: var(--mdvr-list-gap) 0 !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+[class*="_markdown_"] :where(li) {
+  margin: var(--mdvr-li-gap) 0 !important;
+  line-height: var(--mdvr-lineheight-list) !important;
+}
+[class*="_markdown_"] :where(li p:first-child) { display: inline !important; }
+/* 嵌套列表：每层固定增量（v1.9.0 起显式化；v1.8.0 曾回归原生缩进，现配顶层
+ * token 实现整体对齐；产品对嵌套 ol 的 inside 定位不影响 padding 生效） */
+[class*="_markdown_"] :where(li > ul, li > ol) {
+  margin: 0.2em 0 0.3em !important;
+  padding-left: var(--mdvr-list-pad-nested) !important;
+}
+/* 无序符号分层着色（原生 disc，仅改 marker 颜色；随 h1/h3/h5 同步）
+ * 作用域收敛 v2：[class*="_markdown_"] = 产品对话 Markdown 容器的 CSS Modules
+ * 稳定子串（哈希跨构建会变、"_markdown_" 前缀不变，实测构建产物中唯一）。
+ * 规则仅命中 markdown 对话内容，设置面板等 UI 列表不再被波及；
+ * 若产品未来改名则失配 → 安全退化为原生观感，无破坏 */
+[class*="_markdown_"] :where(ul > li)::marker {
+  color: var(--mdvr-bullet-l1) !important;
+  font-size: var(--mdvr-mark-font-size) !important;
+}
+[class*="_markdown_"] :where(ul > li > ul > li)::marker {
+  color: var(--mdvr-bullet-l2) !important;
+}
+[class*="_markdown_"] :where(ul > li > ul > li > ul > li)::marker {
+  color: var(--mdvr-bullet-l3) !important;
+}
+/* 有序符号分层着色（原生 decimal，等宽数字）
+ * 作用域收敛 v2：仅 markdown 对话内容生效（哨兵说明同上）
+ * 溢出控制：① 数字 0.82em 无加粗收窄 ② 顶层 ol 缩进统一为
+ * --mdvr-list-pad（1.6em，见段末）——等宽 "10."≈23.6px 放得下，三位数擦边可接受 */
+[class*="_markdown_"] :where(ol > li)::marker {
+  color: var(--mdvr-bullet-l1) !important;
+  font-family: var(--mdvr-mono) !important;
+  font-size: 0.82em !important;
+}
+[class*="_markdown_"] :where(ol > li > ol > li)::marker {
+  color: var(--mdvr-bullet-l2) !important;
+  font-family: var(--mdvr-mono) !important;
+  font-size: 0.82em !important;
+}
+[class*="_markdown_"] :where(ol > li > ol > li > ol > li)::marker {
+  color: var(--mdvr-bullet-l3) !important;
+  font-family: var(--mdvr-mono) !important;
+  font-size: 0.82em !important;
+}
+/* 顶层列表缩进统一：产品兜底 18px 与任务列表 0.8em 互相错位（12.8/18/38.4px），
+ * v1.9.0 起 ul/ol/任务列表同值 --mdvr-list-pad；:not(li) > ul/ol 不碰嵌套列表
+ * （嵌套走 --mdvr-list-pad-nested 增量）；!important 压产品的 padding-left:18px */
+[class*="_markdown_"] :where(:not(li) > ul, :not(li) > ol) {
+  padding-left: var(--mdvr-list-pad) !important;
+}
+
+/* ------------------------------------------------------------
+ * 10. 任务清单：松烟朱砂复选框
+ *     v1.9.0 起全部 markdown 限定（UI checkbox 不再被重绘）；
+ *     顶层缩进并入 §9 统一 token（:not(li) > ul 已覆盖），原 0.8em 移除
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(li.task-list-item, li:has(input[type="checkbox"])) {
+  list-style-type: none !important;
+}
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"],
+       li.task-list-item input[type="checkbox"]) {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 15px !important;
+  height: 15px !important;
+  margin: 0 0.5em 0 0 !important;
+  vertical-align: middle !important;
+  border-radius: var(--mdvr-radius-check) !important;
+  background: var(--dsw-alias-bg-layer-2) !important;
+  border: 1.5px solid var(--dsw-alias-border-l2) !important;
+  cursor: pointer !important;
+  display: inline-grid !important;
+  place-content: center !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+}
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:hover,
+       li.task-list-item input[type="checkbox"]:hover) {
+  border-color: var(--mdvr-accent) !important;
+  background: rgba(var(--mdvr-accent-rgb), 0.08) !important;
+  box-shadow: 0 0 6px rgba(var(--mdvr-accent-rgb), 0.2) !important;
+}
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:checked,
+       li.task-list-item input[type="checkbox"]:checked) {
+  background: var(--mdvr-checkbox-checked) !important;
+  border-color: var(--mdvr-checkbox-checked) !important;
+  box-shadow: 0 0 8px rgba(var(--mdvr-accent-rgb), 0.45) !important;
+}
+[class*="_markdown_"] :where(ul.contains-task-list input[type="checkbox"]:checked)::after,
+[class*="_markdown_"] :where(li.task-list-item input[type="checkbox"]:checked)::after {
+  content: "" !important;
+  width: 8px !important;
+  height: 4.5px !important;
+  border-left: 2px solid var(--mdvr-check-mark) !important;
+  border-bottom: 2px solid var(--mdvr-check-mark) !important;
+  transform: rotate(-45deg) translate(0.5px, -0.5px) !important;
+}
+/* 完成态文字自然降级 */
+[class*="_markdown_"] :where(li:has(input[type="checkbox"]:checked)) {
+  color: var(--dsw-alias-label-secondary) !important;
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------
+ * 11. 引用块：左边条 + tint 衬底（L1 身份色；v1.10.0 起仅 markdown——
+ *      带背景衬底的块不适用全站）
+ *     !important：产品 ._markdown_ blockquote 显式样式必须压过
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(blockquote) {
+  margin: 1.1em 0 !important;
+  padding: var(--mdvr-pad-quote) !important;
+  border-left: var(--mdvr-border-quote) solid var(--mdvr-quote-border) !important;
+  border-radius: 0 10px 10px 0 !important;
+  background: var(--mdvr-quote-bg) !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+[class*="_markdown_"] :where(blockquote p:first-child) { margin-top: 0 !important; }
+[class*="_markdown_"] :where(blockquote p:last-child) { margin-bottom: 0 !important; }
+[class*="_markdown_"] :where(blockquote blockquote) {
+  margin: 0.5em 0;
+  border-left-color: var(--mdvr-h3);
+  background: var(--mdvr-accent-soft);
+}
+
+/* ------------------------------------------------------------
+ * 12. 分割线 / 链接 / 图片（v1.10.0 起仅 markdown——身份色装饰不强加 UI）
+ * ---------------------------------------------------------- */
+[class*="_markdown_"] :where(hr) {
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, var(--mdvr-accent-faint), transparent) !important;
+  margin: 1.8em 0 !important;
+}
+[class*="_markdown_"] :where(a) {
+  color: var(--mdvr-link) !important;
+  text-decoration: none !important;
+  border-bottom: 1.5px solid transparent !important;
+  transition: all 0.2s ease !important;
+}
+[class*="_markdown_"] :where(a:hover) {
+  color: var(--mdvr-link-hover) !important;
+  border-bottom-color: var(--mdvr-link-hover) !important;
+  text-decoration: none !important;
+}
+[class*="_markdown_"] :where(img) {
+  max-width: 100%;
+  border-radius: var(--mdvr-radius-table);
+  box-shadow: 0 0 0 1px var(--dsw-alias-border-l1), var(--mdvr-shadow-img-drop);
+}
+
+/* ------------------------------------------------------------
+ * 13. 扩展定制：选区 / 滚动条 / 键盘焦点环（主题签名，第 2 层全局——
+ *     刻意保持全站生效，勿收口 markdown）
+ * ---------------------------------------------------------- */
+::selection {
+  background: var(--mdvr-selection-bg) !important;
+  color: var(--mdvr-selection-text) !important;
+}
+::-webkit-scrollbar { width: var(--mdvr-scrollbar-size); height: var(--mdvr-scrollbar-size); }
+::-webkit-scrollbar-thumb {
+  background: var(--mdvr-accent-faint);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--mdvr-accent); }
+::-webkit-scrollbar-track { background: transparent; }
+:where(a:focus-visible, input:focus-visible) {
+  outline: var(--mdvr-focus-width) solid var(--mdvr-accent) !important;
+  outline-offset: var(--mdvr-focus-offset) !important;
+}

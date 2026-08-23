@@ -169,12 +169,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.13.3',
+  version: '1.13.4',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '色卡双档化：主题卡色板改两行——上行=浅色档 4 色（底色/抬升面/品牌/强调）、下行=深色档 4 色；用户主题从 CSS 首次/末次出现提取，内置与系统卡硬编码双档样本；两行高度与右侧名称+描述对齐',
+    '新增 3 个内置主题：旧用户主题 Cyber-Titanium（钛影）/ High-Vis-Clarity（高清晰）/ Pine-Smoke-Ink（松烟墨黛）按猛男粉规范升级内置——结构/99 变量名单/三层作用域逐项对齐，浅档分界色提对比 ≥2.1:1；THEME_META 注册显示名与双档色卡',
   ],
 }
 

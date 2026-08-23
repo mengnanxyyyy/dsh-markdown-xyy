@@ -72,9 +72,14 @@ body[data-ds-dark-theme] { ... }
 
 ## 四、内置主题
 
+> v1.13.4 起内置主题 4 个：三个旧用户主题按猛男粉规范升级内置（结构/99 变量名单/三层作用域逐项对齐，仅身份配色不同）；「草莓猛男粉 = 标准」参考实现。
+
 | 文件 | 名称 | 风格 |
 | --- | --- | --- |
 | `plugin/assets/themes/strawberry-mocha.css` | 草莓猛男粉 | 丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量（全变量化参考实现，变量分层见 `docs/unified-variables.md`） |
+| `plugin/assets/themes/Cyber-Titanium-native.css` | Cyber Titanium · 钛影 | 2026 Mac 极客：Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银 |
+| `plugin/assets/themes/High-Vis-Clarity-native.css` | High-Vis Clarity · 高清晰 | 旧显示器/低色域友好：高反差冷白 × 强辨识纯天蓝 × 黄金重点（border ≥2.2:1） |
+| `plugin/assets/themes/Pine-Smoke-Ink-native.css` | 松烟墨黛 | 2026 中文文人：徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白 |
 
 > v1.7.0 起内置主题仅保留草莓猛男粉；早期纯配色主题 lobeui-emphasis / inkpaper / qingci 已移除（历史在 git）。
 

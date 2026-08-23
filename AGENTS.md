@@ -11,7 +11,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 🔒 主题铁律（最重要）
 
 1. **主题必须是 CSS 文件（v1.2.0 起全部资产文件化，运行时由 Host 读取）**：
-   - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；v1.7.0 起仅保留 `strawberry-mocha.css`，lobeui-emphasis/inkpaper/qingci 已移除，历史在 git）
+   - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；**v1.13.4 起 4 个**：`strawberry-mocha` 草莓猛男粉（标准参考）+ 按同规范升级的 `Cyber-Titanium-native` 钛影 / `High-Vis-Clarity-native` 高清晰 / `Pine-Smoke-Ink-native` 松烟墨黛；lobeui-emphasis/inkpaper/qingci 已移除、v1.7.0 曾精简为单一主题，历史在 git）
    - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，仅作新建回退）/ `themes/strawberry-mocha.css`（内置主题，兼作项目根探测哨兵之一）。排版骨架 `typography.css` 已随 v1.8.0 删除；**独立模板 `template-strawberry.css` 已随 v1.12.0 删除**（新建用户主题默认取内置主题内容，见铁律 5）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
    - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
@@ -69,7 +69,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-23）
 
-- 最新版本：v1.13.3（色卡双档化：主题卡色板上行=浅档 4 色、下行=深档 4 色；用户主题按首次/末次出现提取，内置/系统硬编码双档样本；两行与名称+描述对齐）
+- 最新版本：v1.13.4（内置主题扩军：三旧用户主题按猛男粉规范 100% 复刻升级内置——钛影/高清晰/墨黛，99 变量名单+三层作用域逐项对齐、浅档分界色 ≥2.1:1；THEME_META 注册显示名/双档色卡；内置 1→4）
+- v1.13.3（历史归档，tag 在 v1.13.3）：色卡双档化（上行浅档 4 色/下行深档 4 色，用户主题首次/末次出现提取）
 - v1.13.2（历史归档，tag 在 v1.13.2）：内置主题卡恢复与用户主题同构（色板+名称无描述行），系统自带并栏保留 DSH 色板
 - v1.13.1（历史归档，tag 在 v1.13.1）：系统自带并入「内置主题」栏（曾误为纯名称卡，v1.13.2 修正）
 - v1.13.0（历史归档，tag 在 v1.13.0）：设置页统一（内置/用户主题卡片同构）+ 外观 ☀️/🌙/🖥️ 对任意主题可用（自带浅深两档即跟随切换）；清理「无深浅之分·按钮禁用」旧说法
@@ -82,8 +83,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - v1.6.0（历史归档，tag 在 93801f6）：内置主题目录内聚 `plugin/assets/themes/*.css`（随 `plugin/` 打包即携带；Host 优先读 assets、旧 `themes/` 兼容回退）
 - v1.5.0（历史归档，tag 在 c13cdf2）：新增模板资产 `plugin/assets/template-strawberry.css`（新建用户主题默认模板）+ 修复内置主题列表 ~16KB 通道截断（改分块拉取）
 - v1.4.0（历史归档，tag 在 1e7bab9）：新增内置主题「草莓猛男粉」`plugin/assets/themes/strawberry-mocha.css`——第三方 Velvet-Strawberry-Mocha-v2-native-var 内置化，全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量；元素段按 `docs/diagnosis-velvet-native-leak.md` 整改；统一变量契约盘点 `docs/unified-variables.md`
-- 选择：`system-native`（系统自带，默认）/ 内置 `strawberry-mocha`（草莓猛男粉，v1.7.0 起唯一内置）/ 用户主题 `user:<id>`
-- 内置主题变量分层（v1.4.0 统一契约）：L0 平台 token（13 固定）→ L1 身份色（`--mdvr-*`/`--hl-*` 浅深成对，两档 body）→ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（`:root` 单值）。`strawberry-mocha` 是唯一内置主题，带完整 ③ 元素段（近 80 条规则、全量消费变量）；其余曾内置的 lobeui/inkpaper/qingci（早期纯配色）已移除
+- 选择：`system-native`（系统自带，默认）/ 内置 4 个（`strawberry-mocha` 草莓猛男粉 = 标准参考；v1.13.4 起 + `Cyber-Titanium-native` 钛影 + `High-Vis-Clarity-native` 高清晰 + `Pine-Smoke-Ink-native` 松烟墨黛）/ 用户主题 `user:<id>`
+- 内置主题变量分层（v1.4.0 统一契约）：L0 平台 token（13 固定）→ L1 身份色（`--mdvr-*`/`--hl-*` 浅深成对，两档 body）→ L2 排版/形状常量 + L3 功能旋钮 + 字体栈（`:root` 单值）。`strawberry-mocha` 是标准参考实现（带完整 ③ 元素段，全量消费变量）；**v1.13.4 起另 3 个内置主题（钛影/高清晰/墨黛）按同一规范 100% 复刻（99 变量名单/三层作用域对齐，仅配色不同）**；曾内置的 lobeui/inkpaper/qingci（早期纯配色）已移除
 - 设置页：设置 → 主题设置（外观模式=持久，选择=会话级，刷新恢复 `DEFAULT_SELECTION`；用户主题区有刷新按钮 + 新建按钮 + 每卡编辑按钮；资产异步加载，就绪前显示占位；刷新失败有错误提示）
 - 注意：外观三档切换使用产品 `ctx.get('theme')` 的 `getTheme()/setTheme()`（可选服务，缺失时按钮禁用）；主题自身仍不调用 `overrideTokens`；用户主题目录由 `resolveUserThemesDir` 动态解析（shell `$HOME` → workspaceRoot 推导 → 回退 `/home/lab/.dsh/web-themes`）
 - 路线图：gfm alert / 选择持久化 / 台账落盘

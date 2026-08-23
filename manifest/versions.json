@@ -3,8 +3,19 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
-      "version": "1.13.3",
+      "version": "1.13.4",
       "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "新增 3 个内置主题（subagent 团队并行升级）：Cyber-Titanium（钛影）/ High-Vis-Clarity（高清晰）/ Pine-Smoke-Ink（松烟墨黛）——旧用户主题按猛男粉规范 100% 复刻升级：结构/99 变量名单/三层作用域/深浅拆档派生色逐项对齐（自检+独立核验零差集），浅档 border 提对比 ≥2.1:1（钛影 2.10/2.66、高清晰 2.24/2.68、墨黛 2.09/2.59，胶囊边同策略）；THEME_META 注册显示名/描述/双档色卡",
+        "内置主题 1 → 4（strawberry-mocha + 三新）；check-release 自动校验 4 主题 CSS 结构与深色挂载全通过"
+      ]
+    },
+    {
+      "version": "1.13.3",
+      "packageId": "pkg-13",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-23",
