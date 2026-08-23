@@ -169,13 +169,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '1.13.0',
+  version: '1.13.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '设置页统一：内置/用户主题卡片同构（容器 + 选择按钮，panel.css 移除 button 专用规则）；外观 ☀️/🌙/🖥️ 对任意选中主题可用（主题自带浅深两档即跟随切换）',
-    'AGENTS/themes/capabilities/template.css/example.css 清理「无深浅之分·按钮禁用」旧说法',
+    '主题设置布局：系统自带并入「内置主题」栏，内置列表仅显示名称（.mdvr-theme-main-name）',
   ],
 }
 

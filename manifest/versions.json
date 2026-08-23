@@ -3,8 +3,18 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
-      "version": "1.13.0",
+      "version": "1.13.1",
       "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-23",
+      "changes": [
+        "主题设置布局微调：系统自带并入「内置主题」一栏（去掉独立「主题」栏）；内置主题列表改为仅显示标题名称（无色板/描述，新增 .mdvr-theme-main-name 样式）"
+      ]
+    },
+    {
+      "version": "1.13.0",
+      "packageId": "pkg-10",
       "name": "LobeUI 风格 · 主题系统",
       "palette": "multi-theme-css",
       "date": "2026-08-23",

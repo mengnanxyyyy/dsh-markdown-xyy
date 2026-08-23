@@ -69,7 +69,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态（2026-08-23）
 
-- 最新版本：v1.13.0（设置页统一 + 深浅跟随：内置/用户主题卡片统一为「容器 + 选择按钮」同构样式（panel.css 移除 button 专用规则）；外观 ☀️/🌙/🖥️ 对任意选中主题可用（主题自带浅深两档即跟随系统切换）；AGENTS/themes/capabilities/template.css/example.css 清理「无深浅之分·按钮禁用」旧说法）
+- 最新版本：v1.13.1（主题设置布局：系统自带并入「内置主题」栏，内置列表仅显示名称（.mdvr-theme-main-name））
+- v1.13.0（历史归档，tag 在 v1.13.0）：设置页统一（内置/用户主题卡片同构）+ 外观 ☀️/🌙/🖥️ 对任意主题可用（自带浅深两档即跟随切换）；清理「无深浅之分·按钮禁用」旧说法
 - v1.12.0（历史归档，tag 在 v1.12.0）：模板瘦身——删除 template-strawberry.css，「🆕 新建用户主题」默认取内置主题猛男粉内容（newThemeStarter 从 builtinThemes 取 CSS）
 - v1.11.0（历史归档，tag 在 v1.11.0）：深浅模式整改——单值拆档（inline-code/selection/shadow 7 变量移入两档 body 成对定义）、选区白字浅档修复、阴影浅紫 tint/深黑 0.45、docs/unified-variables.md 分层账更新
 - v1.10.0（历史归档，tag 在 v1.10.0）：三层作用域体系——0 全站=body 字体/基色变量共享；1 元素规则全 markdown 限定 `[class*="_markdown_"]`（36 条收口）；2 selection/滚动条/焦点环保持全局签名；删 body>pre 死规则、pre 拆双规格、272 前缀化
