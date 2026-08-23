@@ -27,8 +27,9 @@
 .mdvr-theme-card:hover { border-color: var(--mdvr-accent-faint, #b4b3ed); }
 .mdvr-theme-main { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 8px 10px; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 13px; color: var(--dsw-alias-label-primary); font-family: inherit; }
 .mdvr-theme-card-active { border-color: var(--mdvr-accent, #5856d6); box-shadow: 0 0 0 1px var(--mdvr-accent, #5856d6); }
-.mdvr-theme-swatches { display: flex; gap: 4px; }
-.mdvr-theme-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--dsw-alias-border-l1); }
+.mdvr-theme-swatches { display: flex; flex-direction: column; gap: 3px; }
+.mdvr-theme-swatch-row { display: flex; gap: 3px; }
+.mdvr-theme-swatch { width: 11px; height: 11px; border-radius: 3px; border: 1px solid var(--dsw-alias-border-l1); }
 .mdvr-theme-info { display: flex; flex-direction: column; gap: 2px; }
 .mdvr-theme-name { font-weight: 650; }
 .mdvr-theme-desc { font-size: 12px; color: var(--dsw-alias-label-secondary); }

@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.13.2',
+  version: '1.13.3',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-23',
   changes: [
-    '修正 v1.13.1 误改：内置主题列表恢复与用户主题同构（色板 + 名称，仅去掉描述行；系统自带保留其 DSH 出厂色板）',
+    '色卡双档化：主题卡色板改两行——上行=浅色档 4 色（底色/抬升面/品牌/强调）、下行=深色档 4 色；用户主题从 CSS 首次/末次出现提取，内置与系统卡硬编码双档样本；两行高度与右侧名称+描述对齐',
   ],
 }
 
@@ -51,6 +51,7 @@ const THEME_META = {
     name: '草莓猛男粉',
     desc: '丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全变量化（含语法高亮）',
     swatches: ['#faf6f8', '#ffffff', '#d93b68', '#d93b68'],
+    swatchesDark: ['#1e1e2e', '#181825', '#fb7185', '#fb7185'],
   },
 }
 
@@ -234,13 +235,20 @@ async function saveUserTheme(id, css) {
   }
 }
 
-// 从主题 CSS 文本提取色板预览（浅色档 4 色：底色/抬升面/品牌色/强调色；取不到返回空）
+// v1.13.3：从主题 CSS 提取双档色板预览（各 4 色：底色/抬升面/品牌色/强调色）
+// 浅 = 首次出现（浅色档 body）、深 = 末次出现（body[data-ds-dark-theme]）；单档主题深色档回退浅色档值
 function parseThemeSwatches(css) {
   const grab = (name) => {
-    const m = css.match(new RegExp(name + '\\s*:\\s*([^;]+);'))
-    return m ? m[1].trim() : null
+    const re = new RegExp(name + '\\s*:\\s*([^;]+);', 'g')
+    const all = []
+    let m
+    while ((m = re.exec(css)) !== null) all.push(m[1].trim())
+    return all
   }
-  return [grab('--dsw-alias-bg-base'), grab('--dsw-alias-bg-layer-1'), grab('--dsw-alias-brand-primary'), grab('--mdvr-accent')].filter(Boolean)
+  const names = ['--dsw-alias-bg-base', '--dsw-alias-bg-layer-1', '--dsw-alias-brand-primary', '--mdvr-accent']
+  const light = names.map((n) => { const a = grab(n); return a[0] || null }).filter(Boolean)
+  const dark = names.map((n) => { const a = grab(n); return a.length > 1 ? a[a.length - 1] : (a[0] || null) }).filter(Boolean)
+  return { light, dark }
 }
 
 // ---------- §4 选择引擎 ----------
@@ -564,8 +572,13 @@ function ThemeSettings() {
     ['system', '🖥️ 跟随系统'],
   ]
   // 渲染 helpers（压缩重复的卡片结构）
-  const swatchRow = (colors) => React.createElement('span', { className: 'mdvr-theme-swatches' },
+  // v1.13.3：色卡两行（上=浅档 4 色 / 下=深档 4 色），行高与右侧名称+描述两行一致
+  const swatchRow = (colors) => React.createElement('span', { className: 'mdvr-theme-swatch-row' },
     colors.map((c, i) => React.createElement('span', { key: i, className: 'mdvr-theme-swatch', style: { background: c } })),
+  )
+  const swatchGrid = (light, dark) => React.createElement('span', { className: 'mdvr-theme-swatches' },
+    swatchRow(light && light.length ? light : ['#cccccc']),
+    swatchRow(dark && dark.length ? dark : (light && light.length ? light : ['#cccccc'])),
   )
   const themeInfo = (name, desc) => React.createElement('span', { className: 'mdvr-theme-info' },
     React.createElement('span', { className: 'mdvr-theme-name' }, name),
@@ -651,9 +664,9 @@ function ThemeSettings() {
     ),
     // v1.13.2：内置主题列表与用户主题同构（色板 + 名称，仅去掉描述行），系统自带并入其中
     React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '内置主题'),
-    [{ id: 'system-native', name: '系统自带', swatches: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'] }]
-      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id, swatches: meta.swatches || [] })))
-      .map(({ id, name, swatches }) => {
+    [{ id: 'system-native', name: '系统自带', light: ['#ffffff', '#f9fafb', '#0f1115', '#5686fe'], dark: ['#0f1115', '#1b1e24', '#5686fe', '#3d6df4'] }]
+      .concat(entries.map(({ id, meta }) => ({ id, name: meta.name || id, light: meta.swatches || [], dark: meta.swatchesDark || [] })))
+      .map(({ id, name, light, dark }) => {
         const selTheme = sel === id
         return React.createElement('div', {
           key: id,
@@ -665,7 +678,7 @@ function ThemeSettings() {
             'aria-pressed': selTheme,
             onClick: () => { if (applySelection(rootCtx, id)) setSel(id) },
           },
-            swatchRow(swatches),
+            swatchGrid(light, dark),
             React.createElement('span', { className: 'mdvr-theme-name' }, name + (selTheme ? ' ✓' : '')),
           ),
         )
@@ -693,7 +706,7 @@ function ThemeSettings() {
     userIds.map((id) => {
       const entry = userThemes[id]
       const selUser = sel === 'user:' + id
-      const swatches = entry ? parseThemeSwatches(entry.css) : []
+      const sw = entry ? parseThemeSwatches(entry.css) : { light: [], dark: [] }
       return React.createElement('div', {
         key: id,
         className: 'mdvr-theme-card mdvr-theme-card-editable' + (selUser ? ' mdvr-theme-card-active' : ''),
@@ -704,7 +717,7 @@ function ThemeSettings() {
           'aria-pressed': selUser,
           onClick: () => { if (applySelection(rootCtx, 'user:' + id)) setSel('user:' + id) },
         },
-          swatchRow(swatches.length ? swatches : ['#cccccc']),
+          swatchGrid(sw.light, sw.dark),
           themeInfo(id + (selUser ? ' ✓' : ''), '用户主题：~/.dsh/web-themes/' + id + '.css'),
         ),
         React.createElement('button', {
