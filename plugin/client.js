@@ -27,12 +27,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.13.5',
+  version: '1.15.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-23',
+  date: '2026-08-29',
   changes: [
-    '内置主题卡恢复显示描述行（与用户卡同构：双行色板 + 名称 + 描述），THEME_META desc 全量展示；系统自带卡补充描述',
+    '对话流节点间距紧凑化（主题 §14）：产品对话流主列 gap 16px→5px（稳定锚点 [data-chat-flow]，哈希类名勿用），工具调用卡/消息等全对话流节点垂直间距收紧',
   ],
 }
 

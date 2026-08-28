@@ -789,3 +789,13 @@ body {
   outline: var(--mdvr-focus-width) solid var(--mdvr-accent) !important;
   outline-offset: var(--mdvr-focus-offset) !important;
 }
+
+/* ============================================================
+ * 14. 对话流节点间距（工具调用块之间的主间距源）
+ *     产品对话流主列 .Md3f7G_column { gap:16px }（哈希类名勿用）——
+ *     稳定属性锚点 [data-chat-flow]（仅该列持有），gap 覆盖为 5px；
+ *     影响范围：对话流全部节点（消息 / 工具调用卡 / 状态条等）之间距
+ * ============================================================ */
+[data-chat-flow] {
+  gap: 5px !important;              /* 产品 gap:16px */
+}

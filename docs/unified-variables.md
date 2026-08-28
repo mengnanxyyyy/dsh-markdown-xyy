@@ -1,6 +1,6 @@
 # 统一变量契约（Unified Variable Contract）—— v1.4.0
 
-> 盘点对象：内置主题（v1.4~v1.6 期间的 lobeui-emphasis / inkpaper / qingci / **strawberry-mocha**；**v1.7.0 起仅保留 strawberry-mocha**）+ 新建模板（`plugin/assets/template.css`）+ 完整参考主题（`~/.dsh/web-themes/example.css`）+ 面板样式（`plugin/assets/panel.css`）。
+> 盘点对象：内置主题（v1.4~v1.6 期间的 lobeui-emphasis / inkpaper / qingci / **strawberry-mocha**；**v1.7.0 起仅保留 strawberry-mocha**）+ 新建模板（`plugin/assets/template.css`）+ 完整参考主题（盘点时为 `~/.dsh/web-themes/example.css`，2026-08 用户主题清理已删除，同源留存于 `plugin/assets/template.css`）+ 面板样式（`plugin/assets/panel.css`）。
 > 触发点：v1.4.0 把第三方主题 Velvet-Strawberry-Mocha-v2-native-var.css 内置化为「草莓猛男粉」（`plugin/assets/themes/strawberry-mocha.css`）时，对全部主题/资产做了一次「哪些变量能统一」的检测与分类。
 > 结论一句话：**L0 平台 token（13 个固定名单）+ L1 身份色核心契约（17 个）是曾并存的四套内置主题共用的统一变量集（v1.7.0 起由草莓猛男粉独占承载）；L1 扩展（标题/文本/列表/`--hl-*`）+ L2 排版/形状常量 + L3 旋钮是 strawberry-mocha 的完整化演示；panel.css 只消费核心契约里的 7 个变量（全部带默认回退）。**
 > 日期：2026-08-22
@@ -146,7 +146,7 @@
 
 ## 十、维护引用（改变量名/值要动的地方）
 
-- 改核心 17 个变量之一：`panel.css` 回退值 → 内置主题 + `template.css` + `example.css`（参考主题）→ strawberry-mocha 元素段。
+- 改核心 17 个变量之一：`panel.css` 回退值 → 内置主题 + `template.css`（参考主题）→ strawberry-mocha 元素段。
 - 改 strawberry-mocha 专属变量：仅 `plugin/assets/themes/strawberry-mocha.css` + 本文档 §四~§六。
 - 新增 `--dsw-alias-*`：❌ 不允许（平台名单固定）。
 - 版本台账：`manifest/versions.json` v1.4.0 条目已登记本契约。

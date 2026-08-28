@@ -14,7 +14,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
    - 内置主题：插件目录内 `plugin/assets/themes/*.css`（v1.6.0 起内聚于此，随 `plugin/` 打包即携带；**v1.13.4 起 4 个**：`strawberry-mocha` 草莓猛男粉（标准参考）+ 按同规范升级的 `Cyber-Titanium-native` 钛影 / `High-Vis-Clarity-native` 高清晰 / `Pine-Smoke-Ink-native` 松烟墨黛；lobeui-emphasis/inkpaper/qingci 已移除、v1.7.0 曾精简为单一主题，历史在 git）
    - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）/ `template.css`（青瓷演示模板，仅作新建回退）/ `themes/strawberry-mocha.css`（内置主题，兼作项目根探测哨兵之一）。排版骨架 `typography.css` 已随 v1.8.0 删除；**独立模板 `template-strawberry.css` 已随 v1.12.0 删除**（新建用户主题默认取内置主题内容，见铁律 5）
    - 用户主题：`$HOME/.dsh/web-themes/*.css`（插件专属目录，放 CSS 即新主题，**无需打包/升级插件**）
-   - **`~/.dsh/web-themes/example.css` 是「完整参考主题」**（第三方用户手册）：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查；`plugin/assets/template.css`（新建模板）与其同源完整版。改 example.css 前先读它。
+   - **「完整参考主题」（第三方用户手册）= `plugin/assets/template.css`**：头部警告区 + 13 token/15 变量全注释影响范围 + 全部可控元素规则 + 扩展示例 + 配色速查。（原目录内副本 `~/.dsh/web-themes/example.css` 已随 2026-08 用户主题清理删除——全部旧用户主题 CSS 均已被内置主题取代，用户主题目录现仅存 README。）
    - **改文件即生效**：Host 每次经 `themes.builtin.list` / `themeAssets.get` / `themes.user.*` RPC 从文件读取；客户端在 apply 时缓存一次。
    - **⚠️ 消息通道单条上限 ~16KB（v1.2.3 分块解决，v1.3.0 全覆盖）**：页面↔宿主的 RPC 消息超过 ~16KB 会失败/静默截断——旧 `themeAssets.get` 单次返回 24KB → 设置面板错误占位（无样式）；`themes.user.save` 17KB → 文件写入被截断损坏。**所有大文本（主题/模板/资产）走分块协议**：`8000 字符/片`，get 侧 `{index} → {ok, index, total, chunk}` 循环拉取（client `fetchChunks` 校验 index/total 一致性），save 侧 client 上传 `{id, uploadId, index, total, chunk}`、host 按 uploadId 隔离缓冲、**分片全部到齐后**拼装并执行 Host 侧 CSS 校验再写盘（v1.3.0 事务化，杜绝缺片/并发混片）。**任何新的大内容 RPC 都必须分块**。
    - **CSS 语法校验（v1.2.3 client / v1.3.0 host 双端）**：保存前 `validateCss`（client 端即时反馈 + Host 写盘前强制，双端同逻辑）检测注释/字符串/花括号/圆括号闭合，错误**拒绝保存**并在编辑器状态栏显示具体原因；超过 100KB 拒绝。
