@@ -9,7 +9,7 @@
 | --- | --- |
 | 不可变版本 | 每个 Package 是一个不可变版本，`cordis_run update` 原子切换，失败可回滚到 `currentPackageId`；旧版本永不覆盖、随时可回滚 |
 | 双半分工 | Host 管「版本台账」状态与 RPC、主题资产文件读写；Client 管「主题选择 + 排版 + 面板 UI」 |
-| 不碰基线 | 主题 = CSS 文件（`plugin/assets/themes/*.css` / `$HOME/.dsh/web-themes/*.css`），经 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`；元素排版用 `:where()` 零优先级选择器做增量覆盖；永不修改产品主题注册表或 DOM 结构 |
+| 不碰基线 | 主题 = CSS 文件（`plugin/assets/themes/*.css` / `$HOME/.dsh/web-themes-xyy/*.css`），经 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`；元素排版用 `:where()` 零优先级选择器做增量覆盖；永不修改产品主题注册表或 DOM 结构 |
 | 一次迭代一个 Package | 每次改动必须追加新 Package（`cordis_define` kind: existing），绝不覆盖旧版本 |
 | 台账双写 | 插件内存台账（进程内，按 `packageId` 去重）+ `manifest/versions.json`（工作区持久态，随 git 留存） |
 
@@ -44,9 +44,9 @@
 - **内存台账** `ledger`：条目 `{pluginId, packageId, version, name, palette, date, changes}`，按 `packageId` 去重、最新在前。
 - `versions.note`：版本面板挂载时上报自身 Package 的 MANIFEST，Host 记账。
 - `versions.list`：返回 `{current, history}` 快照，供面板渲染。
-- **内置主题 / 共享资产 / 用户主题全部从文件读取**：`plugin/assets/themes/*.css`、`plugin/assets/panel.css`、`$HOME/.dsh/web-themes/*.css`（v1.17.0 起 `template.css` 已删除，新建起步改取所选内置主题内容）；改文件即生效，无需升级插件。
+- **内置主题 / 共享资产 / 用户主题全部从文件读取**：`plugin/assets/themes/*.css`、`plugin/assets/panel.css`、`$HOME/.dsh/web-themes-xyy/*.css`（v1.17.0 起 `template.css` 已删除，新建起步改取所选内置主题内容）；改文件即生效，无需升级插件。
 - **大文本分块协议**：页面↔宿主单条消息约 16KB 上限；所有大文本（主题 / 模板 / 资产）按 8000 字符/片分块传输。get 侧以 `{index, total, chunk}` 循环拉取（客户端校验 index/total 一致性，防错位拼接）；save 侧为事务化上传（uploadId 隔离并发 + 分片完整性检查 + TTL/并发上限，**全部分片到齐后**拼接），再执行 Host 侧 CSS 语法校验（注释/字符串/花括号/圆括号闭合），错误明确拒绝；单文件上限 100KB。
-- **用户主题保存显式放开沙箱**：写 `$HOME/.dsh/web-themes/<id>.css` 走 `danger-full-access` 策略（用户主动编辑自己的主题文件）。
+- **用户主题保存显式放开沙箱**：写 `$HOME/.dsh/web-themes-xyy/<id>.css` 走 `danger-full-access` 策略（用户主动编辑自己的主题文件）。
 - 只传 JSON 标量，不序列化任何 Cordis/DSH 活对象。
 
 ### 目录解析（不硬编码）
@@ -76,7 +76,7 @@ Plugin（稳定实例，pluginId）
 
 ## 6. 主题管线（文件即主题）
 
-1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes/`（用户）新建/修改 `.css`：浅色写 `body { ... }`、深色写 `body[data-ds-dark-theme] { ... }`，13 个 `--dsw-alias-*` 与 `--mdvr-*` 变量定义在文件内（契约见 `docs/variables.md`）。
+1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes-xyy/`（用户）新建/修改 `.css`：浅色写 `body { ... }`、深色写 `body[data-ds-dark-theme] { ... }`，13 个 `--dsw-alias-*` 与 `--mdvr-*` 变量定义在文件内（契约见 `docs/variables.md`）。
 2. 内置主题需要在 `plugin/src/client.core.js` 的 `THEME_META` 注册显示名/描述/双档色板，并运行 `node scripts/build-client.js`（用户主题自动出现在列表，无需注册）。
 3. 改文件后刷新页面即生效（Host 每次 RPC 从文件读取）。
 4. 需要发布新版本时按 `docs/development.md` 走完整迭代流程。

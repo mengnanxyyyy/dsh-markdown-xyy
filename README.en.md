@@ -37,7 +37,7 @@ That is exactly what this project does: a "reading-assist" theme for Markdown in
 
 - **✔️ 4 built-in themes**, each with light / dark variants; ☀️ / 🌙 / 🖥️ appearance modes follow the system
 - **✔️ Persistent theme choice**: your selected theme is remembered (localStorage) and restored after refresh, a fresh page, or a restart — and synced across open tabs in real time
-- **✔️ Drop-in user themes**: put a CSS file into `~/.dsh/web-themes/` and it becomes a theme — no packaging, no plugin upgrades
+- **✔️ Drop-in user themes**: put a CSS file into `~/.dsh/web-themes-xyy/` and it becomes a theme — no packaging, no plugin upgrades
 - **✔️ Live theme editor**: create / edit user themes in Settings with syntax highlighting, one-click formatting, and double-side CSS validation
 - **✔️ Element-level progressive styling**: `:where()` zero-specificity overrides only touch bare Markdown elements; explicit product styles always win
 - **✔️ Immutable version ledger**: every iteration is one immutable Package; current version and full history are shown in the run card, rollback anytime

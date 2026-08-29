@@ -14,7 +14,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 1. **主题 = CSS 资产文件**：
    - 内置主题：`plugin/assets/themes/*.css`（当前 4 个：`strawberry-mocha` 标准参考 + `Cyber-Titanium-native` + `High-Vis-Clarity-native` + `Pine-Smoke-Ink-native`）
    - 共享资产：`plugin/assets/panel.css`（面板与设置页样式）；**`template.css` 已删除（v1.17.0）**——新建用户主题起步一律取自所选内置主题，无独立模板资产
-   - 用户主题：`$HOME/.dsh/web-themes/*.css` —— 放 CSS 即新主题，无需打包/升级插件
+   - 用户主题：`$HOME/.dsh/web-themes-xyy/*.css` —— 放 CSS 即新主题，无需打包/升级插件
 2. **改文件即生效**：Host 每次从文件读取（`themes.builtin.list` / `themes.builtin.get` / `themeAssets.get` / `themes.user.*`），客户端不内联 CSS。
 3. **大文本分块协议**：RPC 单条消息上限约 16KB；所有大文本（主题/模板/资产）按 **8000 字符/片** 分块传输。get 侧 `{index, total, chunk}` 循环拉取（校验 index/total 一致）；save 侧按 uploadId 隔离缓冲，**分片全部到齐后** Host 再校验写盘（杜绝缺片/并发混片）。**任何新的大内容 RPC 都必须分块**。
 4. **CSS 校验**：保存前 `validateCss`（client 端即时反馈 + Host 写盘前强制，双端同逻辑）检查注释/字符串/花括号/圆括号闭合，错误拒绝保存；超 100KB 拒绝。
@@ -77,7 +77,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态
 
-- 当前版本 v1.17.0（新建用户主题可选底子内置主题 + 删除 template.css；v1.16.0 主题选择持久化）；内置主题 4 个；路线图见 docs/capabilities.md。
+- 当前版本 v1.18.0（用户主题目录改名 `~/.dsh/web-themes-xyy`，避免与 DSH 官方目录名冲突；v1.17.0 新建可选底子主题；v1.16.0 主题选择持久化）；内置主题 4 个；路线图见 docs/capabilities.md。
 - 提交历史已重建为「每发布版本一个提交 + 顶部 docs 提交」（共 36 个）；旧历史备份在本地分支 `backup-pre-cleanup`，**勿推送**。
 - README 双语维护（`README.md` 中文 + `README.en.md` 英文镜像，顶部互挂语言徽章）：公众版只展示「安装即用」（npm registry / github:），**勿回填**动态 define、`file:` 本地开发类内容（动态 define 流程只存在于 docs/development.md）；主题预览图 = `screenshots/*.jpg`（4 张，README 画廊引用）。
 - 待决：`plugin/host.js` 的 FALLBACK_* 常量硬编码了本机目录（运行时兜底，功能正常；公开仓库可见，未定是否中性化）。

@@ -1,6 +1,6 @@
 # 主题系统规范
 
-> 主题系统 = 插件能控制的所有 CSS 的收敛。**每套主题 = 一个独立 CSS 文件**：内置主题在 `plugin/assets/themes/*.css`（随插件打包携带），用户主题在 `$HOME/.dsh/web-themes/*.css`（放文件即新主题，无需打包/升级插件）。
+> 主题系统 = 插件能控制的所有 CSS 的收敛。**每套主题 = 一个独立 CSS 文件**：内置主题在 `plugin/assets/themes/*.css`（随插件打包携带），用户主题在 `$HOME/.dsh/web-themes-xyy/*.css`（放文件即新主题，无需打包/升级插件）。
 > 主题文件里用到的全部变量（13 个 `--dsw-alias-*` 平台 token、`--mdvr-*` 身份色、`--hl-*` 语法高亮、L2/L3 排版常量）的名单与默认值见 `docs/variables.md`。
 
 ## 一、插件能控制什么 / 到什么程度
@@ -57,7 +57,7 @@ body[data-ds-dark-theme] { ... }
 
 ## 四、用户主题（动态添加、可编辑）
 
-- **目录**：`$HOME/.dsh/web-themes/`，动态解析不硬编码——shell 读 `$HOME` → `workspaceRoot` 推导 → 回退目录（host.js `resolveUserThemesDir`）。放任意 `*.css` 即新主题，**无需打包/升级插件**。
+- **目录**：`$HOME/.dsh/web-themes-xyy/`，动态解析不硬编码——shell 读 `$HOME` → `workspaceRoot` 推导 → 回退目录（host.js `resolveUserThemesDir`）。放任意 `*.css` 即新主题，**无需打包/升级插件**。
 - **id 约束**：文件名仅允许字母/数字/下划线/连字符，且不以点或连字符开头（`^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`）。
 - **添加方式三选一**：
   1. 手动放入 `*.css`（三段式格式，参考内置主题，推荐 `strawberry-mocha` 为标准参考实现）→ 设置页「🔄 刷新用户主题」即生效；
@@ -87,7 +87,7 @@ body[data-ds-dark-theme] { ... }
 
 ## 七、如何新增一个主题
 
-1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes/`（用户）新建 `.css`（复制任意主题为模板，改头注释：主题 id / 名称 / 风格说明）。
+1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes-xyy/`（用户）新建 `.css`（复制任意主题为模板，改头注释：主题 id / 名称 / 风格说明）。
 2. 定 13 个 `--dsw-alias-*` token 的浅/深值。浅档语义色按 WCAG AA 实测值：error `#c74330` / success `#287b38` / warn `#985d00`（白底与页面底均达标）。
    > ⚠️ **浅色分界色注意**：浅色档边框/分层底色 vs 背景的对比是灰阶差显示器的重灾区——WCAG 1.4.11 非文本要求 ≥3:1，粉调审美受约束时至少 ≥2:1 肉眼可辨。调整优先级：先改主题专属 `--mdvr-code-border` 等，再谨慎动 L0 `--dsw-alias-border-*`（会波及整个产品 UI）。
 3. 定 accent 系变量（tint 配方：`result = round(α·A + (1−α)·S)`，浅档 α=12%、深档 α=14%）。

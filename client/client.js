@@ -72,12 +72,12 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.17.0',
+  version: '1.18.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '「新建用户主题」可选底子主题（内置 4 选 1，默认草莓猛男粉）：起步内容 = 所选内置主题 CSS 整体复制；同时删除插件资产 template.css（青瓷参考模板，其职责由内置主题 reference 承担），资产契约只剩 panel.css',
+    '用户主题目录改名 $HOME/.dsh/web-themes → $HOME/.dsh/web-themes-xyy（避免与 DSH 官方未来可能占用 web-themes 目录名冲突）；Host 解析/回退常量与客户端文案同步',
   ],
 }
 
@@ -154,7 +154,7 @@ let activeSelection = DEFAULT_SELECTION  // 当前选择：'system-native'、内
 let themeDisposer = null      // 当前样式表清理函数
 let themeService = null       // 产品 theme 服务（外观模式三档切换用，可选）
 let builtinThemes = {}        // 内置主题缓存：id → { css }（工作区 themes/*.css）
-let userThemes = {}           // 用户主题缓存：id → { css }（~/.dsh/web-themes）
+let userThemes = {}           // 用户主题缓存：id → { css }（~/.dsh/web-themes-xyy）
 let userThemeIds = []         // 用户主题 id 列表（目录顺序）
 let panelCss = ''             // 面板与设置页样式（plugin/assets/panel.css）
 let assetsPromise = null      // 资产加载 Promise（失败后重置，允许重试）
@@ -276,7 +276,7 @@ async function fetchChunks(method, argFn) {
   return text
 }
 
-// 从 Host 加载用户主题（~/.dsh/web-themes/*.css；放文件即新主题，无需打包升级）
+// 从 Host 加载用户主题（~/.dsh/web-themes-xyy/*.css；放文件即新主题，无需打包升级）
 // 成功返回 id 列表（缓存已原子替换为最新快照）；失败返回 null（调用方应区分“无主题”与“读取失败”，v1.3.0）
 async function loadUserThemes() {
   try {
@@ -301,7 +301,7 @@ async function loadUserThemes() {
   }
 }
 
-// 保存 / 新建用户主题：本地 CSS 校验（错误禁止保存）→ 事务化分块上传（uploadId，v1.3.0）→ 写回 ~/.dsh/web-themes/<id>.css
+// 保存 / 新建用户主题：本地 CSS 校验（错误禁止保存）→ 事务化分块上传（uploadId，v1.3.0）→ 写回 ~/.dsh/web-themes-xyy/<id>.css
 // 返回 { ok, reason? }：reason 为用户可读的错误说明（语法错误 / 超限 / 写入失败）
 async function saveUserTheme(id, css) {
   const err = validateCss(css)
@@ -523,7 +523,7 @@ function formatCss(src) {
 
 // 用户主题编辑器：新建（填文件名）或编辑（载入现有 CSS）
 // 编辑体验：彩色 pre 叠在透明文字 textarea 之下 → 输入即实时语法高亮；
-// 「🧹 格式化」一键排版；「💾 保存」写回 ~/.dsh/web-themes/<id>.css
+// 「🧹 格式化」一键排版；「💾 保存」写回 ~/.dsh/web-themes-xyy/<id>.css
 function ThemeEditor(props) {
   const [name, setName] = React.useState(props.id || '')
   const [css, setCss] = React.useState(props.initialCss || '')
@@ -583,7 +583,7 @@ function ThemeEditor(props) {
     const result = await saveUserTheme(id, css)
     setBusy(false)
     if (result.ok) {
-      setStatus('✅ 已保存到 ~/.dsh/web-themes/' + id + '.css')
+      setStatus('✅ 已保存到 ~/.dsh/web-themes-xyy/' + id + '.css')
       props.onSaved(id)
     } else {
       setStatus('❌ ' + (result.reason || '保存失败（目录不可写或文件已锁定）'))
@@ -661,7 +661,7 @@ function ThemeEditor(props) {
 // 选择模型（v0.9.0 + v1.0.0 + v1.2.0 + v1.3.0）：
 //   - 「系统自带」= 默认：插件零干预，深浅跟随系统，☀️/🌙/🖥️ 三档可用
 //   - 内置第三方主题 & 用户主题：无深浅之分 —— 选中后三档按钮变灰禁用（除非回到「系统自带」）
-//   - 用户主题：~/.dsh/web-themes/ 放 CSS 文件 + 点「刷新」即生效；卡片右上「✏️ 编辑」进编辑器
+//   - 用户主题：~/.dsh/web-themes-xyy/ 放 CSS 文件 + 点「刷新」即生效；卡片右上「✏️ 编辑」进编辑器
 //   - 内置主题只读（无编辑按钮），主题文件在仓库 themes/*.css
 //   - 资产异步加载（Host 文件驱动），就绪前显示加载占位
 // v1.3.0：卸载/竞态防护（mountedRef + request generation）、刷新失败提示、主题卡按钮化（键盘可达）+ aria-pressed
@@ -796,8 +796,8 @@ function ThemeSettings() {
           ),
         )
       }),
-    // 用户主题（~/.dsh/web-themes/：放 CSS 文件即新主题，点刷新生效；可编辑）
-    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/web-themes/）'),
+    // 用户主题（~/.dsh/web-themes-xyy/：放 CSS 文件即新主题，点刷新生效；可编辑）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/web-themes-xyy/）'),
     React.createElement('div', { className: 'mdvr-user-actions' },
       React.createElement('button', {
         className: 'mdvr-refresh-btn',
@@ -831,7 +831,7 @@ function ThemeSettings() {
           onClick: () => { if (applySelection(rootCtx, 'user:' + id)) setSel('user:' + id) },
         },
           swatchGrid(sw.light, sw.dark),
-          themeInfo(id + (selUser ? ' ✓' : ''), '用户主题：~/.dsh/web-themes/' + id + '.css'),
+          themeInfo(id + (selUser ? ' ✓' : ''), '用户主题：~/.dsh/web-themes-xyy/' + id + '.css'),
         ),
         React.createElement('button', {
           type: 'button',

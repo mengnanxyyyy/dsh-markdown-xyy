@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.18.0",
+      "packageId": "pkg-6",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-29",
+      "changes": [
+        "用户主题目录改名 $HOME/.dsh/web-themes → $HOME/.dsh/web-themes-xyy（避免与 DSH 官方未来可能占用 web-themes 目录名冲突）；Host 解析/回退常量与客户端文案同步"
+      ]
+    },
+    {
       "version": "1.17.0",
       "packageId": "pkg-5",
       "name": "LobeUI 风格 · 主题系统",
