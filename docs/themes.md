@@ -1,109 +1,105 @@
-# 主题系统说明（v1.2.0 资产文件化）
+# 主题系统规范
 
-> 插件能控制的全部 CSS 收敛为「主题系统」：**每套主题 = 内置目录 `plugin/assets/themes/` 下一个独立 CSS 文件**（v1.6.0 起内聚到插件目录内、随 `plugin/` 打包携带；旧仓库根 `themes/` 兼容回退）。
-> v1.2.0 起全部资产文件化：内置主题 + 共享资产（排版骨架/面板样式/新建模板）由 **Host 运行时从文件读取**
-> （`themes.builtin.list` / `themeAssets.get` RPC，v1.3.0 起全部资产统一走分块协议），**改文件即生效，无需升级插件**；客户端不再内联 CSS（`build-client.js` 仅拷贝源码）。
-> v1.2.1 起项目根按内容探测（`resolveProjectRoot`：workspaceRoot → 兄弟目录 → 显式兜底，⚠️ workspaceRoot 是 DSH 启动目录而非必然的项目目录）。
-> 项目约定见 `AGENTS.md`。
+> 主题系统 = 插件能控制的所有 CSS 的收敛。**每套主题 = 一个独立 CSS 文件**：内置主题在 `plugin/assets/themes/*.css`（随插件打包携带），用户主题在 `$HOME/.dsh/web-themes/*.css`（放文件即新主题，无需打包/升级插件）。
+> 主题文件里用到的全部变量（13 个 `--dsw-alias-*` 平台 token、`--mdvr-*` 身份色、`--hl-*` 语法高亮、L2/L3 排版常量）的名单与默认值见 `docs/variables.md`。
 
 ## 一、插件能控制什么 / 到什么程度
 
 | 层 | 内容 | 控制范围 | 程度 |
 | --- | --- | --- | --- |
 | ① 全局 token | `--dsw-alias-*` 13 个（bg 三层/overlay/边框×2/品牌/文字×2/语义×3/侧栏） | 整个应用表面、文字、边框、语义色 | 浅/深双值，全量覆盖 |
-| ② 强调变量 | `--mdvr-*`（accent 系 5 个 + highlight 系 2 个 + quote/code/table 系 5 个 + link 系 2 个） | 排版层的全部色彩细节 | 浅/深双值 |
-| ③ 元素排版 | v1.3.0 起排版骨架停用、v1.8.0 删除 `typography.css`：对话排版由产品 `._markdown_*` 规则兜底，主题通过自身 ③ 段（`:where()` 零优先级 + 按需 `!important`）增量覆盖 | 所有 Markdown 元素的样式 | 主题 ③ 段（规则级） |
+| ② 强调变量 | `--mdvr-*`（accent 系 5 + link 系 2 + highlight 系 2 + quote 系 2 + code/table 系 3 + 字体 2 + 旋钮 1，共 17 个核心；另有标题/文本/列表/派生扩展） | 排版层的全部色彩细节 | 浅/深双值 |
+| ③ 元素排版 | 对话 Markdown 排版由产品 `._markdown_*` 规则兜底，主题通过自身 ③ 段（`:where()` 零优先级 + 按需 `!important`）增量覆盖 | 所有 Markdown 元素（标题/段落/列表/代码/表格/引用/分割线/链接/高亮/选区等） | 主题 ③ 段（规则级） |
 | ④ 面板 UI | `plugin/assets/panel.css` + 自绘组件（版本卡片 / 主题设置页 / 主题编辑器） | 插件自有 UI | 完全控制 |
-
-> ⚠️ **浅色分界色注意（v1.11.x 约定）**：浅色档边框/分层底色 vs 背景的对比是灰阶差显示器的重灾区——WCAG 1.4.11 非文本要求 ≥3:1，粉调审美受约束时至少 ≥2:1 肉眼可辨。实测猛男粉浅档 border-l1/l2 与底仅 1.3~1.7:1，属典型「看不清」区。调整优先级：先改主题专属 `--mdvr-code-border` 等，再谨慎动 L0 `--dsw-alias-border-*`（会波及整个产品 UI）。
 
 ### 明确做不到（平台限制）
 
-1. **不改产品 DOM**：不能改类名、结构、属性；不能操作 `document.body`/`window`。
-2. **零优先级**：`:where()` 意味着产品显式样式永远优先，我们只兜底"裸语义元素"。
-3. **token 名单固定**：13 个 `--dsw-alias-*` 由平台 `Theme.listTokens` 决定，不可新增（新色只能走 `--mdvr-*` 自定义变量）。
-4. **无持久化**：动态插件是内存态，设置页的选择在刷新/重启后恢复默认（`DEFAULT_SELECTION = 'system-native'` 决定默认值）。
-5. **无 JS 组件进对话流**：只能注册平台预留的座位（run 卡片、设置页、侧栏动作等）。
+1. **不改产品 DOM**：不能改类名、结构、属性；不能操作 `document.body` / `window`。
+2. **零优先级**：`:where()` 意味着产品显式样式永远优先，主题只兜底「裸语义元素」；要覆盖产品显式样式需按需 `!important`。
+3. **token 名单固定**：13 个 `--dsw-alias-*` 由平台 `Theme.listTokens` 决定，不可新增（新颜色只能走 `--mdvr-*` 自定义变量）。
+4. **无持久化**：选择为会话级内存态，刷新/重启后恢复默认（`DEFAULT_SELECTION = 'system-native'`）。
+5. **无 JS 进对话流**：只能注册平台预留的座位（run 卡片、设置页、侧栏动作等）。
 
-## 二、主题文件格式（`plugin/assets/themes/*.css`）
+## 二、主题文件格式（三段式）
 
-每个主题一个 CSS 文件，三段式结构（全部带注释）：
+每个主题一个 CSS 文件，三段式结构（全部带注释，参考 `plugin/assets/themes/strawberry-mocha.css`）：
 
 ```css
-/* 文件头注释：主题 id/名称/风格说明/色值来源 */
+/* 文件头注释：主题 id / 名称 / 风格说明 / 色值来源 */
 
-/* ① 浅色档：全局 token（13 个）+ 强调变量（--mdvr-*） */
+/* ① 浅色档：13 个全局 token + --mdvr-* 强调变量 */
 body { ... }
 
 /* ② 深色档：同 ① 的深色取值 */
 body[data-ds-dark-theme] { ... }
 
-/* ③ 元素级定制（可选）：追加在主题① ② 之后，覆盖产品兜底/补充元素样式（草莓猛男粉即全量参考） */
+/* ③ 元素级定制（可选）：追加在 ① ② 之后，:where() 增量覆盖产品兜底 */
 :where(...) { ... }
 ```
 
 要点：
-- **挂载机制与产品一致**：浅色 `body`、深色 `body[data-ds-dark-theme]`（产品用属性选择器而非 `prefers-color-scheme`）。插件样式注入晚于产品样式表 → 同选择器后者胜出。
-- 变量齐全性：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。
-- **排版兜底（v1.3.0+，v1.8.0 已删骨架文件）**：对话 Markdown 排版由产品 `._markdown_*` 规则兜底，主题只在自己 ③ 段做增量覆盖（变量契约见 `docs/unified-variables.md`）。
-- **变量分层（v1.4.0 起统一契约，见 `docs/unified-variables.md`）**：L0 平台 token（13 个固定名单）→ L1 身份色（`--mdvr-*` 与 `--hl-*`，浅/深成对，写在 ① ② 两档）→ L2 排版/形状常量（行高/字号/圆角/内距等，单值）→ L3 功能旋钮（`--mdvr-mm` 等）→ 字体栈（单值）。L2/L3/字体放 `:root` 声明一次，不再在 body 两档重复。
-- 参考实现：`plugin/assets/themes/strawberry-mocha.css` 是内置主题（v1.7.0 起唯一），带**完整 ③ 元素段**（近 80 条规则、全量消费 `--mdvr-*`/`--hl-*`）；早期纯配色主题（lobeui/inkpaper/qingci）已在 v1.7.0 移除。
 
+- **挂载机制与产品一致**：浅色写 `body`、深色写 `body[data-ds-dark-theme]`——产品用**属性选择器**标记深色，不是 `@media (prefers-color-scheme)`；选择器拼错则深色档完全不生效且不回退。插件样式注入晚于产品样式表，同选择器后者胜出。
+- **变量齐全性**：`--mdvr-sans` / `--mdvr-mono` / `--mdvr-mm` 是排版常量；`--mdvr-link*` / `--mdvr-highlight*` 是公共约定（链接蓝 + 琥珀高亮）；`--mdvr-accent*` / `--mdvr-quote*` / `--mdvr-code-*` / `--mdvr-table-*` 是主题身份色。变量分层（L0 → L1 → L2 → L3）与全部默认值见 `docs/variables.md`。
+- **元素作用域**：主题 ③ 段全部规则以 `[class*="_markdown_"]` 限定（产品对话 Markdown 容器的 CSS Modules 稳定子串），只影响对话内容，设置面板等 UI 不被波及；`:where()` 包裹选择器，零优先级兜底。选区 / 滚动条 / 焦点环（主题签名层）刻意保持全站生效。
+- **`!important` 的使用**：产品对对话 Markdown 有显式样式（`._markdown_*` 类规则，特异性 ≥ (0,2,x)），`:where()` 归零后必然输给产品；主题身份属性需要 `!important` 取胜（内置主题 ③ 段即如此，见注释说明）。
 
-## 三、选择模型（v0.9.0）
+## 三、选择模型
 
 设置页「主题设置」分两组互斥单选：
 
-1. **「系统自带」（默认，`DEFAULT_SELECTION = 'system-native'`）**：插件零干预（不注入 token/排版/变量），深浅跟随系统/外观偏好，☀️/🌙/🖥️ 三档可用（持久保存）。
-2. **内置 / 用户主题（v1.13.0 起深浅跟随外观三档）**：☀️/🌙/🖥️ 按钮对任意选中主题可用——主题 CSS 自带 `body`（浅）与 `body[data-ds-dark-theme]`（深）两档即随切换生效；只写单档的主题在另一档保持原样。默认行为 = 原生（插件不做任何主题动作）。
+1. **「系统自带」（默认，`DEFAULT_SELECTION = 'system-native'`）**：插件零干预——不注入 token/排版/变量，界面保持 DSH 出厂观感，深浅跟随系统/外观选择。
+2. **内置 / 用户主题（互斥单选）**：选中即注入「主题 CSS + panel.css」，整体替换观感，取消选中（回到系统自带）即还原。
 
-### 用户主题（v1.0.0+，动态添加；v1.2.0 起可在设置页内编辑）
+**外观 ☀️ 浅色 / 🌙 深色 / 🖥️ 跟随系统**：对任意选中主题可用（仅 `themeService` 缺失时按钮禁用），走产品 `theme.setTheme` 官方接口，实时生效且偏好持久化。主题 CSS 自带 `body`（浅）与 `body[data-ds-dark-theme]`（深）两档，切换外观档即跟随生效；只写单档的主题在另一档保持原样。
 
-- 目录：`$HOME/.dsh/web-themes/`（v1.1.0 起**系统动态解析**，不硬编码：shell 读 `$HOME` → `sandboxPolicy.workspaceRoot` 推导 → `FALLBACK_USER_THEMES_DIR` 回退，见 host.js `resolveUserThemesDir`）
-- 添加方式三选一：
-  1. 手动放入任意 `*.css`（三段式格式，参考内置主题 `plugin/assets/themes/*.css` 或完整注释手册版 `plugin/assets/template.css`）→ 设置页「🔄 刷新用户主题」即生效，**无需打包/升级插件**；
-  2. 设置页「🆕 新建用户主题」：**v1.12.0 起默认以内置主题 `strawberry-mocha`（猛男粉）内容起步**（即 `plugin/assets/themes/strawberry-mocha.css` 全文；独立模板资产已删除，加载失败回退 `plugin/assets/template.css` 青瓷演示版），浅色档 / 深色档 / 元素定制全注释，填文件名保存；
-  3. 已有主题点卡片右上「✏️ 编辑」：改 CSS 后「💾 保存」写回原文件（Host `themes.user.save` RPC，沙箱放开到 `danger-full-access`）。
-- 编辑器能力（v1.2.0）：**实时语法高亮**（透明 textarea 叠彩色 pre：注释/字符串/选择器/变量/at 规则/颜色/数值/属性名分色，跟随主题变量配色）；「🧹 格式化」一键排版（补分号、花括号换行、2 空格缩进、注释保留）；「Tab」插入缩进；保存成功后若该主题正被使用则自动重新应用（修改即时生效）。
-- **内置主题只读**：仓库 `plugin/assets/themes/*.css` 的卡片无「编辑」按钮；但 v1.2.0 起内置主题与面板样式由 Host 从文件读取，**改 `plugin/assets/themes/*.css` 或 `plugin/assets/*.css` 后刷新/重启插件即生效**（无需重新打包）。
-- 选中后外观三档同样可用：主题内容自带浅深两档即跟随切换（v1.13.0 起）
+## 四、用户主题（动态添加、可编辑）
 
-> `demo.css`（DSH 默认）与 `native.css`（原生）已随 v0.9.0 移除，由「系统自带」统一承担原生观感（历史版本在 git 中可查）。
+- **目录**：`$HOME/.dsh/web-themes/`，动态解析不硬编码——shell 读 `$HOME` → `workspaceRoot` 推导 → 回退目录（host.js `resolveUserThemesDir`）。放任意 `*.css` 即新主题，**无需打包/升级插件**。
+- **id 约束**：文件名仅允许字母/数字/下划线/连字符，且不以点或连字符开头（`^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`）。
+- **添加方式三选一**：
+  1. 手动放入 `*.css`（三段式格式，参考内置主题或完整参考主题 `plugin/assets/template.css`）→ 设置页「🔄 刷新用户主题」即生效；
+  2. 设置页「🆕 新建用户主题」：默认以**内置主题 `strawberry-mocha` 的内容本身**起步（浅/深/元素定制全注释，填文件名保存）；未加载到时回退 `plugin/assets/template.css`（青瓷参考版）；
+  3. 已有主题卡片右上「✏️ 编辑」：改 CSS 后「💾 保存」写回原文件。
+- **编辑器能力**：实时语法高亮（透明 textarea 叠彩色 pre：注释/字符串/选择器/变量/at 规则/颜色/数值/属性名分色，跟随主题变量配色）；「🧹 格式化」一键排版（补分号、花括号换行、2 空格缩进、注释保留，结果通过语法校验才覆盖原文）；「Tab」插入缩进；保存走 Host `themes.user.save`（事务化分块上传 + 双端 CSS 校验 + 100KB 上限），沙箱显式放开；保存成功后若该主题正被使用则自动重新应用（修改即时生效）。
+- **内置主题只读**：`plugin/assets/themes/*.css` 的卡片无「✏️ 编辑」按钮；但内置主题与共享资产由 Host 从文件读取，改文件后刷新/重启插件即生效，无需重新打包。
 
-## 四、内置主题
-
-> v1.13.4 起内置主题 4 个：三个旧用户主题按猛男粉规范升级内置（结构/99 变量名单/三层作用域逐项对齐，仅身份配色不同）；「草莓猛男粉 = 标准」参考实现。
+## 五、内置主题
 
 | 文件 | 名称 | 风格 |
 | --- | --- | --- |
-| `plugin/assets/themes/strawberry-mocha.css` | 草莓猛男粉 | 丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量（全变量化参考实现，变量分层见 `docs/unified-variables.md`） |
+| `plugin/assets/themes/strawberry-mocha.css` | 草莓猛男粉（标准参考实现） | 丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全量 `--mdvr-*` 身份色 + `--hl-*` 语法高亮 + L2/L3 排版常量（全变量化参考实现，带完整 ③ 元素段，变量分层见 `docs/variables.md`） |
 | `plugin/assets/themes/Cyber-Titanium-native.css` | Cyber Titanium · 钛影 | 2026 Mac 极客：Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银 |
-| `plugin/assets/themes/High-Vis-Clarity-native.css` | High-Vis Clarity · 高清晰 | 旧显示器/低色域友好：高反差冷白 × 强辨识纯天蓝 × 黄金重点（border ≥2.2:1） |
+| `plugin/assets/themes/High-Vis-Clarity-native.css` | High-Vis Clarity · 高清晰 | 旧显示器/低色域友好：高反差冷白 × 强辨识纯天蓝 × 黄金重点 |
 | `plugin/assets/themes/Pine-Smoke-Ink-native.css` | 松烟墨黛 | 2026 中文文人：徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白 |
 
-> v1.7.0 起内置主题仅保留草莓猛男粉；早期纯配色主题 lobeui-emphasis / inkpaper / qingci 已移除（历史在 git）。
+四个内置主题按**同一变量契约 100% 对齐**（变量名单/三层作用域逐项一致，仅配色不同），`strawberry-mocha` 为参考实现；`THEME_META`（`plugin/src/client.core.js`）注册各主题的显示名/描述/双档色板预览。
 
-## 四、构建与切换机制
+## 六、构建与切换机制
 
-- **构建（v1.2.0 起）**：`node scripts/build-client.js` = 拷贝 `plugin/src/client.core.js` → `plugin/client.js` + 资产完整性检查。CSS 资产不再内联：Host 经 `themes.builtin.list` / `themeAssets.get` 从 `plugin/assets/themes/*.css` 与 `plugin/assets/*.css` 读取（`sandboxPolicy.workspaceRoot` 定位）。
-- **define 传输**：`node scripts/minify.js` 生成精简双半（仅删注释/折叠空白，token 流等价校验），一次传 host+client 双半。
-- **发布门禁**：`node scripts/check-release.js` 自动核对 MANIFEST 一致性、构建产物、CSS 契约与 packageId 唯一性。
-- **注入（v1.3.0+）**：`主题css + panel.css`（排版骨架已删，产品 `._markdown_*` 规则兜底排版），`applySelection(id)` 原子切换（先构建新样式成功后再卸载旧样式）。
-- **卸载**：`ctx.effect` 持有样式表 disposer，stop/update/undefine 自动还原。
+- **构建**：`node scripts/build-client.js` = 拷贝 `plugin/src/client.core.js` → `plugin/client.js` + 资产完整性检查。CSS 资产不内联，Host 运行时从文件读取。
+- **define 传输**：`node scripts/minify.js` 生成精简双半（仅删注释/折叠空白，token 流等价断言），一次传 host+client 双半；define 后 `cordis_inspect_self` 核对双半完整再 run。
+- **发布门禁**：`node scripts/check-release.js` 自动核对 MANIFEST 一致性、构建产物、资产完整性、CSS 结构闭合、内置主题浅/深双档挂载（`body` + `body[data-ds-dark-theme]`）、panel.css 的 `var(--mdvr-*)` 全部带回退。
+- **注入与原子切换**：`applySelection(id)` 先构建目标 CSS（主题文件缺失/unavailable 时返回失败不动现状），成功插入新样式后再卸载旧样式；「系统自带」只注入 panel.css。
+- **卸载**：`ctx.effect` 持有样式表 disposer，stop/update/undefine 自动还原注入的样式。
 
-## 五、如何新增一个主题
+## 七、如何新增一个主题
 
-1. 在 `plugin/assets/themes/` 或 `$HOME/.dsh/web-themes/` 新建 `.css`（复制任意主题为模板，改头注释）。
-2. 定 13 个 token 的浅/深值（浅档语义色参考 `docs/readability-a11y.md` 的 AA 值）。
+1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes/`（用户）新建 `.css`（复制任意主题为模板，改头注释：主题 id / 名称 / 风格说明）。
+2. 定 13 个 `--dsw-alias-*` token 的浅/深值。浅档语义色按 WCAG AA 实测值：error `#c74330` / success `#287b38` / warn `#985d00`（白底与页面底均达标）。
+   > ⚠️ **浅色分界色注意**：浅色档边框/分层底色 vs 背景的对比是灰阶差显示器的重灾区——WCAG 1.4.11 非文本要求 ≥3:1，粉调审美受约束时至少 ≥2:1 肉眼可辨。调整优先级：先改主题专属 `--mdvr-code-border` 等，再谨慎动 L0 `--dsw-alias-border-*`（会波及整个产品 UI）。
 3. 定 accent 系变量（tint 配方：`result = round(α·A + (1−α)·S)`，浅档 α=12%、深档 α=14%）。
-4. 需要差异化元素时写 ③ 段扩展规则。
-5. 在 `plugin/src/client.core.js` 的 `THEME_META` 加一行（显示名/描述/色板预览）——仅内置主题需要；用户主题自动出现在列表。
-6. `node scripts/build-client.js` → 定义新 Package → update → 设置页验证。
+4. 需要差异化元素时写 ③ 段扩展规则（`:where()` + markdown 限定；必要时 `!important`）。
+5. 内置主题在 `plugin/src/client.core.js` 的 `THEME_META` 加一行（显示名/描述/双档色板预览），然后 `node scripts/build-client.js`；用户主题自动出现在列表，无需注册。
+6. `node scripts/check-release.js` 过门禁 → 定义新 Package → update → 设置页验证（浅/深两档 + 面板）。
 
-## 六、完整参考主题（第三方用户手册）
+## 八、完整参考主题（第三方用户手册）
 
-- **完整参考主题 = 仓库 `plugin/assets/template.css`**：涵盖全部可控面并逐条注释影响范围——
-  ① 13 全局 token（官方语义注释）② 15 个 `--mdvr-*` 变量（每个标注影响哪些元素）③ 全部可控元素规则（标题/段落/列表/任务框/行内代码/代码块/引用/表格/分割线/链接/粗体/高亮/删除线/上下标/kbd/图片，`:where()` 零优先级覆盖产品兜底）④ 扩展示例（选区/滚动条/斑马纹/焦点轮廓）⑤ 头部警告区（挂载机制、零优先级、固定名单、无深浅之分、WCAG AA、生效方式）+ 尾部配色速查（tint 配方、AA 实测值）。
-- **「🆕 新建用户主题」起点（v1.12.0 起）= 内置主题 `plugin/assets/themes/strawberry-mocha.css`（猛男粉）内容本身**——独立模板资产 `plugin/assets/template-strawberry.css` 已随 v1.12.0 删除，不再双维护；加载失败回退 `plugin/assets/template.css`。
-- 2026-08 用户主题清理：`$HOME/.dsh/web-themes/` 下 6 个旧用户主题 CSS（钛影 / 高清晰 / 松烟墨黛 / Velvet 猛男粉两版 / example.css）全部删除——前三者与猛男粉均已内置化，example.css 与 template.css 同源（手册以 `plugin/assets/template.css` 为准）；目录现仅存说明 README，新建路径照常可用。历史在 git。
-- 编写时警告要点：浅色 `body` / 深色 `body[data-ds-dark-theme]`（属性选择器，**非** `prefers-color-scheme`）；元素定制一律 `:where()`；`--dsw-alias-*` 固定 13 个不可新增；正文对比度 ≥4.5:1。
+- **完整参考主题 = `plugin/assets/template.css`**：用最小文件演示「一个主题能改的全部内容」，每条规则注释写明影响范围——
+  ① 头部警告区：挂载机制（属性选择器非媒体查询）、`:where()` 零优先级、13 token 固定名单、外观三档跟随、WCAG AA、生效方式（刷新即生效）、谨慎项（勿 @import 外部 URL、语法错误整段失效）；
+  ② 浅色档 / 深色档：13 个全局 token（官方语义注释）+ `--mdvr-*` 变量（每个标注影响哪些元素）；
+  ③ 元素级定制：全部可控元素规则（标题/段落/列表/任务框/行内代码/代码块/引用/表格/分割线/链接/粗体/高亮/删除线/上下标/kbd/图片）；
+  ④ 扩展示例：选区 / 滚动条 / 斑马纹 / 焦点可见性；
+  ⑤ 尾部配色速查：tint 配方、浅档语义色 AA 实测值、链接色建议、边条优先原则、深档亮度控制。
+- **「🆕 新建用户主题」起点**：默认取内置 `strawberry-mocha` 的内容本身（它是最完整的参考实现）；`template.css` 作为加载失败时的回退模板。
+- 编写主题时的硬性检查：浅色 `body` / 深色 `body[data-ds-dark-theme]`；元素定制一律 `:where()`；`--dsw-alias-*` 固定 13 个不可新增；正文对比度 ≥4.5:1。
