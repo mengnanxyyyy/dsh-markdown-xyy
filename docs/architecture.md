@@ -106,4 +106,19 @@ Plugin（稳定实例，pluginId）
 | `docs/variables.md` | 统一变量契约（L0~L3 全部变量名单与默认值） |
 | `docs/capabilities.md` | 能力全景与路线图 |
 | `docs/development.md` | 贡献者开发/发布流程与快速排查 |
-| `README.md` / `AGENTS.md` / `LICENSE` | 项目说明 / 项目记忆 / 许可证 |
+| `README.md` / `README.en.md` / `AGENTS.md` / `LICENSE` | 项目说明（中/英）/ 项目记忆 / 许可证 |
+| `package.json` / `cordis.patch.yml` | 常驻安装包清单 / dsh bundle 插件行（`dsh plugin add` 挂载） |
+| `lib/index.mjs` / `client/client.js` | 常驻安装版双半产物（`scripts/build-installed.js` 生成，勿手改） |
+| `screenshots/` | README 主题预览画廊图片 |
+
+## 9. 双通道（动态 define / 常驻安装）
+
+同一份源码、两条装载通道，仅通信传输不同：
+
+| | 动态 define（开发迭代） | 常驻安装（dsh plugin add） |
+| --- | --- | --- |
+| Host 半注册 | `harness.handle`（动态注入全局） | `webServer.register`（`/mdvr/api/*` HTTP JSON 路由） |
+| Client 半 | 运行时全局 `host`/`styles`/`React` | 包装器内同签名桥（fetch + `<style>` 注入 + `require('react')`） |
+| 生命周期 | 内存态，进程重启丢失 | 随 `dsh web` 常驻，bundle 层装载 |
+
+host.js 的 `registerRpc()` 按 `typeof harness` 自动选择通道（有 harness 走动态，无则走 webServer）；改源码后两个通道的产物都要重新生成（`build-client.js` + `build-installed.js`）。

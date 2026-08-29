@@ -1,105 +1,102 @@
 # dsh-markdown-xyy
 
-**DeepSeek Harness 动态插件：版本记录 + Markdown 对话主题排版。**
+**给 DeepSeek Harness 的对话 Markdown 换上主题 —— 4 套内置主题（浅/深双档）+ 用户主题自由定义，顺带把插件迭代记成可回滚的版本台账。**
 
-一个运行在 DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`），解决插件迭代中的两个真实痛点：
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![version](https://img.shields.io/badge/version-1.15.0-5856d6.svg)](manifest/versions.json)
+[![lang](https://img.shields.io/badge/language-中文-brightgreen.svg)](README.md)
+[![lang-en](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
 
-- **版本会丢** —— Harness 动态插件是内存态，进程重启即失，改动散落在会话里无从追溯；
-- **观感难定制** —— 对话里的 Markdown 排版与配色想要可配置，又绝不能破坏产品自带的主题基线。
+运行在 [DeepSeek Harness](https://github.com/deepseek-ai) 上的 Cordis 插件：不动产品基线主题，用纯 CSS 给对话里的 Markdown 排版与配色换肤——标题、代码块、表格、引用、链接、高亮，浅色深色各一套，跟随系统自动切换。
 
-本项目把这两件事打包成一个插件：
+## 主题预览
 
-- **版本记录**：每个迭代 = 一个不可变 Cordis Package。插件维护内存台账，经 `versions.note` / `versions.list` RPC 上报与查询，并随每次迭代镜像存档到 `manifest/versions.json`（与 git tag 对应）；`cordis_run` 卡片内直接展示当前版本与完整历史。
-- **Markdown 对话主题排版**：主题 = 纯 CSS 资产文件（内置 `plugin/assets/themes/*.css`、用户 `$HOME/.dsh/web-themes/*.css`），由 Host 运行时从文件读取，Client 以 `styles.insert` 注入 `body` / `body[data-ds-dark-theme]`（与产品挂载机制一致，不改产品基线主题）。Markdown 排版由产品 `._markdown_*` 规则兜底，主题用 `:where()` 零优先级做元素级增量覆盖，产品显式样式永远优先。
+| 草莓猛男粉 `strawberry-mocha` | Cyber Titanium · 钛影 `cyber-titanium` |
+| :---: | :---: |
+| ![草莓猛男粉](screenshots/strawberry-mocha.png) | ![钛影](screenshots/cyber-titanium.png) |
+| 丝绒草莓甜点 × Catppuccin Mocha 暗夜，标准参考实现 | Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银 |
+
+| High-Vis Clarity · 高清晰 `high-vis-clarity` | 松烟墨黛 `pine-smoke-ink` |
+| :---: | :---: |
+| ![高清晰](screenshots/high-vis-clarity.png) | ![松烟墨黛](screenshots/pine-smoke-ink.png) |
+| 旧显示器 / 低色域友好：高反差冷白 × 纯天蓝 × 黄金重点 | 徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白 |
+
+> 预览图存放于 [screenshots/](screenshots/)，换图直接覆盖同名文件即可。
 
 ## 特性
 
-- ✔️ **不可变版本台账 + 版本面板**：一次迭代一个 Package，版本号 / 日期 / 变更随包携带，`cordis_run` 卡片内即看当前与全部历史
-- ✔️ **4 套内置主题**：草莓猛男粉 `strawberry-mocha`（标准参考）、钛影 `Cyber-Titanium-native`、高清晰 `High-Vis-Clarity-native`、松烟墨黛 `Pine-Smoke-Ink-native`
-- ✔️ **用户主题动态加载**：往 `$HOME/.dsh/web-themes/` 放一个 CSS 就是新主题，无需打包、无需升级插件
-- ✔️ **深浅色双档跟随系统**：外观 ☀️ / 🌙 / 🖥️ 三档，主题自带浅深两档即随切换生效
-- ✔️ **实时主题编辑器**：设置页内新建 / 编辑用户主题，实时语法高亮 + 一键格式化，保存前双端 CSS 校验，错误拒绝写入
-- ✔️ **Markdown 元素级排版增量覆盖**：`:where()` 零优先级，只影响裸语义元素，不碰产品基线主题
-- ✔️ **发布门禁脚本**：`node scripts/check-release.js` 一键校验 MANIFEST 一致性 / CSS 契约 / packageId 唯一，达标才可发版
+- **✔️ 4 套内置主题**，每套浅色 / 深色双档，☀️ / 🌙 / 🖥️ 外观三档随系统切换
+- **✔️ 用户主题即放即用**：往 `~/.dsh/web-themes/` 放一个 CSS 文件就是新主题，无需打包、无需升级插件
+- **✔️ 实时主题编辑器**：设置页内新建 / 编辑用户主题，语法高亮 + 一键格式化，保存前双端 CSS 校验
+- **✔️ 元素级排版增量覆盖**：`:where()` 零优先级，只兜底裸 Markdown 元素，产品显式样式永远优先
+- **✔️ 不可变版本台账**：每个迭代 = 一个不可变 Package，run 卡片内即看当前版本与完整历史，可随时回滚
+- **✔️ 双通道安装**：会话内动态加载（开发迭代）或常驻安装（`dsh plugin add`，进程重启不丢）
 
-## 快速开始（加载插件）
+## 快速开始
 
-前置：一个可运行的 DeepSeek Harness 会话环境。本项目无任何 npm 依赖，不需要安装步骤。
+前置：一个可运行的 DeepSeek Harness 环境（`dsh web`）。本项目无运行时依赖，无需安装 npm 包。
 
-**① 克隆仓库**
+**方式一：常驻安装（推荐，重启不丢）**
 
 ```bash
-git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git && cd dsh-markdown-xyy
+git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git
+node scripts/build-installed.js                      # 生成常驻双半产物（lib/index.mjs + client/client.js）
+dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy
+dsh web                                              # 重启生效；卸载用 remove
 ```
 
-**② 构建并精简双半源码**（供 define 传输；minify 只删注释 / 折叠空白，语义零风险）
+加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
+
+**方式二：会话内动态加载（开发迭代模式）**
 
 ```bash
-node scripts/build-client.js                        # 同步 plugin/src/client.core.js → plugin/client.js + 资产检查
+node scripts/build-client.js                         # 同步源码 → 产物 + 资产检查
 node scripts/minify.js plugin/host.js /tmp/host.min.js
 node scripts/minify.js plugin/client.js /tmp/client.min.js
-node --check /tmp/host.min.js && node --check /tmp/client.min.js   # 可选：语法复核
 ```
 
-**③ 在 Harness 会话中加载动态插件**
+在 Harness 会话中 `cordis_define`（host + client 双半一次传入，pluginId 前缀 `mdvr`）→ `cordis_run`，然后在浏览器验证。动态插件为内存态，进程重启后需重新加载。
 
-1. `cordis_define`：`kind: new`（或对既有实例用 `existing`），**host + client 双半一次传入**（即上面的两个 minify 产物），pluginId 前缀 `mdvr`。
-2. `cordis_run`：首次用 `run`，已有版本用 `update` 切换到新 Package。
+> 两种方式共用同一份源码，仅通信通道不同（动态走 harness RPC，常驻走 `webServer` HTTP 路由）。
 
-加载完成后进入 **设置 → 主题设置**：可切换「系统自带」或 4 套内置主题，也可新建 / 编辑用户主题（实时语法高亮编辑器）。
+## 自定义主题
 
-### 另一种：常驻安装（无需会话内 define，重启不丢）
-
-本仓库同时是标准 npm 插件包（`lib/index.mjs` = Host 半、`client/client.js` = Client 半，由 `node scripts/build-installed.js` 生成），可被 `dsh` 安装进 profile，随 `dsh web` 启动常驻：
-
-```bash
-node scripts/build-installed.js                 # 重新生成双半产物（改完 host.js/源码后必跑）
-dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy   # 安装（file: 指向本仓库即本地常驻）
-dsh web                                         # 重启 web 生效；卸载用 remove
-```
-
-常驻版与动态版共用同一份源码，仅通信通道不同：动态走 harness RPC / 全局 bridge，常驻版 Host 走 `webServer` HTTP 路由（`/mdvr/api/*`）、Client 走同签名 HTTP 桥。两种方式可并存。
+主题 = 一个 CSS 文件，三段式结构（① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`）。参考与完整教程见 [docs/themes.md](docs/themes.md) 和内置模板 `plugin/assets/template.css`；变量契约（L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮）见 [docs/variables.md](docs/variables.md)。
 
 ## 项目结构
 
 ```
 dsh-markdown-xyy/
-├── AGENTS.md               # 面向 Agent 贡献者的项目约定
-├── LICENSE
-├── README.md
-├── docs/
-│   ├── architecture.md     # 架构：双半分工 / 版本模型 / 主题管线
-│   ├── themes.md           # 主题系统规范（能力边界 / 文件格式 / 用户主题）
-│   ├── variables.md        # 变量契约（L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮）
-│   ├── capabilities.md     # 能力清单与路线图
-│   └── development.md      # 开发与发布流程（一次迭代 = 一个 Package）
+├── README.md / README.en.md     # 中 / 英 README
+├── AGENTS.md                    # 面向 Agent 贡献者的项目约定
+├── LICENSE                      # MIT
+├── package.json                 # 常驻安装包清单（main=lib/index.mjs，exports ./client）
+├── cordis.patch.yml             # dsh bundle 插件行（dsh plugin add 后挂载）
+├── screenshots/                 # 主题预览图（README 画廊）
+├── docs/                        # architecture / themes / variables / capabilities / development
 ├── manifest/
-│   └── versions.json       # 版本台账持久镜像
+│   └── versions.json            # 版本台账持久镜像
+├── lib/
+│   └── index.mjs                # 常驻安装版 Host 半（生成产物）
+├── client/
+│   └── client.js                # 常驻安装版 Client 半（__ModuleLoader__ 注册，生成产物）
 ├── plugin/
-│   ├── host.js             # Host 半源码镜像（版本台账 + 主题资产 RPC）
-│   ├── client.js           # Client 半源码镜像（构建产物，勿手改）
-│   ├── src/client.core.js  # Client 半源码（唯一的可编辑源）
-│   └── assets/
-│       ├── panel.css       # 面板 / 设置页样式
-│       ├── template.css    # 完整参考主题（带全部注释）
-│       └── themes/         # 内置主题（4 个 CSS）
+│   ├── host.js                  # Host 半源码镜像（版本台账 + 主题资产 RPC）
+│   ├── client.js                # 动态版 Client 半产物（勿手改）
+│   ├── src/client.core.js       # Client 半源码（唯一的可编辑源）
+│   └── assets/                  # panel.css / template.css / themes/（4 个内置主题）
 └── scripts/
-    ├── build-client.js     # 拷贝 client.core.js → client.js + 资产检查
-    ├── check-release.js    # 发布门禁（MANIFEST 一致性/CSS 契约/packageId 唯一）
-    └── minify.js           # define 传输用安全精简
+    ├── build-client.js          # 动态版产物构建
+    ├── build-installed.js       # 常驻版双半产物构建
+    ├── check-release.js         # 发布门禁
+    └── minify.js                # define 传输用安全精简
 ```
 
-## 当前版本
-
-**v1.15.0「对话流节点间距紧凑化」**（2026-08-29）：四个内置主题新增 §14——以稳定属性 `[data-chat-flow]` 为锚点（产品哈希类名跨构建会变，勿用），把对话流主列 `gap` 由 16px 收紧到 5px，工具调用卡 / 消息 / 状态条等全部对话流节点垂直间距统一变紧凑。
-
-完整版本历史见 [manifest/versions.json](manifest/versions.json)，git 侧对应 tag 见 `git tag`（如 `v1.15.0`）。
-
-## 文档导航
+## 文档
 
 | 文档 | 内容 |
 | --- | --- |
-| [docs/architecture.md](docs/architecture.md) | 架构：双半分工 / 版本模型 / 主题管线 |
+| [docs/architecture.md](docs/architecture.md) | 架构：双半分工 / 版本模型 / 主题管线 / 双通道 |
 | [docs/themes.md](docs/themes.md) | 主题系统规范：能力边界 / 文件格式 / 用户主题 |
 | [docs/variables.md](docs/variables.md) | 变量契约：L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮 |
 | [docs/capabilities.md](docs/capabilities.md) | 能力清单与路线图 |
@@ -107,13 +104,11 @@ dsh-markdown-xyy/
 
 ## 开发
 
-迭代流程：**改 MANIFEST → build → define → run → 验证 → tag**，完整步骤与约定见 [docs/development.md](docs/development.md)。发版前跑发布门禁：
+迭代流程 **改 MANIFEST → build → define → run → 验证 → tag** 见 [docs/development.md](docs/development.md)；发版前跑发布门禁：
 
 ```bash
 node scripts/check-release.js
 ```
-
-脚本校验：双份 MANIFEST 版本一致、`client.js` 与源未漂移、CSS 契约（浅深双档挂载、`var(--mdvr-*)` 回退、括号闭合）、packageId 唯一、minify 产物可传；失败返回非零退出码并指明具体原因。
 
 ## 许可
 
