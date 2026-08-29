@@ -40,13 +40,13 @@ That is exactly what this project does: a "reading-assist" theme for Markdown in
 - **✔️ Live theme editor**: create / edit user themes in Settings with syntax highlighting, one-click formatting, and double-side CSS validation
 - **✔️ Element-level progressive styling**: `:where()` zero-specificity overrides only touch bare Markdown elements; explicit product styles always win
 - **✔️ Immutable version ledger**: every iteration is one immutable Package; current version and full history are shown in the run card, rollback anytime
-- **✔️ Two install channels**: session-scoped dynamic loading (dev iterations) or permanent install (`dsh plugin add`, survives restarts)
+- **✔️ One-command permanent install**: from the npm registry (`dsh plugin add dsh-markdown-xyy`), GitHub as fallback, survives restarts
 
 ## Quick start
 
 Prerequisite: a running DeepSeek Harness (`dsh web`). No runtime dependencies, no npm install needed.
 
-**Option 1 — permanent install (recommended, survives restarts)**
+**Permanent install (recommended, survives restarts)**
 
 Install directly from the npm registry (published: [dsh-markdown-xyy](https://www.npmjs.com/package/dsh-markdown-xyy)):
 
@@ -61,18 +61,6 @@ dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
 Then open **Settings → Theme Settings**: switch between "System native" and the 4 built-in themes, or create / edit user themes.
-
-**Option 2 — dynamic, session-scoped loading (development mode)**
-
-```bash
-node scripts/build-client.js                         # sync source → artifact + asset checks
-node scripts/minify.js plugin/host.js /tmp/host.min.js
-node scripts/minify.js plugin/client.js /tmp/client.min.js
-```
-
-In a Harness session, `cordis_define` (pass host + client halves together, pluginId prefix `mdvr`) → `cordis_run`, then verify in the browser. Dynamic plugins are in-memory: they are lost on process restart and must be redefined.
-
-> Both channels share the same source; only the transport differs (dynamic uses the harness RPC channel, installed uses `webServer` HTTP routes).
 
 ## Custom themes
 

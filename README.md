@@ -40,13 +40,13 @@
 - **✔️ 实时主题编辑器**：设置页内新建 / 编辑用户主题，语法高亮 + 一键格式化，保存前双端 CSS 校验
 - **✔️ 元素级排版增量覆盖**：`:where()` 零优先级，只兜底裸 Markdown 元素，产品显式样式永远优先
 - **✔️ 不可变版本台账**：每个迭代 = 一个不可变 Package，run 卡片内即看当前版本与完整历史，可随时回滚
-- **✔️ 双通道安装**：会话内动态加载（开发迭代）或常驻安装（`dsh plugin add`，进程重启不丢）
+- **✔️ 常驻安装即用即走**：npm registry 一条命令装好（`dsh plugin add dsh-markdown-xyy`），GitHub 备选，进程重启不丢
 
 ## 快速开始
 
 前置：一个可运行的 DeepSeek Harness 环境（`dsh web`）。本项目无运行时依赖，无需安装 npm 包。
 
-**方式一：常驻安装（推荐，重启不丢）**
+**常驻安装（推荐，重启不丢）**
 
 直接在 npm registry 安装（已发布：[dsh-markdown-xyy](https://www.npmjs.com/package/dsh-markdown-xyy)）：
 
@@ -61,18 +61,6 @@ dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
 加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
-
-**方式二：会话内动态加载（开发迭代模式）**
-
-```bash
-node scripts/build-client.js                         # 同步源码 → 产物 + 资产检查
-node scripts/minify.js plugin/host.js /tmp/host.min.js
-node scripts/minify.js plugin/client.js /tmp/client.min.js
-```
-
-在 Harness 会话中 `cordis_define`（host + client 双半一次传入，pluginId 前缀 `mdvr`）→ `cordis_run`，然后在浏览器验证。动态插件为内存态，进程重启后需重新加载。
-
-> 两种方式共用同一份源码，仅通信通道不同（动态走 harness RPC，常驻走 `webServer` HTTP 路由）。
 
 ## 自定义主题
 
