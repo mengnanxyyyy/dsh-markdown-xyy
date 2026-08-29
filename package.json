@@ -16,6 +16,7 @@
     "lib",
     "client",
     "plugin/assets",
+    "cordis.patch.yml",
     "manifest",
     "docs",
     "scripts",
@@ -23,6 +24,15 @@
     "README.md",
     "LICENSE"
   ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
   "scripts": {
     "build:client": "node scripts/build-client.js",
     "build:installed": "node scripts/build-installed.js",

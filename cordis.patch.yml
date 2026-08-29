@@ -1,0 +1,6 @@
+# dsh bundle patch：常驻安装本插件到 profile 层栈。
+# 启动即装载（Host 半 lib/index.mjs + Client 半 client/client.js），与动态 define 无关。
+# 卸载：dsh plugin --profile web remove dsh-markdown-xyy
+- insert:
+    - id: dsh-markdown-xyy
+      name: dsh-markdown-xyy
