@@ -48,6 +48,18 @@ node --check /tmp/host.min.js && node --check /tmp/client.min.js   # 可选：�
 
 加载完成后进入 **设置 → 主题设置**：可切换「系统自带」或 4 套内置主题，也可新建 / 编辑用户主题（实时语法高亮编辑器）。
 
+### 另一种：常驻安装（无需会话内 define，重启不丢）
+
+本仓库同时是标准 npm 插件包（`lib/index.mjs` = Host 半、`client/client.js` = Client 半，由 `node scripts/build-installed.js` 生成），可被 `dsh` 安装进 profile，随 `dsh web` 启动常驻：
+
+```bash
+node scripts/build-installed.js                 # 重新生成双半产物（改完 host.js/源码后必跑）
+dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy   # 安装（file: 指向本仓库即本地常驻）
+dsh web                                         # 重启 web 生效；卸载用 remove
+```
+
+常驻版与动态版共用同一份源码，仅通信通道不同：动态走 harness RPC / 全局 bridge，常驻版 Host 走 `webServer` HTTP 路由（`/mdvr/api/*`）、Client 走同签名 HTTP 桥。两种方式可并存。
+
 ## 项目结构
 
 ```
