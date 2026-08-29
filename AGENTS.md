@@ -48,6 +48,13 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（产品 `._markdown_*` 兜底 + 主题 `:where()` 增量覆盖）④ 面板 UI（panel.css）
 - 不能：改产品 DOM；token 名单固定；`:where()` 零优先级（产品显式样式优先）。持久化已解决：选中主题存 `localStorage`（见 主题铁律 11），不再「刷新恢复 `DEFAULT_SELECTION`」
 
+## 发布许可（最高优先级，2026-08-29 用户明示）
+
+- **未获用户明确确认，禁止任何发布动作**：① 打 tag（`git tag`）② push 到 GitHub ③ `npm publish`。
+- 日常开发只允许**本地 `git commit`**（改代码/重建产物/改 docs 等均属开发，可自主进行），但**不得**因此顺带 tag / push / publish。
+- 需要发布时，先向用户说明将执行哪一步（tag / push / publish），**等用户明确同意后才执行**；被拒或未答复均视为不执行。
+- 违反后果按越权处理：已打未确认的 tag 需主动删除并向用户说明。
+
 ## 标准迭代流程
 
 1. 决定版本号（semver）→ 同步更新 `plugin/host.js` + `plugin/src/client.core.js` 的 MANIFEST（双份一致）
@@ -56,7 +63,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 4. `node scripts/check-release.js`
 5. minify 双半 → `cordis_define`（kind: existing，双半一次传完）
 6. `cordis_inspect_self` 核对 → `cordis_run`（update，可能需审批）→ 验证
-7. 回填 packageId → `git commit` + `git tag vX.Y.Z`
+7. 回填 packageId → `git commit`（本地提交）——**tag / push / npm publish 走「发布许可」规则，未经用户确认不得执行**
 
 ## 常见坑
 
