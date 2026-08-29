@@ -49,14 +49,14 @@ const FALLBACK_TEMPLATE_CSS = '/* 主题模板不可用，请检查插件资产 
 const THEME_META = {
   'strawberry-mocha': {
     name: '草莓猛男粉',
-    desc: '丝绒草莓甜点 × Catppuccin Mocha 暗夜：原生列表符号 + 全变量化（含语法高亮）',
+    desc: '本人喜欢 丝绒草莓甜点 × Catppuccin Mocha 暗夜',
     swatches: ['#faf6f8', '#ffffff', '#d93b68', '#d93b68'],
     swatchesDark: ['#1e1e2e', '#181825', '#fb7185', '#fb7185'],
   },
   // v1.13.4：三个旧用户主题按猛男粉规范升级内置（结构/变量名单/三层作用域对齐草莓猛男粉）
   'Cyber-Titanium-native': {
     name: 'Cyber Titanium · 钛影',
-    desc: '2026 Mac 极客程序员：Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银',
+    desc: 'Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银',
     swatches: ['#f5f6f9', '#ffffff', '#635bff', '#635bff'],
     swatchesDark: ['#111216', '#171920', '#7c72ff', '#7c72ff'],
   },
@@ -68,7 +68,7 @@ const THEME_META = {
   },
   'Pine-Smoke-Ink-native': {
     name: '松烟墨黛',
-    desc: '2026 中文文人：徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白',
+    desc: '徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白',
     swatches: ['#faf7f2', '#ffffff', '#b23d35', '#b23d35'],
     swatchesDark: ['#141618', '#1b1e21', '#c34a42', '#c34a42'],
   },
