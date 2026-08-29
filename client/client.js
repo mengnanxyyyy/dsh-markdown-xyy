@@ -72,12 +72,12 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '2.0.1',
+  version: '2.0.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '修复常驻安装（npm）通道：Host 资产根优先取插件包自身目录（__MDVR_PKG_ROOT__ 注入，npm 装到任何机器都能读到内置主题/面板样式，不再依赖本机开发目录）；webServer 路由注册加固（失败不拖垮 fiber）；Host 声明 inject webServer 确保就绪后再注册路由',
+    '移除启动期 console 日志（[mdvr] host ledger ready / projectRoot 命中提示），保持 dsh 启动日志干净；registerRpc 失败警告保留（仅路由注册出错时输出，便于诊断）',
   ],
 }
 
