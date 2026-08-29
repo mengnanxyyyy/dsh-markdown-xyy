@@ -133,7 +133,7 @@ else fail('plugin/client.js 与源文件不一致 —— 运行 node scripts/bui
 
 // ---------- 4. JS 语法 ----------
 console.log('\n4) JS 语法检查')
-for (const f of ['plugin/host.js', 'plugin/src/client.core.js', 'plugin/client.js', 'scripts/build-client.js', 'scripts/minify.js', 'scripts/check-release.js']) {
+for (const f of ['plugin/host.js', 'plugin/src/client.core.js', 'plugin/client.js', 'scripts/build-client.js', 'scripts/minify.js', 'scripts/check-release.js', 'scripts/build-installed.js', 'lib/index.mjs', 'client/client.js']) {
   try {
     execFileSync(process.execPath, ['--check', path.join(root, f)], { stdio: 'pipe' })
     ok(f)
