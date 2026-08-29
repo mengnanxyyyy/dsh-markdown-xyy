@@ -9,6 +9,16 @@
 
 A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reskins the Markdown rendering in conversations with pure CSS — headings, code blocks, tables, quotes, links, highlights — without touching the product's baseline theme. Every theme ships a light and a dark variant that follow the system appearance.
 
+## 📖 Why this project exists
+
+The reason is simple: **the native conversation styling is not built for reading long walls of text.**
+
+When a lot of conversation text piles up, everything looks "flat" — headings, quotes, key points and code all lean on default typography, and the faster you scan, the easier it is to miss what matters. Since I deal with large amounts of conversation text every day, **coloring the key information and layering the hierarchy** became essential: being able to spot the essentials at a glance makes even the longest conversations readable.
+
+That is exactly what this project does: a "reading-assist" theme for Markdown in conversations — emphasized highlights, clear typography, light/dark variants, and never touching the product's default theme.
+
+> This project was built end-to-end with AI: core development by my partner **deepseek-v4-flash**, with the four themes' palettes refined with help from my international friend **Gemini**.
+
 ## Theme previews
 
 | Strawberry Mocha `strawberry-mocha` | Cyber Titanium `cyber-titanium` |
