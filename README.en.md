@@ -48,12 +48,16 @@ Prerequisite: a running DeepSeek Harness (`dsh web`). No runtime dependencies, n
 
 **Option 1 — permanent install (recommended, survives restarts)**
 
-Install directly from GitHub (anyone can use it; pinning a version is safest):
+Install directly from the npm registry (published: [dsh-markdown-xyy](https://www.npmjs.com/package/dsh-markdown-xyy)):
 
 ```bash
-dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy#v1.15.0   # recommended: pinned version
-dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy          # or follow the latest main
-dsh web                                                                      # restart to apply; uninstall with remove
+dsh plugin --profile web add dsh-markdown-xyy
+```
+
+Or follow the latest GitHub main (handy while a mirror hasn't synced the new npm package yet):
+
+```bash
+dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
 Local development (`file:` pointing at this repo; re-`add` after code changes):
@@ -62,7 +66,6 @@ Local development (`file:` pointing at this repo; re-`add` after code changes):
 git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git
 node scripts/build-installed.js                      # build the installed halves (lib/index.mjs + client/client.js)
 dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy
-dsh web
 ```
 
 Then open **Settings → Theme Settings**: switch between "System native" and the 4 built-in themes, or create / edit user themes.
