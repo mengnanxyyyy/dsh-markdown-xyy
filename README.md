@@ -48,11 +48,21 @@
 
 **方式一：常驻安装（推荐，重启不丢）**
 
+从 GitHub 直接安装（任何人可用，锁版本最稳）：
+
+```bash
+dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy#v1.15.0   # 推荐：锁版本
+dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy          # 或跟随 main 最新
+dsh web                                                                      # 重启生效；卸载用 remove
+```
+
+本地开发调试（`file:` 指向本仓库，改代码重新 add 即更新）：
+
 ```bash
 git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git
 node scripts/build-installed.js                      # 生成常驻双半产物（lib/index.mjs + client/client.js）
 dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy
-dsh web                                              # 重启生效；卸载用 remove
+dsh web
 ```
 
 加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
