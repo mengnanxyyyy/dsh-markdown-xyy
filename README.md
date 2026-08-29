@@ -8,6 +8,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/mengnanxyyyy/dsh-markdown-xyy)](https://github.com/mengnanxyyyy/dsh-markdown-xyy)
 [![language](https://img.shields.io/badge/language-中文-brightgreen.svg)](README.md)
 [![English](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
+[![LINUX DO](https://shorturl.at/ggSqS)](https://linux.do)
 
 运行在 [DeepSeek Harness](https://github.com/deepseek-ai) 上的 Cordis 插件：不动产品基线主题，用纯 CSS 给对话里的 Markdown 排版与配色换肤——标题、代码块、表格、引用、链接、高亮，浅色深色各一套，跟随系统自动切换。
 
