@@ -28,12 +28,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.18.0',
+  version: '2.0.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '用户主题目录改名 $HOME/.dsh/web-themes → $HOME/.dsh/web-themes-xyy（避免与 DSH 官方未来可能占用 web-themes 目录名冲突）；Host 解析/回退常量与客户端文案同步',
+    '2.0 正式版（首个正式发布）：整合全部历史迭代（v0.1–v1.18 折叠进 2.0.0 单版本）——主题选择持久化（localStorage 跨页恢复/多标签同步）+ 新建用户主题可选底子内置主题 + 用户主题目录 $HOME/.dsh/web-themes-xyy + 四套内置主题 + 不可变版本台账',
   ],
 }
 
