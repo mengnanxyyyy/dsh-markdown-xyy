@@ -2,10 +2,12 @@
 
 **给 DeepSeek Harness 的对话 Markdown 换上主题 —— 4 套内置主题（浅/深双档）+ 用户主题自由定义，顺带把插件迭代记成可回滚的版本台账。**
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-1.15.0-5856d6.svg)](manifest/versions.json)
-[![lang](https://img.shields.io/badge/language-中文-brightgreen.svg)](README.md)
-[![lang-en](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
+[![license](https://img.shields.io/github/license/mengnanxyyyy/dsh-markdown-xyy)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/dsh-markdown-xyy)](https://www.npmjs.com/package/dsh-markdown-xyy)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-markdown-xyy)](https://www.npmjs.com/package/dsh-markdown-xyy)
+[![GitHub stars](https://img.shields.io/github/stars/mengnanxyyyy/dsh-markdown-xyy)](https://github.com/mengnanxyyyy/dsh-markdown-xyy)
+[![language](https://img.shields.io/badge/language-中文-brightgreen.svg)](README.md)
+[![English](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
 
 运行在 [DeepSeek Harness](https://github.com/deepseek-ai) 上的 Cordis 插件：不动产品基线主题，用纯 CSS 给对话里的 Markdown 排版与配色换肤——标题、代码块、表格、引用、链接、高亮，浅色深色各一套，跟随系统自动切换。
 
@@ -63,9 +65,36 @@ dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 
 加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
 
-## 自定义主题
+## 🎨 自定义主题（让 AI 复制粘贴，3 分钟换肤）
 
-主题 = 一个 CSS 文件，三段式结构（① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`）。参考与完整教程见 [docs/themes.md](docs/themes.md) 和内置参考实现 `plugin/assets/themes/strawberry-mocha.css`；「🆕 新建用户主题」会以所选内置主题为底子整体起步；变量契约（L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮）见 [docs/variables.md](docs/variables.md)。
+主题本质就是一个 **CSS 文件**：改它 = 换肤，无需改代码、无需升级插件，保存/放文件后刷新即生效。
+
+**方式一：让 AI 改（最快，推荐）**
+
+1. 设置 → 主题设置 →「🆕 新建用户主题」→ 选一个最接近你审美的**底子主题**（默认草莓猛男粉，顶部下拉可换钛影 / 高清晰 / 松烟墨黛）；
+2. 复制编辑器里的整段 CSS，粘贴给任意 AI（DeepSeek / ChatGPT / Claude）；
+3. 把需求发给它，例如：
+
+```
+你是 CSS 主题专家。这是 DSH 对话 Markdown 主题的完整 CSS，文件结构不能破坏：
+[把编辑器里的整段 CSS 粘贴到这里]
+帮我改成「赛博朋克」风：① 把 --mdvr-accent 和各处 --dsw-alias-* token 改成霓虹紫+电光青
+② 背景改深黑 ③ 代码块加霓虹描边。保持三段式结构（body / body[data-ds-dark-theme] /
+:where()）和全部变量名：只改值、不动名单，输出完整 CSS 让我直接粘贴回编辑器保存。
+```
+
+4. 把 AI 返回的完整 CSS 粘贴回编辑器 →「💾 保存」→ 新主题立刻出现在列表可选用（保存前插件会做 CSS 语法校验，不过会拒绝并提示原因）。
+
+**方式二：手写 / 放文件**
+
+- 主题 = 三段式 CSS：① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`。参考内置 `plugin/assets/themes/strawberry-mocha.css`（全注释的标准参考实现）；
+- 放文件即新主题：复制成 `~/.dsh/web-themes-xyy/<你的名字>.css` → 设置页「🔄 刷新用户主题」；
+- 90% 的换肤效果来自几个关键变量（完整契约见 [docs/variables.md](docs/variables.md)）：
+  - `--dsw-alias-bg-base` / `--dsw-alias-bg-layer-1` … 背景与表面层次
+  - `--dsw-alias-brand-primary` 品牌 / 强调主色
+  - `--mdvr-accent` 主题强调色、`--mdvr-link-*` 链接、`--mdvr-code-*` 代码、`--hl-*` 语法高亮
+
+完整规范：[docs/themes.md](docs/themes.md)｜变量契约：[docs/variables.md](docs/variables.md)
 
 ## 项目结构
 

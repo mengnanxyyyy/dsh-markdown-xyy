@@ -2,10 +2,12 @@
 
 **Theme the Markdown in your DeepSeek Harness conversations — 4 built-in themes (light/dark), user-defined themes, and a version ledger for the plugin itself.**
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-1.15.0-5856d6.svg)](manifest/versions.json)
-[![lang](https://img.shields.io/badge/language-English-brightgreen.svg)](README.en.md)
-[![lang-zh](https://img.shields.io/badge/中文-README-blue.svg)](README.md)
+[![license](https://img.shields.io/github/license/mengnanxyyyy/dsh-markdown-xyy)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/dsh-markdown-xyy)](https://www.npmjs.com/package/dsh-markdown-xyy)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-markdown-xyy)](https://www.npmjs.com/package/dsh-markdown-xyy)
+[![GitHub stars](https://img.shields.io/github/stars/mengnanxyyyy/dsh-markdown-xyy)](https://github.com/mengnanxyyyy/dsh-markdown-xyy)
+[![language](https://img.shields.io/badge/language-English-brightgreen.svg)](README.en.md)
+[![中文](https://img.shields.io/badge/中文-README-blue.svg)](README.md)
 
 A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reskins the Markdown rendering in conversations with pure CSS — headings, code blocks, tables, quotes, links, highlights — without touching the product's baseline theme. Every theme ships a light and a dark variant that follow the system appearance.
 
@@ -63,9 +65,39 @@ dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 
 Then open **Settings → Theme Settings**: switch between "System native" and the 4 built-in themes, or create / edit user themes.
 
-## Custom themes
+## 🎨 Custom themes (copy-paste with AI, re-skin in 3 minutes)
 
-A theme is a single CSS file in three sections: ① light `body {…}` ② dark `body[data-ds-dark-theme] {…}` ③ element overrides `:where()`. See [docs/themes.md](docs/themes.md) and the reference implementation `plugin/assets/themes/strawberry-mocha.css`; "New user theme" starts from the chosen built-in theme as its base. The variable contract (L0 platform tokens / L1 identity colors / L2 constants / L3 knobs) is documented in [docs/variables.md](docs/variables.md).
+A theme is essentially a **CSS file**: editing it re-skins the UI — no code changes, no plugin upgrade, and it takes effect on refresh after save / drop-in.
+
+**Way 1 — let AI do it (fastest, recommended)**
+
+1. Open **Settings → Theme Settings → New user theme**, pick a **base theme** closest to your taste (default: Strawberry Mocha; the dropdown also offers Titanium / High-Vis Clarity / Pine Smoke Ink).
+2. Copy the whole CSS from the editor and paste it into any AI (DeepSeek / ChatGPT / Claude).
+3. Tell it what you want, e.g.:
+
+```
+You are a CSS theme expert. This is the complete CSS of a DSH conversation Markdown theme —
+keep the file structure intact:
+[paste the whole editor CSS here]
+Restyle it as "cyberpunk": ① change --mdvr-accent and the --dsw-alias-* tokens to neon
+purple + electric cyan ② make the background deep black ③ add a neon outline to code blocks.
+Keep the three-section structure (body / body[data-ds-dark-theme] / :where()) and every
+variable name: change values only, never the variable list. Output the complete CSS so I
+can paste it straight back into the editor and save.
+```
+
+4. Paste the AI's full CSS back into the editor → **Save** → the new theme appears in the list immediately (the plugin validates CSS syntax before saving and rejects broken output with a reason).
+
+**Way 2 — hand-write / drop a file**
+
+- A theme is a three-section CSS: ① light `body {…}` ② dark `body[data-ds-dark-theme] {…}` ③ element overrides `:where()`. See the reference implementation `plugin/assets/themes/strawberry-mocha.css` (fully commented).
+- Drop-in: save it as `~/.dsh/web-themes-xyy/<your-name>.css`, then click "Refresh user themes" in Settings.
+- 90% of a re-skin is a handful of key variables (full contract in [docs/variables.md](docs/variables.md)):
+  - `--dsw-alias-bg-base` / `--dsw-alias-bg-layer-1` … background & surface layers
+  - `--dsw-alias-brand-primary` brand / accent color
+  - `--mdvr-accent` theme accent, `--mdvr-link-*` links, `--mdvr-code-*` code, `--hl-*` syntax highlighting
+
+Full spec: [docs/themes.md](docs/themes.md) ｜ Variable contract: [docs/variables.md](docs/variables.md)
 
 ## Project layout
 
