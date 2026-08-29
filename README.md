@@ -29,7 +29,7 @@
 **① 克隆仓库**
 
 ```bash
-git clone <仓库地址> && cd dsh-markdown-xyy
+git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git && cd dsh-markdown-xyy
 ```
 
 **② 构建并精简双半源码**（供 define 传输；minify 只删注释 / 折叠空白，语义零风险）
