@@ -60,14 +60,6 @@ dsh plugin --profile web add dsh-markdown-xyy
 dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
-本地开发调试（`file:` 指向本仓库，改代码重新 add 即更新）：
-
-```bash
-git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git
-node scripts/build-installed.js                      # 生成常驻双半产物（lib/index.mjs + client/client.js）
-dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy
-```
-
 加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
 
 **方式二：会话内动态加载（开发迭代模式）**

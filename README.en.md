@@ -60,14 +60,6 @@ Or follow the latest GitHub main (handy while a mirror hasn't synced the new npm
 dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
-Local development (`file:` pointing at this repo; re-`add` after code changes):
-
-```bash
-git clone https://github.com/mengnanxyyyy/dsh-markdown-xyy.git
-node scripts/build-installed.js                      # build the installed halves (lib/index.mjs + client/client.js)
-dsh plugin --profile web add file:/abs/path/to/dsh-markdown-xyy
-```
-
 Then open **Settings → Theme Settings**: switch between "System native" and the 4 built-in themes, or create / edit user themes.
 
 **Option 2 — dynamic, session-scoped loading (development mode)**
