@@ -65,7 +65,7 @@ dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 
 ## 自定义主题
 
-主题 = 一个 CSS 文件，三段式结构（① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`）。参考与完整教程见 [docs/themes.md](docs/themes.md) 和内置模板 `plugin/assets/template.css`；变量契约（L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮）见 [docs/variables.md](docs/variables.md)。
+主题 = 一个 CSS 文件，三段式结构（① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`）。参考与完整教程见 [docs/themes.md](docs/themes.md) 和内置参考实现 `plugin/assets/themes/strawberry-mocha.css`；「🆕 新建用户主题」会以所选内置主题为底子整体起步；变量契约（L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮）见 [docs/variables.md](docs/variables.md)。
 
 ## 项目结构
 
@@ -88,7 +88,7 @@ dsh-markdown-xyy/
 │   ├── host.js                  # Host 半源码镜像（版本台账 + 主题资产 RPC）
 │   ├── client.js                # 动态版 Client 半产物（勿手改）
 │   ├── src/client.core.js       # Client 半源码（唯一的可编辑源）
-│   └── assets/                  # panel.css / template.css / themes/（4 个内置主题）
+│   └── assets/                  # panel.css / themes/（4 个内置主题）
 └── scripts/
     ├── build-client.js          # 动态版产物构建
     ├── build-installed.js       # 常驻版双半产物构建

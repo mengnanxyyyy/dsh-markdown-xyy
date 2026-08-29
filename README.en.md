@@ -65,7 +65,7 @@ Then open **Settings → Theme Settings**: switch between "System native" and th
 
 ## Custom themes
 
-A theme is a single CSS file in three sections: ① light `body {…}` ② dark `body[data-ds-dark-theme] {…}` ③ element overrides `:where()`. See [docs/themes.md](docs/themes.md) and the commented template `plugin/assets/template.css`; the variable contract (L0 platform tokens / L1 identity colors / L2 constants / L3 knobs) is documented in [docs/variables.md](docs/variables.md).
+A theme is a single CSS file in three sections: ① light `body {…}` ② dark `body[data-ds-dark-theme] {…}` ③ element overrides `:where()`. See [docs/themes.md](docs/themes.md) and the reference implementation `plugin/assets/themes/strawberry-mocha.css`; "New user theme" starts from the chosen built-in theme as its base. The variable contract (L0 platform tokens / L1 identity colors / L2 constants / L3 knobs) is documented in [docs/variables.md](docs/variables.md).
 
 ## Project layout
 
@@ -88,7 +88,7 @@ dsh-markdown-xyy/
 │   ├── host.js                  # Host half source mirror (ledger + theme-asset RPC)
 │   ├── client.js                # dynamic-mode Client half artifact (do not hand-edit)
 │   ├── src/client.core.js       # Client half source (single editable source)
-│   └── assets/                  # panel.css / template.css / themes/ (4 built-in themes)
+│   └── assets/                  # panel.css / themes/ (4 built-in themes)
 └── scripts/
     ├── build-client.js          # dynamic-mode artifact build
     ├── build-installed.js       # installed-mode halves build

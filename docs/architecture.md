@@ -23,7 +23,7 @@
 │    versions.list        → 台账快照 { current, history }       │
 │    themes.builtin.list  → 内置主题 id 列表（文件枚举）          │
 │    themes.builtin.get   → 内置主题 CSS（分块）                 │
-│    themeAssets.get      → 共享资产 panel.css / template.css    │
+│    themeAssets.get      → 共享资产 panel.css                    │
 │    themes.user.list     → 用户主题 id 列表（文件枚举）          │
 │    themes.user.get      → 用户主题 CSS（分块）                 │
 │    themes.user.save     → 保存/新建用户主题（事务化分块上传）    │
@@ -44,7 +44,7 @@
 - **内存台账** `ledger`：条目 `{pluginId, packageId, version, name, palette, date, changes}`，按 `packageId` 去重、最新在前。
 - `versions.note`：版本面板挂载时上报自身 Package 的 MANIFEST，Host 记账。
 - `versions.list`：返回 `{current, history}` 快照，供面板渲染。
-- **内置主题 / 共享资产 / 用户主题全部从文件读取**：`plugin/assets/themes/*.css`、`plugin/assets/panel.css`、`plugin/assets/template.css`、`$HOME/.dsh/web-themes/*.css`；改文件即生效，无需升级插件。
+- **内置主题 / 共享资产 / 用户主题全部从文件读取**：`plugin/assets/themes/*.css`、`plugin/assets/panel.css`、`$HOME/.dsh/web-themes/*.css`（v1.17.0 起 `template.css` 已删除，新建起步改取所选内置主题内容）；改文件即生效，无需升级插件。
 - **大文本分块协议**：页面↔宿主单条消息约 16KB 上限；所有大文本（主题 / 模板 / 资产）按 8000 字符/片分块传输。get 侧以 `{index, total, chunk}` 循环拉取（客户端校验 index/total 一致性，防错位拼接）；save 侧为事务化上传（uploadId 隔离并发 + 分片完整性检查 + TTL/并发上限，**全部分片到齐后**拼接），再执行 Host 侧 CSS 语法校验（注释/字符串/花括号/圆括号闭合），错误明确拒绝；单文件上限 100KB。
 - **用户主题保存显式放开沙箱**：写 `$HOME/.dsh/web-themes/<id>.css` 走 `danger-full-access` 策略（用户主动编辑自己的主题文件）。
 - 只传 JSON 标量，不序列化任何 Cordis/DSH 活对象。
@@ -96,7 +96,7 @@ Plugin（稳定实例，pluginId）
 | `plugin/client.js` | Client 构建产物（`node scripts/build-client.js` 拷贝生成，禁止手改） |
 | `plugin/assets/themes/*.css` | 内置主题（4 个，文件即主题） |
 | `plugin/assets/panel.css` | 插件自有 UI 样式（版本卡片 / 设置页 / 编辑器） |
-| `plugin/assets/template.css` | 完整参考主题（新建用户主题回退模板） |
+| `plugin/assets/themes/*.css` | 参考实现 = 内置 `strawberry-mocha`（原 template.css 已删，v1.17.0） |
 | `scripts/build-client.js` | 源 → 产物拷贝 + 资产完整性检查 |
 | `scripts/check-release.js` | 发布门禁（MANIFEST 一致性 / 语法 / 资产 / CSS 契约 / packageId 提示） |
 | `scripts/minify.js` | 双半精简产物（define 传输用） |

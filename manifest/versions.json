@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.17.0",
+      "packageId": "pkg-5",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-29",
+      "changes": [
+        "「新建用户主题」可选底子主题（内置 4 选 1，默认草莓猛男粉）：起步内容 = 所选内置主题 CSS 整体复制；同时删除插件资产 template.css（青瓷参考模板，其职责由内置主题参考承担），资产契约只剩 panel.css"
+      ]
+    },
+    {
       "version": "1.16.0",
       "packageId": "pkg-3",
       "name": "LobeUI 风格 · 主题系统",

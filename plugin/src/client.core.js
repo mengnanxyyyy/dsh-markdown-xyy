@@ -11,7 +11,7 @@
 // 【文件结构总览】
 //   §1 配置区        —— MANIFEST / DEFAULT_SELECTION（默认：系统自带）/ 模板兜底
 //   §2 主题元信息    —— THEME_META（显示名/描述/色板预览）
-// §3 资产与主题缓存 —— builtinThemes / panelCss / templateCss（Host 文件驱动，分块拉取）
+// §3 资产与主题缓存 —— builtinThemes / panelCss（Host 文件驱动，分块拉取）
 //   §4 选择引擎      —— applySelection（先构建后替换，原子切换）+ 外观三档
 //   §5 组件          —— VersionCard / ThemeSettings / ThemeEditor / highlightCss / formatCss
 //   §6 插件入口 apply()（runSeq/disposed 生命周期隔离，v1.3.0）
@@ -28,12 +28,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.16.0',
+  version: '1.17.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '主题选择持久化（localStorage）：选中的主题（系统自带/内置/用户）跨刷新与新开页面自动恢复，多标签页实时同步（storage 事件）；外观模式仍由产品 theme.setTheme 持久化',
+    '「新建用户主题」可选底子主题（内置 4 选 1，默认草莓猛男粉）：起步内容 = 所选内置主题 CSS 整体复制；同时删除插件资产 template.css（青瓷参考模板，其职责由内置主题 reference 承担），资产契约只剩 panel.css',
   ],
 }
 
@@ -69,8 +69,8 @@ function clearStoredSelection() {
   } catch (e) { /* 忽略 */ }
 }
 
-// 新建用户主题模板的兜底（Host 资产 plugin/assets/template.css 不可用时使用）
-const FALLBACK_TEMPLATE_CSS = '/* 主题模板不可用，请检查插件资产 plugin/assets/template.css */\nbody { --mdvr-accent: #5856d6; }\n'
+// 新建用户主题起步内容的兜底（所选底子内置主题不可用时使用；v1.17.0 起 template.css 已删除，无独立模板资产）
+const FALLBACK_STARTER_CSS = '/* 底子主题不可用（内置主题未加载），请先到设置页确认内置主题列表 */\nbody { --mdvr-accent: #5856d6; }\n'
 
 // ---------- §2 主题元信息（第三方主题：显示名/描述/色板预览；CSS 内容运行时由 Host 提供） ----------
 // 「系统自带」（id: system-native）不是主题，是特殊选择：插件零干预，见 §4
@@ -113,7 +113,6 @@ let builtinThemes = {}        // 内置主题缓存：id → { css }（工作区
 let userThemes = {}           // 用户主题缓存：id → { css }（~/.dsh/web-themes）
 let userThemeIds = []         // 用户主题 id 列表（目录顺序）
 let panelCss = ''             // 面板与设置页样式（plugin/assets/panel.css）
-let templateCss = ''          // 新建用户主题模板（plugin/assets/template.css）
 let assetsPromise = null      // 资产加载 Promise（失败后重置，允许重试）
 let runSeq = 0                // 每次 apply() 递增；异步回调据此判断自己是否仍属于当前 Run（v1.3.0）
 let disposed = false          // 当前 Run 是否已卸载（stop/update 后置 true，阻止迟到回调注入）
@@ -143,23 +142,21 @@ async function loadBuiltinThemes() {
   }
 }
 
-// 加载共享资产（面板样式 + 回退模板；全部走分块协议 themeAssets.get，v1.3.0）
-// v1.12.0：新建用户主题默认 = 内置主题 猛男粉 内容（见 newThemeStarter），
-// 不再维护独立模板资产 template-strawberry.css；template.css（青瓷）仅作回退
+// 加载共享资产（面板样式；走分块协议 themeAssets.get，v1.3.0）
+// v1.17.0：删除插件资产 template.css（青瓷参考模板）——新建用户主题的起步内容一律取自所选内置主题，
+// 不再维护独立模板资产（v1.12.0 的 template-strawberry.css 同理已删）
 async function loadAssets() {
   try {
     const pan = await fetchChunks('themeAssets.get', (index) => ({ name: 'panel', index }))
-    const tpl = await fetchChunks('themeAssets.get', (index) => ({ name: 'template', index }))
     if (pan !== null) panelCss = pan
-    if (tpl !== null && tpl.length > 0) templateCss = tpl
   } catch (e) { /* 忽略：资产缺失时插件仍可用（仅无样式） */ }
 }
 
-// v1.12.0：新建用户主题起步内容 = 内置 猛男粉（strawberry-mocha）CSS；
-// 未加载到时回退 template.css（青瓷）→ 内联兜底
-function newThemeStarter() {
-  const builtin = builtinThemes['strawberry-mocha']
-  return (builtin && builtin.css) || templateCss || FALLBACK_TEMPLATE_CSS
+// v1.17.0：新建用户主题起步内容 = 所选「底子」内置主题 CSS（整体复制，浅/深/元素定制全注释）；
+// 该底子未加载（极少见）时回退内联最小起步。template.css 已删除，无独立模板资产
+function newThemeStarter(baseId) {
+  const builtin = baseId ? builtinThemes[baseId] : null
+  return (builtin && builtin.css) || FALLBACK_STARTER_CSS
 }
 
 // 确保资产与内置主题已加载（幂等；失败重置 Promise，下次调用可重试，v1.3.0）
@@ -488,6 +485,8 @@ function ThemeEditor(props) {
   const [css, setCss] = React.useState(props.initialCss || '')
   const [status, setStatus] = React.useState('')
   const [busy, setBusy] = React.useState(false)
+  // v1.17.0：新建模式可选「底子主题」—— 起步内容 = 所选内置主题 CSS 整体复制（默认草莓猛男粉）
+  const [base, setBase] = React.useState(props.baseId || 'strawberry-mocha')
   // 高亮结果与输入分离：输入即时（onChange 只 setCss），高亮异步（rAF）→ 大文本粘贴/编辑不卡顿
   const [hl, setHl] = React.useState(() => highlightCss(props.initialCss || ''))
   const taRef = React.useRef(null)
@@ -520,6 +519,14 @@ function ThemeEditor(props) {
     const next = css.slice(0, s) + '  ' + css.slice(en)
     setCss(next)
     setTimeout(() => { ta.selectionStart = ta.selectionEnd = s + 2 }, 0)
+  }
+  // v1.17.0：切换底子主题 = 以该内置主题内容整体替换起步 CSS（文件名与下方编辑内容都会被替换，通常在动手编辑前切换）
+  const onBaseChange = (e) => {
+    const id = e.target.value
+    const label = ((props.bases || []).find((b) => b.id === id) || {}).name || id
+    setBase(id)
+    setCss(newThemeStarter(id))
+    setStatus('底子已切换为「' + label + '」，起步内容已替换')
   }
   const onSave = async () => {
     const id = props.isNew ? name.trim() : props.id
@@ -565,6 +572,15 @@ function ThemeEditor(props) {
         placeholder: '例如 my-theme',
         onChange: (e) => setName(e.target.value),
       }),
+    ),
+    props.isNew && props.bases && props.bases.length > 0 && React.createElement('div', { className: 'mdvr-editor-row' },
+      React.createElement('label', { className: 'mdvr-editor-label', htmlFor: 'mdvr-editor-base' }, '底子主题（起步内容）'),
+      React.createElement('select', {
+        id: 'mdvr-editor-base',
+        className: 'mdvr-editor-input',
+        value: base,
+        onChange: onBaseChange,
+      }, props.bases.map((b) => React.createElement('option', { key: b.id, value: b.id }, b.name))),
     ),
     React.createElement('div', { className: 'mdvr-editor-body' },
       React.createElement('pre', { ref: preRef, className: 'mdvr-editor-pre', 'aria-hidden': true, dangerouslySetInnerHTML: { __html: hl } }),
@@ -617,6 +633,8 @@ function ThemeSettings() {
   const [editor, setEditor] = React.useState(null)
   // v1.13.2：内置主题列表 = 系统自带（并入）+ 各内置主题（色板 + 名称，无描述行）
   const entries = builtinIds.map((id) => ({ id, meta: THEME_META[id] || { name: id, desc: '', swatches: [] } }))
+  // v1.17.0：新建用户主题的「底子主题」可选列表（全部内置主题，显示名取 THEME_META）
+  const baseOptions = builtinIds.map((id) => ({ id, name: (THEME_META[id] || { name: id }).name }))
   const schemeOptions = [
     ['light', '☀️ 浅色'],
     ['dark', '🌙 深色'],
@@ -746,7 +764,7 @@ function ThemeSettings() {
       React.createElement('button', {
         className: 'mdvr-refresh-btn',
         type: 'button',
-        onClick: () => ensureAssets().then(() => setEditor({ isNew: true, id: null, css: newThemeStarter() })),
+        onClick: () => ensureAssets().then(() => setEditor({ isNew: true, id: null, baseId: 'strawberry-mocha', css: newThemeStarter('strawberry-mocha') })),
       }, '🆕 新建用户主题'),
       React.createElement('span', { className: 'mdvr-themes-title' }, '放入 CSS 文件后点刷新即生效'),
     ),
@@ -785,6 +803,8 @@ function ThemeSettings() {
       isNew: editor.isNew,
       id: editor.id,
       initialCss: editor.css,
+      baseId: editor.baseId || (editor.isNew ? 'strawberry-mocha' : undefined), // v1.17.0：新建时默认底子草莓猛男粉
+      bases: editor.isNew ? baseOptions : [], // v1.17.0：新建时可选全部内置主题为底子
       onClose: () => setEditor(null),
       onSaved: handleSaved,
     }),

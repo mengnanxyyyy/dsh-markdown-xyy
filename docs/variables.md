@@ -1,6 +1,6 @@
 # 统一变量契约（Unified Variable Contract）
 
-> 盘点对象：四个内置主题（`plugin/assets/themes/*.css`，同一契约 100% 对齐、仅配色不同）+ 完整参考主题（`plugin/assets/template.css`）+ 面板样式（`plugin/assets/panel.css`，仅消费、不定义）。
+> 盘点对象：四个内置主题（`plugin/assets/themes/*.css`，同一契约 100% 对齐、仅配色不同，`strawberry-mocha` 为参考实现）+ 面板样式（`plugin/assets/panel.css`，仅消费、不定义）。v1.17.0 起独立参考资产 `plugin/assets/template.css` 已删除，参考职责由内置主题承担。
 > 结论一句话：**L0 平台 token（13 个固定名单）+ L1 身份色核心契约（17 个）是全部主题共用的统一变量集；L1 扩展（标题/文本/列表/`--hl-*`）+ L2 排版/形状常量 + L3 旋钮是草莓猛男粉（参考实现）的完整化演示，四个内置主题均全量提供；panel.css 只消费核心契约里的 7 个变量（全部带默认回退）。**
 > 主题文件的元素级消费方式见 `docs/themes.md`，整体架构见 `docs/architecture.md`。
 
@@ -10,9 +10,9 @@
 
 | 层 | 内容 | 单值 / 浅深成对 | 是否全主题统一 | 现状 |
 |---|---|---|---|---|
-| **L0 平台 token** | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | ✅ 成对（body / body[data-ds-dark-theme]） | ✅ 四个内置主题 + template.css 全量定义（固定名单不可增删） | 已统一 |
-| **L1 身份色 · 核心** | accent 系 5 + link/highlight 系 4 + quote/code/table 系 5 + 字体 2 + `--mdvr-mm` = **17 个** | ✅ 色彩成对；字体/mm 单值 | ✅ 四个内置主题 + template.css 全定义（唯一强制集） | 已统一 |
-| **L1 身份色 · 扩展** | 标题梯度 h1~h6（6）、文本排印 strong/italic/bold-italic/subsup/del（5）、列表 bullet-l1/2/3 + checkbox-checked（4）、派生色 accent-rgb + inline-code×2 + selection×2 + check-mark + shadow×3（9，拆浅深两档或单值） | 色彩成对；check-mark 单值 | ❌ 仅四个内置主题定义（可选扩展；template.css 不定义） | 已统一 |
+| **L0 平台 token** | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | ✅ 成对（body / body[data-ds-dark-theme]） | ✅ 四个内置主题全量定义（固定名单不可增删） | 已统一 |
+| **L1 身份色 · 核心** | accent 系 5 + link/highlight 系 4 + quote/code/table 系 5 + 字体 2 + `--mdvr-mm` = **17 个** | ✅ 色彩成对；字体/mm 单值 | ✅ 四个内置主题全定义（唯一强制集） | 已统一 |
+| **L1 身份色 · 扩展** | 标题梯度 h1~h6（6）、文本排印 strong/italic/bold-italic/subsup/del（5）、列表 bullet-l1/2/3 + checkbox-checked（4）、派生色 accent-rgb + inline-code×2 + selection×2 + check-mark + shadow×3（9，拆浅深两档或单值） | 色彩成对；check-mark 单值 | ❌ 仅四个内置主题定义（可选扩展；历史 template.css 亦不定义） | 已统一 |
 | **L1 语法高亮** | `--hl-keyword/string/number/property/function/comment`（6） | ✅ 成对 | ❌ 仅四个内置主题定义 | 已统一 |
 | **L2 排版/形状常量** | 行高/段距/字号/圆角/边框/内距/滚动条/焦点（38 个，`--mdvr-*` 单值；阴影 3 项拆浅深两档移入 ① ②） | ❌ 单值（`:root` 一次） | ❌ 仅四个内置主题定义 | 已统一 |
 | **L3 功能旋钮** | `--mdvr-mm`（间距倍率） | ❌ 单值 | ⚠️ 四个内置主题均定义但 **0 处消费**（休眠旋钮） | 待激活 |
@@ -33,13 +33,13 @@
 | `--dsw-specific-sidebar-fill` | 侧栏底 |
 
 - 名单固定（平台 Theme.listTokens），**不可新增**；所有主题均按此名单浅深各一组。
-- strawberry-mocha 浅档语义色取值：error `#C74330` / success `#237834` / warn `#965B00`；深档取 Catppuccin Mocha 对应色（`#F38BA8` / `#A6E3A1` / `#F9E2AF`）。参考主题 template.css 的浅档 AA 建议值为 error `#c74330` / success `#287b38` / warn `#985d00`——两者出入见 §十「维护引用」。
+- strawberry-mocha 浅档语义色取值：error `#C74330` / success `#237834` / warn `#965B00`；深档取 Catppuccin Mocha 对应色（`#F38BA8` / `#A6E3A1` / `#F9E2AF`）。内置主题的浅档 AA 参考值（原 template.css 建议，现归入内置主题约定）为 error `#c74330` / success `#287b38` / warn `#985d00`——两者出入见 §十「维护引用」。
 
 ---
 
 ## 三、L1 身份色 · 核心契约（17 个）——全主题统一
 
-> 完整契约 = **30 个变量**（13 L0 + 17 L1），四个内置主题与 template.css **全量提供、无一缺席**；其中「面板最低兼容」只需 7 个 `--mdvr-*`（见 §八）。下表 17 个 = 14 身份色 + 2 字体 + 1 旋钮。
+> 完整契约 = **30 个变量**（13 L0 + 17 L1），四个内置主题 **全量提供、无一缺席**；其中「面板最低兼容」只需 7 个 `--mdvr-*`（见 §八）。下表 17 个 = 14 身份色 + 2 字体 + 1 旋钮。
 
 | 组 | 变量 | 消费方 |
 |---|---|---|
@@ -135,7 +135,7 @@
 
 - **消费的 `--mdvr-*`（7 个，全部带默认回退，铁律）**：`accent`（11 处，回退 `#5856d6`）、`accent-faint`（6，回退 `#b4b3ed`）、`accent-fainter`（1，回退 `#cdccf3`）、`accent-text`（2，回退 `#3a3a4e`）、`highlight`（3，回退 `#b3541e`）、`link`（1，回退 `#005ae0`）、`mono`（3，回退 ui-monospace 栈）。
 - **消费的 `--dsw-alias-*`**：`bg-layer-1/2`、`border-l1`、`label-primary/secondary`、`state-error-primary`。
-- **推论**：① 面板最低兼容 = 7 个 `--mdvr-*`——主题只要定义这 7 个，插件面板就自带该主题配色；② 完整契约 30 个全量提供时（四个内置主题 + template.css 均如此），从配色到排版与面板全链路统一。`strawberry-mocha` 浅档 accent=`#D93B68`、深档=`#FB7185`，面板自动换粉——panel 无需任何改动。
+- **推论**：① 面板最低兼容 = 7 个 `--mdvr-*`——主题只要定义这 7 个，插件面板就自带该主题配色；② 完整契约 30 个全量提供时（四个内置主题均如此），从配色到排版与面板全链路统一。`strawberry-mocha` 浅档 accent=`#D93B68`、深档=`#FB7185`，面板自动换粉——panel 无需任何改动。
 
 ---
 
@@ -145,13 +145,13 @@
 2. **核心 17 个 = 统一变量**：accent/highlight/link/quote/code/table 系 + sans/mono/mm——同名同义同消费方，任何主题缺一个都会造成面板/元素回退不一致。
 3. **扩展变量不强制统一**：`--mdvr-h1..h6`、`--hl-*`、L2 常量只属于「带 ③ 元素段的全量主题」；纯色主题可完全不定义（四个内置主题均带全量 ③ 段，因此实际全量提供）。
 4. **同值不重排档**：两档同值的纯色派生色（如 check-mark）放 `:root` 单值即可；一旦某档需要不同值（inline-code/selection/shadow 即此类：浅档观感/对比度要求迫使拆档）→ 移入 body 两档定义，变量名不变、引用零改动。
-5. **命名冲突检查**：全仓 grep `--mdvr-*` / `--hl-*` / `--dsw-alias-*` 应无同名不同义；四个内置主题与 template.css 之间未发现同名不同值。
+5. **命名冲突检查**：全仓 grep `--mdvr-*` / `--hl-*` / `--dsw-alias-*` 应无同名不同义；四个内置主题之间未发现同名不同值。
 
 ---
 
 ## 十、维护引用（改变量名/值要动的地方）
 
-- 改核心 17 个变量之一：`panel.css` 回退值 → 四个内置主题 + `template.css`（参考主题）→ 主题 ③ 元素段。
+- 改核心 17 个变量之一：`panel.css` 回退值 → 四个内置主题（参考实现 `strawberry-mocha`）→ 主题 ③ 元素段。
 - 改内置主题专属变量：仅 `plugin/assets/themes/*.css` + 本文档 §四~§六。
 - 新增 `--dsw-alias-*`：❌ 不允许（平台名单固定）。
 - 版本台账：`manifest/versions.json` 按版本登记契约演变；新增主题需过 `scripts/check-release.js` 门禁（CSS 结构 + 浅深双档挂载 + panel fallback）。
@@ -159,7 +159,7 @@
 ### 与代码核对后的出入说明（以代码为准）
 
 1. **L2 数量**：早期文档称「43 个 L2 常量」；按代码核对，`:root` 单值区共 43 个**声明**，其中纯 L2 排版/形状常量实为 **38 个**（其余为 L3 旋钮 mm、字体栈 sans/mono/math-font、两档同值 check-mark），阴影 3 项已拆入浅深两档。本文按代码口径。
-2. **浅档语义色**：参考主题 template.css 的建议 AA 值为 error `#c74330` / success `#287b38` / warn `#985d00`；`strawberry-mocha` 实际取值 success `#237834` / warn `#965B00`（error `#C74330` 一致）。两者都是可比对数值——新配色建议按 AA 建议值（见 `docs/themes.md`），若调整内置主题默认值需同步主题文件与本文。
+2. **浅档语义色**：内置主题的 AA 参考值（原 template.css 建议，v1.17.0 起归入内置主题约定）为 error `#c74330` / success `#287b38` / warn `#985d00`；`strawberry-mocha` 实际取值 success `#237834` / warn `#965B00`（error `#C74330` 一致）。两者都是可比对数值——新配色建议按 AA 参考值（见 `docs/themes.md`），若调整内置主题默认值需同步主题文件与本文。
 3. **变量总数**：四个内置主题各 **99 个同名变量**（`:root` 43 + 浅深两档各 56，浅深同集、跨主题 0 差集），与「99 变量名单」的说法一致。
 
 > 关联文档：`docs/themes.md`（能力边界 / 主题文件格式 / 新增主题步骤）、`docs/architecture.md`（整体架构与职责边界）。

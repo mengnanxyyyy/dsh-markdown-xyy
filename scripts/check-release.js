@@ -145,7 +145,8 @@ for (const f of ['plugin/host.js', 'plugin/src/client.core.js', 'plugin/client.j
 // ---------- 5. 资产与内置主题存在且非空 ----------
 console.log('\n5) 资产与内置主题完整性')
 // v1.12.0：template-strawberry.css 已删除（新建用户主题改取内置主题内容）
-const assets = ['panel.css', 'template.css']
+// v1.17.0：template.css（青瓷参考模板）已删除——新建起步取自所选内置主题，资产契约只剩 panel.css
+const assets = ['panel.css']
 for (const a of assets) {
   const p = path.join(root, 'plugin', 'assets', a)
   const st = fs.existsSync(p) ? fs.statSync(p) : null
