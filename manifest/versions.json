@@ -245,7 +245,7 @@
       "palette": "multi-theme-css",
       "date": "2026-08-15",
       "changes": [
-        "修复：resolveProjectRoot 资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径，v1.2.1 全部候选 miss 的补丁）——已用诊断包实测命中 /home/lab/xyygithub/dsh-markdown-xyy"
+        "修复：resolveProjectRoot 资产探测改用 fs 服务 resolve 句柄（stat 不接受字符串路径，v1.2.1 全部候选 miss 的补丁）——已用诊断包实测命中 工作区项目根"
       ]
     },
     {
