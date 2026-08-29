@@ -28,16 +28,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 构建约定
 
 - `plugin/client.js` = `plugin/src/client.core.js` 的拷贝（构建产物，禁止手改）；改逻辑只改 `plugin/src/client.core.js`，然后运行 `node scripts/build-client.js`。
-- **常驻安装通道（与动态 define 并存）**：`node scripts/build-installed.js` 从同一份源码生成 `lib/index.mjs`（Host 半 ESM 包入口）+ `client/client.js`（`__ModuleLoader__` 注册）；安装进 profile：`dsh plugin --profile web add dsh-markdown-xyy`（npm registry，已发布）← 首选，`add github:mengnanxyyyy/dsh-markdown-xyy[#tag]`（GitHub 备选）/ `add file:/本仓库绝对路径`（本地开发），卸载 `remove`；发新版流程 = 升版本 + `npm publish --registry=https://registry.npmjs.org`（prepack 钩子自动重建+门禁）。通道差异只在 host.js 的 `registerRpc`（有 harness 走 harness.handle，无 harness 走 `ctx.get('webServer')` HTTP 路由 `/mdvr/api/*`）与 client 包装器内的 host/styles 桥。**改 host.js / client.core.js 后两个通道的产物都要重新生成**（build-client.js + build-installed.js）。
+- **常驻安装通道（与动态 define 并存）**：`node scripts/build-installed.js` 从同一份源码生成 `lib/index.mjs`（Host 半 ESM 包入口）+ `client/client.js`（`__ModuleLoader__` 注册）；安装进 profile：`dsh plugin --profile web add dsh-markdown-xyy`（npm registry，已发布）← 首选，`add github:mengnanxyyyy/dsh-markdown-xyy[#tag]`（GitHub 备选）/ `add file:/本仓库绝对路径`（本地开发），卸载 `remove`；发新版走 npm 发布（`package.json` 的 `prepack` 钩子自动重建常驻双半 + 跑门禁）。通道差异只在 host.js 的 `registerRpc`（有 harness 走 harness.handle，无 harness 走 `ctx.get('webServer')` HTTP 路由 `/mdvr/api/*`）与 client 包装器内的 host/styles 桥。**改 host.js / client.core.js 后两个通道的产物都要重新生成**（build-client.js + build-installed.js）。
 - 发布门禁：`node scripts/check-release.js`（MANIFEST 一致性 / 语法 / 资产存在 / CSS 契约 / packageId 唯一 / 常驻双半语法）。
-
-## 发布渠道与文档政策
-
-- **GitHub**：`mengnanxyyyy/dsh-markdown-xyy`（public，35 个版本 tag；`gh` 已登录，凭证在 `~/.config/gh`）。提交历史已重建为「每发布版本一个提交 + 顶部 docs 提交」；旧历史备份在本地分支 `backup-pre-cleanup`（**不要推送**）。
-- **npm**：`dsh-markdown-xyy` 已发布，最新 = 当前版本。发布命令必须带 `--registry=https://registry.npmjs.org`（本机 npm 默认 registry 是 npmmirror 镜像，**只读不接发布**）；账号开 2FA，发布需要 OTP 或 bypass token。`prepack` 钩子自动重建常驻双半 + 跑发布门禁。
-- **发新版流程**：升 MANIFEST 双份 + `manifest/versions.json` → `git tag vX.Y.Z` → `npm publish --registry=…` → README 徽章版本号同步。
-- **README 政策（历史决策，勿回填）**：公众 README 只展示「安装即用」（`dsh plugin --profile web add dsh-markdown-xyy` / `github:` 备选）；**不要**在 README 写动态 define、`file:` 本地开发等开发者工作流内容（动态 define 流程只存在于 docs/development.md）。双语同步维护：`README.md`（中文）+ `README.en.md`（英文镜像），顶部互相挂语言徽章。主题预览图 = `screenshots/*.jpg`（4 张用户手动截图：strawberry-mocha / cyber-titanium / high-vis-clarity / pine-smoke-ink），README 画廊引用 `.jpg`。
-- **已知未决**：`plugin/host.js` 的 `FALLBACK_PROJECT_DIR` / `FALLBACK_USER_THEMES_DIR` 仍硬编码 `/home/lab/…` 本地路径（运行时兜底，功能正常；公开仓库可见，用户未定是否中性化——若改需要同步 4 主题与 `template.css` 无关，仅常量）；本机正式 profile 目前仍是 `file:` 本地版（未切 npm registry 版）。
 
 ## define 传输约定
 
@@ -78,3 +70,6 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 ## 当前状态
 
 - 当前版本 v1.15.0（对话流节点间距紧凑化）；内置主题 4 个；路线图见 docs/capabilities.md。
+- 提交历史已重建为「每发布版本一个提交 + 顶部 docs 提交」（共 36 个）；旧历史备份在本地分支 `backup-pre-cleanup`，**勿推送**。
+- README 双语维护（`README.md` 中文 + `README.en.md` 英文镜像，顶部互挂语言徽章）：公众版只展示「安装即用」（npm registry / github:），**勿回填**动态 define、`file:` 本地开发类内容（动态 define 流程只存在于 docs/development.md）；主题预览图 = `screenshots/*.jpg`（4 张，README 画廊引用）。
+- 待决：`plugin/host.js` 的 FALLBACK_* 常量硬编码了本机目录（运行时兜底，功能正常；公开仓库可见，未定是否中性化）。
