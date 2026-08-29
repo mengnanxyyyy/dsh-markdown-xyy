@@ -72,12 +72,12 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '2.0.0',
+  version: '2.0.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '2.0 正式版（首个正式发布）：整合全部历史迭代（v0.1–v1.18 折叠进 2.0.0 单版本）——主题选择持久化（localStorage 跨页恢复/多标签同步）+ 新建用户主题可选底子内置主题 + 用户主题目录 $HOME/.dsh/web-themes-xyy + 四套内置主题 + 不可变版本台账',
+    '修复常驻安装（npm）通道：Host 资产根优先取插件包自身目录（__MDVR_PKG_ROOT__ 注入，npm 装到任何机器都能读到内置主题/面板样式，不再依赖本机开发目录）；webServer 路由注册加固（失败不拖垮 fiber）；Host 声明 inject webServer 确保就绪后再注册路由',
   ],
 }
 

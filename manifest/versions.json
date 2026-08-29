@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.0.1",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-29",
+      "changes": [
+        "修复常驻安装（npm）通道：Host 资产根优先取插件包自身目录（__MDVR_PKG_ROOT__ 注入，npm 装到任何机器都能读到内置主题/面板样式，不再依赖本机开发目录）；webServer 路由注册加固（失败不拖垮 fiber）；Host 声明 inject webServer 确保就绪后再注册路由"
+      ]
+    },
+    {
       "version": "2.0.0",
       "packageId": "pkg-7",
       "name": "LobeUI 风格 · 主题系统",

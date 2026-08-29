@@ -90,6 +90,19 @@ async function resolveProjectRoot(ctx) {
       return false
     }
   }
+  // v2.0.1：常驻安装通道优先用插件包自身目录（build-installed 包装器把包根路径注入为
+  // __MDVR_PKG_ROOT__，覆盖在 IIFE 闭包作用域内）—— npm 安装到任何机器都能从包内
+  // plugin/assets 读取资产，不再依赖本机开发目录；动态 define 通道无该标识（typeof 短路），
+  // 仍走下方原探测链
+  if (typeof __MDVR_PKG_ROOT__ === 'string' && __MDVR_PKG_ROOT__.length > 0) {
+    try {
+      if (await hasAssets(__MDVR_PKG_ROOT__)) {
+        projectRoot = __MDVR_PKG_ROOT__
+        console.log('[mdvr] projectRoot = package ' + projectRoot)
+        return projectRoot
+      }
+    } catch (e) { /* 忽略：包目录不可读时走原探测链 */ }
+  }
   const roots = []
   try {
     const sp = ctx.get('sandboxPolicy')
@@ -170,12 +183,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '2.0.0',
+  version: '2.0.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '2.0 正式版（首个正式发布）：整合全部历史迭代（v0.1–v1.18 折叠进 2.0.0 单版本）——主题选择持久化（localStorage 跨页恢复/多标签同步）+ 新建用户主题可选底子内置主题 + 用户主题目录 $HOME/.dsh/web-themes-xyy + 四套内置主题 + 不可变版本台账',
+    '修复常驻安装（npm）通道：Host 资产根优先取插件包自身目录（__MDVR_PKG_ROOT__ 注入，npm 装到任何机器都能读到内置主题/面板样式，不再依赖本机开发目录）；webServer 路由注册加固（失败不拖垮 fiber）；Host 声明 inject webServer 确保就绪后再注册路由',
   ],
 }
 
@@ -194,22 +207,28 @@ return {
       if (h && typeof h.handle === 'function') return h.handle(method, handler)
       const ws = ctx.get('webServer')
       if (ws !== undefined && typeof ws.register === 'function') {
-        return ws.register({
-          kind: 'exact',
-          path: '/mdvr/api/' + method,
-          handler: async (req, res) => {
-            const args = await readJsonBody(req)
-            let out
-            try { out = await handler(args) } catch (e) {
-              out = { ok: false, reason: String((e && e.message) || e) }
-            }
-            res.writeHead(200, {
-              'content-type': 'application/json; charset=utf-8',
-              'cache-control': 'no-store',
-            })
-            res.end(JSON.stringify(out))
-          },
-        })
+        try {
+          return ws.register({
+            kind: 'exact',
+            path: '/mdvr/api/' + method,
+            handler: async (req, res) => {
+              const args = await readJsonBody(req)
+              let out
+              try { out = await handler(args) } catch (e) {
+                out = { ok: false, reason: String((e && e.message) || e) }
+              }
+              res.writeHead(200, {
+                'content-type': 'application/json; charset=utf-8',
+                'cache-control': 'no-store',
+              })
+              res.end(JSON.stringify(out))
+            },
+          })
+        } catch (e) {
+          // v2.0.1：路由注册失败（路径冲突等）不拖垮整根 fiber —— 只放弃本条 RPC 并留痕
+          console.warn('[mdvr] registerRpc failed for /mdvr/api/' + method + ': ' + String((e && e.message) || e))
+          return () => {}
+        }
       }
       return () => {}
     }

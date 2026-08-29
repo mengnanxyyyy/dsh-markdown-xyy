@@ -30,15 +30,34 @@ const lib = `// ============================================================
 // lib/index.mjs —— 生成文件（scripts/build-installed.js），勿手改。
 // 源：plugin/host.js（常驻安装版 Host 半，npm 包 main 入口）。
 // 通道说明：body 内 registerRpc() 在无 harness 全局时自动落到 webServer HTTP 路由。
+// v2.0.1 包装器增强：
+//   1) __MDVR_PKG_ROOT__ —— 把插件包自身目录注入 body（闭包可见），host.js 的
+//      resolveProjectRoot 优先用它解析资产（npm 装到任何机器都能读包内 plugin/assets）；
+//      动态 define 通道无此标识，typeof 短路走原探测链。
+//   2) inject: ['webServer'] —— 声明硬依赖，等 webServer 就绪且变化时自动重新激活，
+//      避免「插件先于 webServer 装载、ctx.get('webServer') 静默为空 → 路由全缺」。
+//   3) apply 包装 try/catch：启动失败把错误落到 /tmp/mdvr-hostboot.log 便于诊断。
 // ============================================================
 
+import { writeFileSync } from 'node:fs'
+
 const plugin = (function () {
+  const __MDVR_PKG_ROOT__ = new URL('..', import.meta.url).pathname
 ${hostBody}
 })()
 
 export const name = ${JSON.stringify(pkgName)}
-export const inject = plugin.inject || []
-export const apply = plugin.apply
+export const inject = ['webServer']
+export const apply = function (ctx) {
+  try {
+    return plugin.apply(ctx)
+  } catch (err) {
+    try {
+      writeFileSync('/tmp/mdvr-hostboot.log', '[mdvr] host apply failed at ' + new Date().toISOString() + '\\n' + (err && err.stack ? err.stack : String(err)) + '\\n', 'utf8')
+    } catch (e) { /* 忽略：写日志失败不掩盖原错误 */ }
+    throw err
+  }
+}
 `
 
 // ---------- Client 半：client/client.js ----------
