@@ -13,12 +13,12 @@
 
 | 草莓猛男粉 `strawberry-mocha` | Cyber Titanium · 钛影 `cyber-titanium` |
 | :---: | :---: |
-| ![草莓猛男粉](screenshots/strawberry-mocha.png) | ![钛影](screenshots/cyber-titanium.png) |
+| ![草莓猛男粉](screenshots/strawberry-mocha.jpg) | ![钛影](screenshots/cyber-titanium.jpg) |
 | 丝绒草莓甜点 × Catppuccin Mocha 暗夜，标准参考实现 | Space Black 空间黑 × 阳极钛紫 × 电光青 × 冷银 |
 
 | High-Vis Clarity · 高清晰 `high-vis-clarity` | 松烟墨黛 `pine-smoke-ink` |
 | :---: | :---: |
-| ![高清晰](screenshots/high-vis-clarity.png) | ![松烟墨黛](screenshots/pine-smoke-ink.png) |
+| ![高清晰](screenshots/high-vis-clarity.jpg) | ![松烟墨黛](screenshots/pine-smoke-ink.jpg) |
 | 旧显示器 / 低色域友好：高反差冷白 × 纯天蓝 × 黄金重点 | 徽墨沉香 × 矿物朱砂 × 远山黛蓝 × 宣纸冷白 |
 
 > 预览图存放于 [screenshots/](screenshots/)，换图直接覆盖同名文件即可。

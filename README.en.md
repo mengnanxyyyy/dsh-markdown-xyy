@@ -13,12 +13,12 @@ A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reski
 
 | Strawberry Mocha `strawberry-mocha` | Cyber Titanium `cyber-titanium` |
 | :---: | :---: |
-| ![Strawberry Mocha](screenshots/strawberry-mocha.png) | ![Cyber Titanium](screenshots/cyber-titanium.png) |
+| ![Strawberry Mocha](screenshots/strawberry-mocha.jpg) | ![Cyber Titanium](screenshots/cyber-titanium.jpg) |
 | Velvet strawberry × Catppuccin Mocha nights, the reference implementation | Space Black × anodized titanium purple × electric cyan × cool silver |
 
 | High-Vis Clarity `high-vis-clarity` | Pine Smoke Ink `pine-smoke-ink` |
 | :---: | :---: |
-| ![High-Vis Clarity](screenshots/high-vis-clarity.png) | ![Pine Smoke Ink](screenshots/pine-smoke-ink.png) |
+| ![High-Vis Clarity](screenshots/high-vis-clarity.jpg) | ![Pine Smoke Ink](screenshots/pine-smoke-ink.jpg) |
 | High-contrast cool white × pure sky blue × golden accents, built for low-gamut displays | Ink-stick incense × cinnabar × misty indigo × rice-paper cool white |
 
 > Previews live in [screenshots/](screenshots/); overwrite the same filenames to swap images.
