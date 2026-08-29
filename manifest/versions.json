@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "1.16.0",
+      "packageId": "pkg-3",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-08-29",
+      "changes": [
+        "主题选择持久化（localStorage）：选中的主题（系统自带/内置/用户）跨刷新与新开页面自动恢复，多标签页实时同步（storage 事件）；外观模式仍由产品 theme.setTheme 持久化"
+      ]
+    },
+    {
       "version": "1.15.0",
       "packageId": "pkg-22",
       "name": "LobeUI 风格 · 主题系统",

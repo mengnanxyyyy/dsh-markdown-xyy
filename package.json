@@ -1,6 +1,6 @@
 {
   "name": "dsh-markdown-xyy",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "版本记录 + Markdown 对话主题排版 —— DeepSeek Harness 插件（动态 define 与常驻安装双通道）",
   "keywords": [
     "deepseek-harness",

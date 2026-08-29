@@ -65,24 +65,53 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 //   ② 强调变量：--mdvr-*（accent/highlight/quote/code/table/link 系）→ 排版层色彩细节
 //   ③ 元素排版：不再注入排版骨架（typography.css 已停用，v1.3.0+ 后缀）→ 产品 ._markdown_* 规则兜底，主题增量覆盖
 //   ④ 面板 UI：panel.css 自绘组件样式 → 完全控制
-//   限制：不改产品 DOM；:where() 零优先级；token 名单固定 13 个；无持久化
+//   限制：不改产品 DOM；:where() 零优先级；token 名单固定 13 个
+//   持久化（v1.16.0）：主题选择存浏览器 localStorage，刷新/新页/重启自动恢复；外观模式由产品 theme.setTheme 自持持久化
 // ============================================================
 
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '1.15.0',
+  version: '1.16.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-08-29',
   changes: [
-    '对话流节点间距紧凑化（主题 §14）：产品对话流主列 gap 16px→5px（稳定锚点 [data-chat-flow]，哈希类名勿用），工具调用卡/消息等全对话流节点垂直间距收紧',
+    '主题选择持久化（localStorage）：选中的主题（系统自带/内置/用户）跨刷新与新开页面自动恢复，多标签页实时同步（storage 事件）；外观模式仍由产品 theme.setTheme 持久化',
   ],
 }
 
-// 默认选择（会话级内存态，刷新/重启后恢复此值）
+// 初始默认选择（v1.16.0 起用户选中后持久化到 localStorage，不再每次回退）
 // 'system-native' = 系统自带（原生，插件零干预）；其余为第三方主题 id
 const DEFAULT_SELECTION = 'system-native'
+
+// ---------- 主题选择持久化（v1.16.0：跨刷新/新标签页/重启恢复） ----------
+// 仅持久化「选中主题」；外观模式 ☀️/🌙/🖥️ 走产品 theme.setTheme 官方接口（自带持久化），无需重复存储。
+// 存储不可用（隐私模式/沙箱）时全部读写静默跳过 → 回退会话级内存态（与旧版行为一致）。
+const STORAGE_KEY = 'mdvr:theme:selection'
+function readStoredSelection() {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const v = window.localStorage.getItem(STORAGE_KEY)
+      return typeof v === 'string' && v.length > 0 ? v : null
+    }
+  } catch (e) { /* 忽略：隐私模式 / 沙箱禁用存储 */ }
+  return null
+}
+function writeStoredSelection(id) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(STORAGE_KEY, id)
+    }
+  } catch (e) { /* 忽略 */ }
+}
+function clearStoredSelection() {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(STORAGE_KEY)
+    }
+  } catch (e) { /* 忽略 */ }
+}
 
 // 新建用户主题模板的兜底（Host 资产 plugin/assets/template.css 不可用时使用）
 const FALLBACK_TEMPLATE_CSS = '/* 主题模板不可用，请检查插件资产 plugin/assets/template.css */\nbody { --mdvr-accent: #5856d6; }\n'
@@ -324,7 +353,9 @@ function parseThemeSwatches(css) {
 //       切换时旧样式表整体卸载 → 产品观感随之恢复。
 // v1.3.0 原子切换：先解析目标 CSS 并成功插入新样式，再卸载旧样式 —— 目标缺失/插入失败时旧主题保持不动。
 // 返回 true = 切换成功；false = 目标不可用（调用方不应更新选中状态）。
-function applySelection(ctx, id) {
+// v1.16.0：切换成功后把选择写入 localStorage（persist=false 时跳过，用于启动恢复路径——
+//   避免把「读取失败时的临时回退默认值」覆盖掉用户已保存的选择）。
+function applySelection(ctx, id, persist) {
   let css = null
   if (id === 'system-native') {
     css = panelCss
@@ -340,6 +371,7 @@ function applySelection(ctx, id) {
   if (themeDisposer) { themeDisposer(); themeDisposer = null }
   themeDisposer = nextDisposer
   activeSelection = id
+  if (persist !== false) writeStoredSelection(id)
   return true
 }
 
@@ -812,11 +844,56 @@ return {
     // 捕获产品 theme 服务（外观三档切换用；可选，缺失时按钮自动禁用）
     const themeSvc = ctx.get('theme')
     themeService = themeSvc !== undefined ? themeSvc : null // 每次 apply 重新解析，不残留旧 Run 的引用
-    // 资产异步加载（Host 文件驱动），完成后应用默认选择（DEFAULT_SELECTION = 'system-native'）
+    // 资产异步加载（Host 文件驱动），完成后恢复上次会话选中的主题（v1.16.0 localStorage 持久化）
     // v1.3.0：run/disposed 双检查 —— stop/update 后迟到的 Promise 不再注入样式（杜绝幽灵样式）
-    ensureAssets().then(() => {
+    // v1.16.0：启动恢复校验三个分支 —— 内置/系统自带直接应用；用户主题先拉目录再校验（读取失败
+    //   保留下次重试、不覆盖存储；主题被删除则清存储）；非法值清存储。persist=false 避免恢复路径的
+    //   回退写入污染用户已保存的选择。
+    ensureAssets().then(async () => {
       if (disposed || run !== runSeq) return
-      if (activeSelection === DEFAULT_SELECTION) applySelection(ctx, DEFAULT_SELECTION)
+      let target = DEFAULT_SELECTION
+      const stored = readStoredSelection()
+      if (stored !== null) {
+        if (stored === 'system-native' || builtinThemes[stored]) {
+          target = stored
+        } else if (stored.indexOf('user:') === 0) {
+          const got = await loadUserThemes()
+          if (disposed || run !== runSeq) return
+          if (got === null) {
+            target = DEFAULT_SELECTION // 目录读取失败：本次回默认，但不清存储（下次再试）
+          } else if (userThemes[stored.slice(5)]) {
+            target = stored
+          } else {
+            clearStoredSelection() // 该用户主题已不存在：清存储回默认
+          }
+        } else {
+          clearStoredSelection() // 非法/已移除的引用：清存储回默认
+        }
+      }
+      if (activeSelection === DEFAULT_SELECTION) applySelection(ctx, target, false)
+    })
+    // v1.16.0：跨标签页/窗口同步 —— 另一标签页改选择后本页跟随（storage 事件只在“其他标签页”触发）。
+    // 页面关闭时 ctx.effect 自动移除监听；存储不可用则整个监听不挂载。
+    const onStorageSync = (e) => {
+      try {
+        if (!e || e.key !== STORAGE_KEY || disposed || run !== runSeq) return
+        if (e.newValue === null || e.newValue === activeSelection) return
+        if (e.newValue.indexOf('user:') === 0 && !userThemes[e.newValue.slice(5)]) {
+          // 本页用户主题缓存还没加载（设置页未打开过）：先拉目录再应用；被删则 applySelection 返回 false 不动现状
+          loadUserThemes().then(() => {
+            if (!disposed && run === runSeq) applySelection(rootCtx, e.newValue)
+          })
+          return
+        }
+        applySelection(rootCtx, e.newValue)
+      } catch (err) { /* 忽略：沙箱/隐私模式无 storage */ }
+    }
+    ctx.effect(() => {
+      let w = null
+      try { if (typeof window !== 'undefined') w = window } catch (e) { w = null }
+      if (!w) return () => {}
+      w.addEventListener('storage', onStorageSync)
+      return () => w.removeEventListener('storage', onStorageSync)
     })
     // Fiber 卸载清理：还原注入的样式表 + 标记 Run 失效（stop/update/undefine 时自动执行）
     ctx.effect(() => () => {
