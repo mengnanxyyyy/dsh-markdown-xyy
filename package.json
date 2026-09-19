@@ -1,6 +1,6 @@
 {
   "name": "dsh-markdown-xyy",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "版本记录 + Markdown 对话主题排版 —— DeepSeek Harness 插件（动态 define 与常驻安装双通道）",
   "keywords": [
     "deepseek-harness",
@@ -57,11 +57,56 @@
     "prepack": "node scripts/build-installed.js && node scripts/check-release.js"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/cordis": "^4.0.2",
     "react": "^18.2.0"
   },
   "engines": {
     "node": ">=22"
+  },
+  "dshCompatibility": {
+    "verifiedAgainst": "0.1.6-alpha.2",
+    "verifiedDate": "2026-09-19",
+    "cordis": "4.0.2",
+    "darkAttribute": "data-ds-dark-theme",
+    "themeTokens": [
+      "--dsw-alias-bg-base",
+      "--dsw-alias-bg-layer-1",
+      "--dsw-alias-bg-layer-2",
+      "--dsw-alias-bg-overlay",
+      "--dsw-alias-border-l1",
+      "--dsw-alias-border-l2",
+      "--dsw-alias-brand-primary",
+      "--dsw-alias-label-primary",
+      "--dsw-alias-label-secondary",
+      "--dsw-alias-state-error-primary",
+      "--dsw-alias-state-success-primary",
+      "--dsw-alias-state-warn-primary",
+      "--dsw-specific-sidebar-fill"
+    ],
+    "slots": [
+      "settings.section",
+      "tool.view.cordis"
+    ],
+    "hostServices": [
+      "fs",
+      "shell",
+      "sandboxPolicy",
+      "webServer"
+    ],
+    "clientServices": [
+      "theme"
+    ],
+    "gateCoverage": [
+      "verifiedAgainst",
+      "themeTokens",
+      "slots",
+      "darkAttribute",
+      "cordis"
+    ],
+    "manualCoverage": [
+      "hostServices",
+      "clientServices"
+    ]
   },
   "license": "MIT"
 }

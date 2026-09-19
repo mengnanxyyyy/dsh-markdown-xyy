@@ -15,7 +15,7 @@
  *   保持全局签名（见 §13，勿收口）。
  * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
  *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
- *   → 语法高亮 --hl-*（浅深成对）。见 docs/unified-variables.md。
+ *   → 语法高亮 --hl-*（浅深成对）。见 docs/variables.md。
  * ============================================================ */
 
 /* ============================================================
@@ -84,6 +84,15 @@
   --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --mdvr-mono: "JetBrains Mono", SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --mdvr-math-font: "KaTeX_Math", "Latin Modern Math", "Cambria Math", STIXGeneral, "Times New Roman", serif;
+  /* 产品字体 token 覆盖（v2.0.2 修正）：
+     产品的 markdown 字体 token（--dsw-font-markdown-*）**全部由下面这两个 token 派生**
+     （如 --dsw-font-markdown-base-font-family: var(--dsw-font-family)），
+     且 var() 在「使用处」解析 —— 所以覆盖它们即可让 UI 与 markdown
+     （容器 / h1-h6 / 表格 / 行内代码 / 代码块）彻底同源，
+     无需逐元素改写，也不会与产品显式 `font:` 简写打特异性官司。
+     产品把此二者声明在 :root，故此处同样用 :root 覆盖（同特异性 + 注入更晚者胜）。 */
+  --dsw-font-family: var(--mdvr-sans);
+  --ds-font-family-code: var(--mdvr-mono);
 
   /* ===== 单值拆档说明（v1.11.0） =====
    * inline-code / selection / shadow 属颜色·光影类，已拆浅深两档
@@ -130,7 +139,7 @@ body {
   --mdvr-link: #007AD9;                    /* 链接：天蓝 */
   --mdvr-link-hover: #005699;              /* 链接 Hover：深天蓝 */
   --mdvr-highlight: #B07200;               /* 高亮字 */
-  --mdvr-highlight-soft: #FFF3D6;          /* 高亮衬底 */
+  --mdvr-highlight-soft: #FFF3D6;          /* 高亮衬底（预留：暂无消费者，见 docs/variables.md §三） */
   --mdvr-subsup: #007AD9;                  /* 公式/上下标：天蓝 */
   --mdvr-del: #8C959F;                     /* 删除线 */
 
@@ -162,6 +171,16 @@ body {
   --hl-property: #953800;                  /* 属性/键：暖褐 */
   --hl-function: #8250DF;                  /* 函数：深紫 */
   --hl-comment: #6E7781;                   /* 注释：稳重灰 */
+  /* Shiki 语法高亮映射（v2.0.2 新增）：见 strawberry-mocha 同名注释。 */
+  --shiki-token-keyword: var(--hl-keyword);
+  --shiki-token-string: var(--hl-string);
+  --shiki-token-string-expression: var(--hl-string);
+  --shiki-token-constant: var(--hl-number);
+  --shiki-token-function: var(--hl-function);
+  --shiki-token-comment: var(--hl-comment);
+  --shiki-token-parameter: var(--hl-property);
+  --shiki-token-punctuation: var(--dsw-alias-label-secondary);
+  --shiki-token-link: var(--mdvr-link);
 
   /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆浅色档） ===== */
   --mdvr-inline-code-bg: #E8EDF2;          /* 行内代码底（浅档：冷白分层） */
@@ -208,7 +227,7 @@ body[data-ds-dark-theme] {
   --mdvr-link: #38A9FF;                    /* 链接：亮天蓝 */
   --mdvr-link-hover: #80D8FF;              /* 链接 Hover：冰蓝光 */
   --mdvr-highlight: #FFE082;               /* 高亮字 */
-  --mdvr-highlight-soft: #372E14;          /* 高亮衬底 */
+  --mdvr-highlight-soft: #372E14;          /* 高亮衬底（预留：暂无消费者，见 docs/variables.md §三） */
   --mdvr-subsup: #38A9FF;                  /* 上下标/公式符号：亮天蓝 */
   --mdvr-del: #546E7A;                     /* 删除线：坚固中灰 */
 
@@ -240,6 +259,16 @@ body[data-ds-dark-theme] {
   --hl-property: #4DD0E1;                  /* 属性/键：明澈青 */
   --hl-function: #38A9FF;                  /* 函数名：明亮纯蓝 */
   --hl-comment: #78909C;                   /* 注释：清晰石板灰 */
+  /* Shiki 语法高亮映射（v2.0.2 新增，深色档）：见 strawberry-mocha 同名注释。 */
+  --shiki-token-keyword: var(--hl-keyword);
+  --shiki-token-string: var(--hl-string);
+  --shiki-token-string-expression: var(--hl-string);
+  --shiki-token-constant: var(--hl-number);
+  --shiki-token-function: var(--hl-function);
+  --shiki-token-comment: var(--hl-comment);
+  --shiki-token-parameter: var(--hl-property);
+  --shiki-token-punctuation: var(--dsw-alias-label-secondary);
+  --shiki-token-link: var(--mdvr-link);
 
   /* ===== 单值拆档（v1.11.0：原 :root 浅深共用 → 拆深色档） ===== */
   --mdvr-inline-code-bg: #0E1012;          /* 行内代码底（深档：纯净黑核） */
@@ -418,8 +447,11 @@ body {
   padding: 0 !important;
   margin: 0 !important;
 }
-/* 语言标识：等宽大写小字号，锁定左侧 */
-[class*="_markdown_"] :where(.md-code-block > div:first-child span) {
+/* 语言标识：等宽大写小字号，锁定左侧
+   ⚠️ 语言标签实际是 div.infostring，banner 子树内**不存在 span**，
+   旧选择器 `… > div:first-child span` 永不命中（DSH 0.1.6 实测）。
+   改用产品稳定属性锚点 data-code-block-banner，取它的第一个子元素。 */
+[class*="_markdown_"] :where(.md-code-block [data-code-block-banner] > :first-child) {
   color: var(--mdvr-accent) !important;
   font-weight: 700 !important;
   font-family: var(--mdvr-mono) !important;
@@ -488,33 +520,18 @@ body {
 }
 
 /* ------------------------------------------------------------
- * 6. 代码语法高亮（Prism / Highlight.js / Shiki 通用，--hl-* 成对；
- *    v1.10.0 起 markdown 限定，防产品对话外复用同一高亮库被连带换肤）
- *    !important：高亮 token 由产品/高亮库显式着色，必须压过
+ * 6. 代码语法高亮（v2.0.2 更正说明）
+ *    ⚠️ DSH **不使用** Prism / Highlight.js：全产物无 hljs / token 类名，
+ *    代码着色走 Shiki 的 css-variables 主题 —— token 颜色由内联 style 落地，
+ *    取值形如 var(--shiki-token-keyword)。
+ *    所以「.token.* / .hljs-* 选择器 + color」在本平台**永不命中**：
+ *    v1.10.0–v2.0.2 的整段规则均为死代码，已删除。
+ *    真正生效的入口 = 覆盖 9 个 --shiki-token-* 变量，见 ①/② 段
+ *    （--hl-* 定义处紧随其后的映射；--hl-* 仍是调色单一真源）。
+ *    已知取舍：Shiki 的 token 无 per-token 选择器、只有颜色可经变量控制，
+ *    故旧规则里的「关键字加粗」无法保留（注释斜体由产品的 Shiki
+ *    fontStyle 设置提供，不受此影响）。
  * ---------------------------------------------------------- */
-[class*="_markdown_"] :where(.token.keyword, .hljs-keyword, .token.tag, .hljs-tag) {
-  color: var(--hl-keyword) !important;
-  font-weight: 600;
-}
-[class*="_markdown_"] :where(.token.string, .hljs-string, .token.char, .hljs-symbol) {
-  color: var(--hl-string) !important;
-}
-[class*="_markdown_"] :where(.token.number, .hljs-number, .token.boolean, .hljs-literal, .token.constant) {
-  color: var(--hl-number) !important;
-}
-[class*="_markdown_"] :where(.token.property, .hljs-attr, .token.attr-name, .token.key) {
-  color: var(--hl-property) !important;
-}
-[class*="_markdown_"] :where(.token.function, .hljs-function, .token.class-name, .hljs-title) {
-  color: var(--hl-function) !important;
-}
-[class*="_markdown_"] :where(.token.comment, .hljs-comment, .token.prolog, .token.doctype) {
-  color: var(--hl-comment) !important;
-  font-style: italic !important;
-}
-[class*="_markdown_"] :where(.token.operator, .hljs-operator, .token.punctuation, .hljs-punctuation) {
-  color: var(--dsw-alias-label-secondary) !important;
-}
 
 /* ------------------------------------------------------------
  * 7. 行内代码：高辨识冷蓝胶囊（冷白分层底 + 深天蓝字，零行高膨胀签名；
@@ -765,6 +782,21 @@ body {
   border-bottom-color: var(--mdvr-link-hover) !important;
   text-decoration: none !important;
 }
+/* 行内文件引用胶囊（v2.0.2 补）：它是 <button> 而非 <a>，产品给它
+   --dsw-alias-link（非 .compact 上下文），与主题链接色不一致；
+   此处并入主题链接身份。类名子串机制与 [class*="_markdown_"] 同理
+   （_fileMention_ 前缀稳定，hash 后缀随构建变化）。 */
+[class*="_markdown_"] :where([class*="_fileMention_"]) {
+  color: var(--mdvr-link) !important;
+  text-decoration: none !important;
+  border-bottom: 1.5px solid transparent !important;
+  transition: all 0.2s ease !important;
+}
+[class*="_markdown_"] :where([class*="_fileMention_"]:hover) {
+  color: var(--mdvr-link-hover) !important;
+  border-bottom-color: var(--mdvr-link-hover) !important;
+  text-decoration: none !important;
+}
 [class*="_markdown_"] :where(img) {
   max-width: 100%;
   border-radius: var(--mdvr-radius-table);
@@ -793,10 +825,19 @@ body {
 
 /* ============================================================
  * 14. 对话流节点间距（工具调用块之间的主间距源）
- *     产品对话流主列 .Md3f7G_column { gap:16px }（哈希类名勿用）——
- *     稳定属性锚点 [data-chat-flow]（仅该列持有），gap 覆盖为 5px；
+ *     ⚠️ 产品该列的间距**不是** flex gap，而是兄弟元素外边距（DSH 0.1.6 实测）：
+ *       .EvIC1a_column{display:flex}                                       ← 无 gap
+ *       .EvIC1a_column > :not([hidden]) ~ :not([hidden]) { margin-top: var(--dsh-chat-flow-gap,16px) }
+ *       .EvIC1a_flowItem[data-turn-process-answer]       { --dsh-chat-flow-gap:8px }
+ *     flex gap 与外边距**叠加、不折叠**，故旧写法 [data-chat-flow]{gap:5px}
+ *     实际把 16px 变成 21px —— 与「收紧」意图相反。v2.0.2 改为覆盖产品旋钮。
+ *     （原注释引用的 .Md3f7G_column 是旧构建哈希类名，已过时，勿再用。）
  *     影响范围：对话流全部节点（消息 / 工具调用卡 / 状态条等）之间距
  * ============================================================ */
 [data-chat-flow] {
-  gap: 5px !important;              /* 产品 gap:16px */
+  --dsh-chat-flow-gap: 5px !important;   /* 产品默认 16px */
+}
+/* 产品给「本回合过程」节点单独设了 8px；这里一并对齐到同一节奏 */
+[data-chat-flow] [data-turn-process-answer] {
+  --dsh-chat-flow-gap: 5px !important;
 }

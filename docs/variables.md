@@ -33,7 +33,23 @@
 | `--dsw-specific-sidebar-fill` | 侧栏底 |
 
 - 名单固定（平台 Theme.listTokens），**不可新增**；所有主题均按此名单浅深各一组。
+- **对齐基线（v2.0.2 起）**：本名单的权威源是 DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（客户端 `Theme.listTokens` 暴露的正是它）。已复验版本 **DSH 0.1.6-alpha.2**，基线声明在 `package.json` 的 `dshCompatibility`，`node scripts/check-release.js` 第 11 项会做「声明 ↔ 本机 DSH 权威表 ↔ 四套内置主题 CSS」三方比对——**DSH 增删 token 会让门禁失败，而不是静默失配**。
+- 深色档挂载依赖产品属性 `body[data-ds-dark-theme]`（同一门禁的第 11.4 项核对产品是否仍按该属性切档），**不要**改用 `prefers-color-scheme` 写主题。
 - strawberry-mocha 浅档语义色取值：error `#C74330` / success `#237834` / warn `#965B00`；深档取 Catppuccin Mocha 对应色（`#F38BA8` / `#A6E3A1` / `#F9E2AF`）。内置主题的浅档 AA 参考值（原 template.css 建议，现归入内置主题约定）为 error `#c74330` / success `#287b38` / warn `#985d00`——两者出入见 §十「维护引用」。
+
+### 2.1 产品 token 覆盖清单（主题写入产品的**全部**变量）——v2.0.2 核定
+
+四套内置主题对产品的写入面就这四组，除此之外不碰任何产品变量（门禁逐项防护）：
+
+| 组 | 变量 | 写在哪 | 门禁 |
+|---|---|---|---|
+| L0 平台 token（13） | `--dsw-alias-*`×12 + `--dsw-specific-sidebar-fill` | `body{}` / `body[data-ds-dark-theme]{}` | 11.1 / 11.3 |
+| 字体（2） | `--dsw-font-family` / `--ds-font-family-code` | `:root`（与产品同选择器 + 注入更晚） | 12.4 |
+| 语法高亮（9） | `--shiki-token-*` | `body{}` / `body[data-ds-dark-theme]{}` | 12.2 |
+| 对话流间距（1） | `--dsh-chat-flow-gap` | `[data-chat-flow]` 规则块 | 12.3 |
+
+> **字体为什么是这两个 token**：产品的 markdown 字体 token（`--dsw-font-markdown-*`）**全部由它们派生**（如 `--dsw-font-markdown-base-font-family: var(--dsw-font-family)`），且 `var()` 在**使用处**解析 —— 覆盖这两个即可让 UI 与 markdown（容器 / h1-h6 / 表格 / 行内代码 / 代码块）彻底同源，无需逐元素改写，也不与产品显式 `font:` 简写打特异性官司。v2.0.2 之前 markdown 正文实际落在产品字体栈（`-apple-system, …`，不含主题的 Geist），文件头「UI 与 markdown 同源」的自述只对颜色成立。
+> **对话流间距为什么不能用 `gap`**：产品该列（`.EvIC1a_column`）**没有** `gap`，间距由兄弟元素的 `margin-top: var(--dsh-chat-flow-gap,16px)` 实现。flex `gap` 与外边距**叠加、不折叠**，故旧写法 `[data-chat-flow]{gap:5px}` 会把 16px 变成 21px —— 与「收紧」意图正好相反（v2.0.2 修正）。
 
 ---
 
@@ -45,7 +61,7 @@
 |---|---|---|
 | accent 系 5 | `accent` / `accent-text` / `accent-soft` / `accent-faint` / `accent-fainter` | panel.css（accent×11、accent-faint×6、accent-text×2、accent-fainter×1，均带回退）；主题 ③ 元素段 |
 | link 系 2 | `link` / `link-hover` | panel.css（link×1，带回退）；主题 ③ 元素段 |
-| highlight 系 2 | `highlight` / `highlight-soft` | panel.css（highlight×3，带回退）；主题 ③ 元素段 |
+| highlight 系 2 | `highlight` / `highlight-soft` | `highlight`：panel.css（编辑器高亮层 `hl-str/hl-col/hl-num`×3，带回退）；⚠️ `highlight-soft` **暂无任何 `var()` 消费者**（四套主题均定义，属预留；v2.0.2 核实） |
 | quote 系 2 | `quote-border` / `quote-bg` | 主题 ③ 元素段 |
 | code/table 系 3 | `code-border` / `table-head-bg` / `table-head-text` | 主题 ③ 元素段 |
 | 字体 2 | `sans` / `mono` | panel.css（mono×3，带回退）；主题 ③ 元素段 |
@@ -98,8 +114,29 @@
 
 ## 五、L1 语法高亮 `--hl-*`（6 个，浅深成对）——内置主题全量定义
 
-`keyword` / `string` / `number` / `property` / `function` / `comment` —— Prism / Highlight.js / Shiki 通用，主题 ③ 元素段按各库类名消费（`.token.*` / `.hljs-*`），另有 operator/punctuation 规则引用 `--dsw-alias-label-secondary`。
+`keyword` / `string` / `number` / `property` / `function` / `comment`。
 
+**DSH 的实际机制（0.1.6 实测，v2.0.2 更正）**：DSH **不使用** Prism / Highlight.js —— 全产物无 `hljs` / `token` 类名，代码着色走 **Shiki 的 css-variables 主题**：token 颜色由内联 style 落地，取值形如 `var(--shiki-token-keyword)`；`--shiki-token-*`（9 个）连同 `background` / `foreground` 由产品在 `:root`（浅）与 `body[data-ds-dark-theme]`（深）声明。
+
+所以主题的消费路径是**变量映射**，不是选择器：
+
+```css
+/* 浅/深两档各写一份；值全部 var() 引用上面的 --hl-*，保持调色单一真源 */
+--shiki-token-keyword: var(--hl-keyword);
+--shiki-token-string: var(--hl-string);
+--shiki-token-string-expression: var(--hl-string);
+--shiki-token-constant: var(--hl-number);
+--shiki-token-function: var(--hl-function);
+--shiki-token-comment: var(--hl-comment);
+--shiki-token-parameter: var(--hl-property);
+--shiki-token-punctuation: var(--dsw-alias-label-secondary);
+--shiki-token-link: var(--mdvr-link);
+```
+
+`--shiki-background` / `--shiki-foreground` **无需覆盖**：它们已派生自 `--dsw-alias-markdown-code-block` / `--dsw-alias-label-primary`，随 L0 token 自动跟随。
+
+> ⚠️ **`.token.*` / `.hljs-*` 选择器在 DSH 永不命中**（v1.10.0–v2.0.2 的整段规则均为死代码，v2.0.2 已删除）；门禁第 12.1 项禁止其回归。
+> ⚠️ **已知取舍**：Shiki 的 token 没有 per-token 选择器、只有颜色可经变量控制，故旧规则里的「关键字加粗」无法保留；注释斜体由产品的 Shiki `fontStyle` 设置提供。
 > ⚠️ 易混：panel.css 编辑器高亮层的 `.hl-com/.hl-str/.hl-num` 等是**类名**（消费 `--mdvr-highlight` / `--mdvr-accent` 等契约变量带回退），与 `--hl-*` 变量完全无关。
 
 ---

@@ -181,12 +181,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '2.0.2',
+  version: '2.0.3',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-08-29',
+  date: '2026-09-19',
   changes: [
-    '移除启动期 console 日志（[mdvr] host ledger ready / projectRoot 命中提示），保持 dsh 启动日志干净；registerRpc 失败警告保留（仅路由注册出错时输出，便于诊断）',
+    '主题消费面修复（对齐 DSH 0.1.6 实测契约，4 套内置主题同步）：① 对话流间距改为覆盖产品旋钮 --dsh-chat-flow-gap（旧写法用 flex gap，与产品 margin-top 叠加不折叠，反而把 16px 撑成 21px，与收紧意图相反）② 语法高亮改用 9 个 --shiki-token-* 变量映射（DSH 走 Shiki css-variables，无 Prism/hljs，旧的 .token.*/.hljs-* 整段规则从不命中）③ markdown 正文改由覆盖 --dsw-font-family / --ds-font-family-code 跟随主题字体 ④ 代码块语言标签改用 [data-code-block-banner] 锚点（原 span 选择器在该子树不存在） ⑤ 补行内文件引用胶囊 [class*="_fileMention_"] 链接色 ⑥ 修正两处失效文档引用、--mdvr-highlight-soft 标注为预留；发布门禁新增第 12 节 5 项契约检查防回归',
   ],
 }
 
