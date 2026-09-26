@@ -13,7 +13,7 @@
  *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
  *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
  *   保持全局签名（见 §13，勿收口）。
- * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
+ * 统一变量契约：L0 平台 token（14 个，v2.1.0 起 DSH 新增 idle）→ L1 身份色（浅深成对）
  *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
  *   → 语法高亮 --hl-*（浅深成对）。见 docs/variables.md。
  * ============================================================ */
@@ -109,7 +109,7 @@
  *    code-border 从 1.23:1 提到 2.23:1；分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
-  /* ===== 13 个全局 token（平台固定名单） ===== */
+  /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #F4F6F9;            /* 纯净冷白底色，抗环境光漫反射 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #E8EDF2;         /* 代码块/嵌套表面 */
@@ -120,6 +120,7 @@ body {
   --dsw-alias-label-primary: #11161B;      /* 主文字：深冷焦墨黑（对底 ≈16.8:1） */
   --dsw-alias-label-secondary: #556473;    /* 次文字：清晰中灰 */
   --dsw-alias-state-error-primary: #D63939; /* 错误状态色 */
+  --dsw-alias-state-idle-primary: #8C959F; /* 非激活状态色：稳重灰（del 同色系） */
   --dsw-alias-state-success-primary: #1F883D; /* 成功状态色 */
   --dsw-alias-state-warn-primary: #B07200; /* 警告状态色 */
   --dsw-specific-sidebar-fill: #EAEFF4;    /* 侧边栏底色 */
@@ -197,7 +198,7 @@ body {
  *   选择器：body[data-ds-dark-theme]
  * ---------------------------------------------------------- */
 body[data-ds-dark-theme] {
-  /* ===== 13 个全局 token（中性深底，规避死黑与发灰） ===== */
+  /* ===== 14 个全局 token（中性深底，规避死黑与发灰，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #14171A;            /* 应用底色：中性深灰底，消除泛白 */
   --dsw-alias-bg-layer-1: #1E2328;         /* 卡片抬升：拉开明度差，防粘连 */
   --dsw-alias-bg-layer-2: #0E1012;         /* 代码块深度嵌套：纯净黑核 */
@@ -208,6 +209,7 @@ body[data-ds-dark-theme] {
   --dsw-alias-label-primary: #F0F4F8;      /* 主文字：95% 高明度冷白（≈16.3:1） */
   --dsw-alias-label-secondary: #9DB0C0;    /* 次文字：抗暗部截断明亮灰 */
   --dsw-alias-state-error-primary: #FF5C5C; /* 错误：高警示亮红 */
+  --dsw-alias-state-idle-primary: #546E7A; /* 非激活状态色：坚固中灰（del 同色系） */
   --dsw-alias-state-success-primary: #3DDC84; /* 成功：纯正终端亮绿 */
   --dsw-alias-state-warn-primary: #FFB300; /* 警告：高纯度琥珀金 */
   --dsw-specific-sidebar-fill: #0E1012;    /* 侧栏：深邃纯净 */

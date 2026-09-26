@@ -76,7 +76,7 @@ Plugin（稳定实例，pluginId）
 
 ## 6. 主题管线（文件即主题）
 
-1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes-xyy/`（用户）新建/修改 `.css`：浅色写 `body { ... }`、深色写 `body[data-ds-dark-theme] { ... }`，13 个 `--dsw-alias-*` 与 `--mdvr-*` 变量定义在文件内（契约见 `docs/variables.md`）。
+1. 在 `plugin/assets/themes/`（内置）或 `$HOME/.dsh/web-themes-xyy/`（用户）新建/修改 `.css`：浅色写 `body { ... }`、深色写 `body[data-ds-dark-theme] { ... }`，14 个 `--dsw-alias-*` 与 `--mdvr-*` 变量定义在文件内（契约见 `docs/variables.md`）。
 2. 内置主题需要在 `plugin/src/client.core.js` 的 `THEME_META` 注册显示名/描述/双档色板，并运行 `node scripts/build-client.js`（用户主题自动出现在列表，无需注册）。
 3. 改文件后刷新页面即生效（Host 每次 RPC 从文件读取）。
 4. 需要发布新版本时按 `docs/development.md` 走完整迭代流程。

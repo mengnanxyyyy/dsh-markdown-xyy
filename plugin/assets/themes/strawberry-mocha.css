@@ -9,7 +9,7 @@
  *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
  *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
  *   保持全局签名（见 §13，勿收口）。
- * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
+ * 统一变量契约：L0 平台 token（14 个，v2.1.0 起 DSH 新增 idle）→ L1 身份色（浅深成对）
  *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
  *   → 语法高亮 --hl-*（浅深成对）。见 docs/variables.md。
  * ============================================================ */
@@ -104,7 +104,7 @@
  *    v1.11.1 已把 border-l1/l2 提到 2.07/2.63:1；新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
-  /* ===== 13 个全局 token（平台固定名单） ===== */
+  /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #FAF6F8;            /* 燕麦奶白底色 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #F4E8EE;         /* 代码块/嵌套表面 */
@@ -115,6 +115,7 @@ body {
   --dsw-alias-label-primary: #23181C;      /* 主文字：深焙黑巧色 */
   --dsw-alias-label-secondary: #6B5560;    /* 次文字：豆沙灰褐 */
   --dsw-alias-state-error-primary: #C74330; /* 错误状态色 */
+  --dsw-alias-state-idle-primary: #9CA3AF; /* 非激活状态色：柔石灰（del 同色系） */
   --dsw-alias-state-success-primary: #237834; /* 成功状态色 */
   --dsw-alias-state-warn-primary: #965B00; /* 警告状态色 */
   --dsw-specific-sidebar-fill: #F5EDF1;    /* 侧边栏底色 */
@@ -196,7 +197,7 @@ body {
  *   选择器：body[data-ds-dark-theme]
  * ---------------------------------------------------------- */
 body[data-ds-dark-theme] {
-  /* ===== 13 个全局 token（Catppuccin Mocha 底） ===== */
+  /* ===== 14 个全局 token（Catppuccin Mocha 底，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #1E1E2E;            /* 应用底色：Mocha Base 经典紫灰 */
   --dsw-alias-bg-layer-1: #181825;         /* 卡片抬升：Mocha Mantle */
   --dsw-alias-bg-layer-2: #14141E;         /* 代码块深度嵌套：Mocha Crust 深夜紫 */
@@ -207,6 +208,7 @@ body[data-ds-dark-theme] {
   --dsw-alias-label-primary: #CDD6F4;      /* 主文字：香草奶霜白 */
   --dsw-alias-label-secondary: #908CAA;    /* 次文字：淡紫暮雾灰 */
   --dsw-alias-state-error-primary: #F38BA8; /* 错误：树莓红 */
+  --dsw-alias-state-idle-primary: #6C7086; /* 非激活状态色：低调暮霭灰（del 同色系） */
   --dsw-alias-state-success-primary: #A6E3A1; /* 成功：抹茶绿 */
   --dsw-alias-state-warn-primary: #F9E2AF; /* 警告：暖蛋黄 */
   --dsw-specific-sidebar-fill: #14141F;    /* 侧栏：深邃紫夜 */

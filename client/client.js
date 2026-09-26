@@ -61,23 +61,23 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 //   §6 插件入口 apply()（runSeq/disposed 生命周期隔离，v1.3.0）
 //
 // 【能控制什么 / 到什么程度】（详见 docs/themes.md）
-//   ① 全局 token：13 个 --dsw-alias-*（浅/深）→ 整个应用配色
+//   ① 全局 token：14 个 --dsw-alias-*（浅/深）→ 整个应用配色
 //   ② 强调变量：--mdvr-*（accent/highlight/quote/code/table/link 系）→ 排版层色彩细节
 //   ③ 元素排版：不再注入排版骨架（typography.css 已停用，v1.3.0+ 后缀）→ 产品 ._markdown_* 规则兜底，主题增量覆盖
 //   ④ 面板 UI：panel.css 自绘组件样式 → 完全控制
-//   限制：不改产品 DOM；:where() 零优先级；token 名单固定 13 个
+//   限制：不改产品 DOM；:where() 零优先级；token 名单固定 14 个
 //   持久化（v1.16.0）：主题选择存浏览器 localStorage，刷新/新页/重启自动恢复；外观模式由产品 theme.setTheme 自持持久化
 // ============================================================
 
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '2.0.3',
+  version: '2.1.0',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-09-19',
+  date: '2026-09-26',
   changes: [
-    '主题消费面修复（对齐 DSH 0.1.6 实测契约，4 套内置主题同步）：① 对话流间距改为覆盖产品旋钮 --dsh-chat-flow-gap（旧写法用 flex gap，与产品 margin-top 叠加不折叠，反而把 16px 撑成 21px，与收紧意图相反）② 语法高亮改用 9 个 --shiki-token-* 变量映射（DSH 走 Shiki css-variables，无 Prism/hljs，旧的 .token.*/.hljs-* 整段规则从不命中）③ markdown 正文改由覆盖 --dsw-font-family / --ds-font-family-code 跟随主题字体 ④ 代码块语言标签改用 [data-code-block-banner] 锚点（原 span 选择器在该子树不存在） ⑤ 补行内文件引用胶囊 [class*="_fileMention_"] 链接色 ⑥ 修正两处失效文档引用、--mdvr-highlight-soft 标注为预留；发布门禁新增第 12 节 5 项契约检查防回归',
+    'DSH 0.1.7 对齐（DSH 新增 --dsw-alias-state-idle-primary，L0 名单 13→14，主题/基线/docs 同步，cordis 基线 4.0.2→4.0.4）',
   ],
 }
 

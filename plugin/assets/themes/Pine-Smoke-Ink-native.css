@@ -11,7 +11,7 @@
  *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
  *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
  *   保持全局签名（见 §13，勿收口）。
- * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
+ * 统一变量契约：L0 平台 token（14 个，v2.1.0 起 DSH 新增 idle）→ L1 身份色（浅深成对）
  *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
  *   → 语法高亮 --hl-*（浅深成对）。见 docs/variables.md。
  * ============================================================ */
@@ -106,7 +106,7 @@
  *    v1.13.4 已把 border-l1/l2 提到 2.09/2.59:1（居 2:1 之上的犟档）；新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
-  /* ===== 13 个全局 token（平台固定名单） ===== */
+  /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #FAF7F2;            /* 燕麦古宣米白底色 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #F2ECE4;         /* 代码块/嵌套表面 */
@@ -117,6 +117,7 @@ body {
   --dsw-alias-label-primary: #24201D;      /* 主文字：深松烟焦墨 */
   --dsw-alias-label-secondary: #6E6862;    /* 次文字：暮霭淡墨 */
   --dsw-alias-state-error-primary: #B23D35; /* 错误状态色 */
+  --dsw-alias-state-idle-primary: #9C9791; /* 非激活状态色：松烟灰（del 同色系） */
   --dsw-alias-state-success-primary: #4A7A61; /* 成功状态色 */
   --dsw-alias-state-warn-primary: #B87E3B; /* 警告状态色 */
   --dsw-specific-sidebar-fill: #F4EFEA;    /* 侧边栏底色 */
@@ -194,7 +195,7 @@ body {
  *   选择器：body[data-ds-dark-theme]
  * ---------------------------------------------------------- */
 body[data-ds-dark-theme] {
-  /* ===== 13 个全局 token（松烟深黑水墨底） ===== */
+  /* ===== 14 个全局 token（松烟深黑水墨底，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #141618;            /* 应用底色：松烟深墨冷黑 */
   --dsw-alias-bg-layer-1: #1B1E21;         /* 卡片抬升：墨核层级表面 */
   --dsw-alias-bg-layer-2: #101214;         /* 代码块深度嵌套：纯净墨底 */
@@ -205,6 +206,7 @@ body[data-ds-dark-theme] {
   --dsw-alias-label-primary: #D8D6D0;      /* 主文字：宣纸冷白 */
   --dsw-alias-label-secondary: #8B9096;    /* 次文字：暮雨冷灰 */
   --dsw-alias-state-error-primary: #C34A42; /* 错误：朱砂红 */
+  --dsw-alias-state-idle-primary: #5C6269; /* 非激活状态色：松烟冷灰（del 同色系） */
   --dsw-alias-state-success-primary: #5E8B72; /* 成功：竹青绿 */
   --dsw-alias-state-warn-primary: #C99355; /* 警告：沉香金 */
   --dsw-specific-sidebar-fill: #101214;    /* 侧栏：深邃纯墨 */

@@ -9,7 +9,7 @@
  *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
  *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
  *   保持全局签名（见 §13，勿收口）。
- * 统一变量契约：L0 平台 token（13 个）→ L1 身份色（浅深成对）
+ * 统一变量契约：L0 平台 token（14 个，v2.1.0 起 DSH 新增 idle）→ L1 身份色（浅深成对）
  *   → L2 排版/形状常量 + L3 功能旋钮 + 字体栈（:root 单值）
  *   → 语法高亮 --hl-*（浅深成对）。见 docs/variables.md。
  * ============================================================ */
@@ -105,7 +105,7 @@
  *    新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
-  /* ===== 13 个全局 token（平台固定名单） ===== */
+  /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #F5F6F9;            /* 冷铝银白底色 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
   --dsw-alias-bg-layer-2: #EBEEF5;         /* 代码块/嵌套表面 */
@@ -116,6 +116,7 @@ body {
   --dsw-alias-label-primary: #1A1D26;      /* 主文字：深空深灰 */
   --dsw-alias-label-secondary: #60687A;    /* 次文字：磨砂铝灰 */
   --dsw-alias-state-error-primary: #E11D48; /* 错误状态色 */
+  --dsw-alias-state-idle-primary: #94A3B8; /* 非激活状态色：磨砂铝灰（del 同色系） */
   --dsw-alias-state-success-primary: #059669; /* 成功状态色 */
   --dsw-alias-state-warn-primary: #D97706; /* 警告状态色 */
   --dsw-specific-sidebar-fill: #ECEFF5;    /* 侧边栏底色 */
@@ -193,7 +194,7 @@ body {
  *   选择器：body[data-ds-dark-theme]
  * ---------------------------------------------------------- */
 body[data-ds-dark-theme] {
-  /* ===== 13 个全局 token（Space Black 底） ===== */
+  /* ===== 14 个全局 token（Space Black 底，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #111216;            /* 应用底色：Space Black 苹果深空黑 */
   --dsw-alias-bg-layer-1: #171920;         /* 卡片抬升：钛灰精密切割面 */
   --dsw-alias-bg-layer-2: #0B0C0E;         /* 代码块深度嵌套：纯粹黑核 */
@@ -204,6 +205,7 @@ body[data-ds-dark-theme] {
   --dsw-alias-label-primary: #E2E4EB;      /* 主文字：Retina 钛银白 */
   --dsw-alias-label-secondary: #888E9E;    /* 次文字：磨砂钛灰 */
   --dsw-alias-state-error-primary: #FF5A78; /* 错误：激光粉红 */
+  --dsw-alias-state-idle-primary: #475569; /* 非激活状态色：暗灰（del 同色系） */
   --dsw-alias-state-success-primary: #34D399; /* 成功：电光薄荷绿 */
   --dsw-alias-state-warn-primary: #FBBF24; /* 警告：高能琥珀金 */
   --dsw-specific-sidebar-fill: #0E0F13;    /* 侧栏：深邃纯黑 */

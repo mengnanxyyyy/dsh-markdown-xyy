@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.1.0",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-09-26",
+      "changes": [
+        "DSH 0.1.7 对齐（DSH 新增 --dsw-alias-state-idle-primary，L0 名单 13→14，主题/基线/docs 同步，cordis 基线 4.0.2→4.0.4）"
+      ]
+    },
+    {
       "version": "2.0.3",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

@@ -23,9 +23,9 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 7. **挂载机制与产品一致**：浅色写 `body { ... }`，深色写 `body[data-ds-dark-theme] { ... }`（产品用属性选择器，不用 `prefers-color-scheme`）；样式注入晚于产品样式表，同选择器后者胜出。
 8. **选择模型**：默认 `system-native`（插件零干预、深浅跟随系统）；内置/用户主题互斥单选；外观 ☀️/🌙/🖥️ 对任意选中主题可用（仅 `themeService` 缺失时禁用）。
 9. **用户主题可编辑，内置主题只读**：编辑器 = 透明 textarea 叠彩色 pre 语法高亮 + 格式化 + 保存；「新建用户主题」（v1.17.0）**可选底子内置主题**（4 选 1，默认 `strawberry-mocha`），起步 = 底子主题 CSS 整体复制，无独立模板资产（template.css 已删）；内置主题只读。
-10. 主题 CSS 内定义 13 个 `--dsw-alias-*` 全局 token（浅/深）+ `--mdvr-*` 强调变量；**不再调用 `theme.overrideTokens`**；`panel.css` 里 `var(--mdvr-*)` 必须带默认回退值（如 `var(--mdvr-accent, #5856d6)`）。
+10. 主题 CSS 内定义 14 个 `--dsw-alias-*` 全局 token（浅/深，v2.1.0 起 DSH 新增 idle）+ `--mdvr-*` 强调变量；**不再调用 `theme.overrideTokens`**；`panel.css` 里 `var(--mdvr-*)` 必须带默认回退值（如 `var(--mdvr-accent, #5856d6)`）。
 11. **选择持久化（v1.16.0）**：选中主题写入浏览器 `localStorage`（键 `mdvr:theme:selection`），刷新/新开页面/重启自动恢复；启动恢复校验（内置/系统自带直用；用户主题先拉目录再校验，读取失败保留不覆盖、主题被删则清存储）；`applySelection` 成功即写入（`persist=false` 供启动恢复路径，避免回退值污染存储）；跨标签页经 `storage` 事件实时同步。外观模式不重复持久化（产品 `theme.setTheme` 自带）。存储不可用（隐私模式/沙箱）时静默回退会话级内存态。
-12. **主题对产品的写入面只有四组（v2.0.2 核定，勿扩大）**：① L0 平台 token 13 个 ② 字体 token `--dsw-font-family` / `--ds-font-family-code` ③ 语法高亮 `--shiki-token-*` 9 个 ④ 对话流间距 `--dsh-chat-flow-gap`。清单与门禁项对应见 `docs/variables.md` §2.1。四条踩过的坑：
+12. **主题对产品的写入面只有四组（v2.0.2 核定，勿扩大）**：① L0 平台 token 14 个（v2.1.0 起 DSH 新增 idle）② 字体 token `--dsw-font-family` / `--ds-font-family-code` ③ 语法高亮 `--shiki-token-*` 9 个 ④ 对话流间距 `--dsh-chat-flow-gap`。清单与门禁项对应见 `docs/variables.md` §2.1。四条踩过的坑：
     - **代码着色只能经 `--shiki-token-*` 变量**：DSH 无 Prism/Highlight.js（全产物无 `hljs`/`token` 类名），走 Shiki css-variables 主题，token 色由内联 style 落地。**`.token.*` / `.hljs-*` 选择器永不命中**——v1.10.0–v2.0.2 整段规则都是死代码，v2.0.2 已删除。`--hl-*` 保留为调色单一真源，经 `--shiki-token-*: var(--hl-*)` 映射生效。已知取舍：Shiki 无 per-token 选择器，关键字加粗无法保留。
     - **markdown 字体必须覆盖 `--dsw-font-family` / `--ds-font-family-code`**：产品的 markdown 字体 token 全部由这两个派生且 `var()` 在使用处解析；只在 `body` 设 `font-family` 没用（产品容器有 `font:` 简写、h1–h4 各有自己的 token）。另注意**没有** `--dsw-font-family-mono` 这个 token。
     - **对话流间距不能用 flex `gap`**：产品该列没有 `gap`，间距是兄弟元素 `margin-top: var(--dsh-chat-flow-gap,16px)`；`gap` 与 margin **叠加不折叠**，写 `gap:5px` 会把 16px 变成 21px（与收紧意图相反）。
@@ -51,14 +51,14 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 能力边界（详见 docs/themes.md）
 
-- 能控制：① 全局 13 token（浅/深）② `--mdvr-*` 强调变量 ③ 元素排版（产品 `._markdown_*` 兜底 + 主题 `:where()` 增量覆盖）④ 面板 UI（panel.css）
+- 能控制：① 全局 14 token（浅/深，v2.1.0 起 DSH 新增 idle）② `--mdvr-*` 强调变量 ③ 元素排版（产品 `._markdown_*` 兜底 + 主题 `:where()` 增量覆盖）④ 面板 UI（panel.css）
 - 不能：改产品 DOM；token 名单固定；`:where()` 零优先级（产品显式样式优先）。持久化已解决：选中主题存 `localStorage`（见 主题铁律 11），不再「刷新恢复 `DEFAULT_SELECTION`」
 
 ## DSH 版本对齐基线
 
-- **基线声明**：`package.json` 的 `dshCompatibility`（**独立顶层字段**）。⚠️ 不要塞进 `dsh` 字段——那是 DSH 自身的 `bundle` / `client` 登记位，被 profile boot 与 patch 机制消费，塞额外键有被误读的风险。当前基线 **DSH 0.1.6-alpha.2**（复验 2026-09-19），随附 **cordis 4.0.2**。
+- **基线声明**：`package.json` 的 `dshCompatibility`（**独立顶层字段**）。⚠️ 不要塞进 `dsh` 字段——那是 DSH 自身的 `bundle` / `client` 登记位，被 profile boot 与 patch 机制消费，塞额外键有被误读的风险。当前基线 **DSH 0.1.7-rc.2**（复验 2026-09-26），随附 **cordis 4.0.4**。
 - **门禁第 11 项**（`check-release.js`）做三方比对「声明基线 ↔ 本机 DSH 运行时权威源 ↔ 4 套内置主题 CSS」：
-  - `themeTokens`（13 个）↔ DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（即客户端 `Theme.listTokens` 的源）↔ 各主题 CSS 实际定义名单；
+  - `themeTokens`（14 个）↔ DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（即客户端 `Theme.listTokens` 的源）↔ 各主题 CSS 实际定义名单；
   - `slots`（`settings.section` / `tool.view.cordis`）↔ DSH 对应 `.d.ts` 契约文件；
   - `darkAttribute`（`data-ds-dark-theme`）↔ DSH 主题产物是否仍按该属性切深色档；
   - `cordis` ↔ DSH bundling 的 `@deepseek-ai/cordis` 是否仍落在 `peerDependencies` 声明的范围内（第 11.6 项）。**这条防的是 DSH 换 cordis 大版而插件声明静默脱节**——npm 不会在此处校验 peer 范围。范围匹配由门禁内置的极简 `satisfiesRange`（仅支持 `^X.Y.Z` 与精确版本）完成，**不引 semver 依赖**；解析不出范围时降级为警告，不假装通过。
@@ -101,10 +101,10 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态
 
-- 当前版本 v2.0.3（主题消费面修复：6 类「改了却没效果」的问题 + 门禁第 12 节防回归。v2.0.2 移除启动期 console 日志；v2.0.1 修复常驻/npm 通道：__MDVR_PKG_ROOT__ 包目录资产解析 + Host inject webServer + 路由注册加固；v2.0.0 首个正式版 = 持久化 + 底子主题 + `~/.dsh/web-themes-xyy` + 四套内置主题）；内置主题 4 个；路线图见 docs/capabilities.md。
+- 当前版本 v2.1.0（DSH 0.1.7 对齐：DSH 新增 `--dsw-alias-state-idle-primary`，L0 名单 13→14，4 套内置主题浅/深同步补值 + 基线升 0.1.7-rc.2 / cordis 4.0.4 + docs 全套同步。v2.0.3 主题消费面修复：6 类「改了却没效果」的问题 + 门禁第 12 节防回归。v2.0.2 移除启动期 console 日志；v2.0.1 修复常驻/npm 通道：__MDVR_PKG_ROOT__ 包目录资产解析 + Host inject webServer + 路由注册加固；v2.0.0 首个正式版 = 持久化 + 底子主题 + `~/.dsh/web-themes-xyy` + 四套内置主题）；内置主题 4 个；路线图见 docs/capabilities.md。
 - **DSH 版本对齐（v2.0.2 补充，未升版本）**：`package.json` 新增 `dshCompatibility` 基线（DSH 0.1.6-alpha.2 / cordis 4.0.2），`@deepseek-ai/cordis` peerDep 收紧为 `^4.0.2`（与 DSH 0.1.6 随附版本及官方包一致），`check-release.js` 新增第 11 项门禁，`README.md` / `README.en.md` 新增「本项目版本 / 对齐的 DSH 版本」表格（受第 11.2 项核对）。本次仅动声明与门禁，**未改任何运行逻辑**，故四处 MANIFEST 版本号保持 v2.0.2 不变、无需重建产物。详见「DSH 版本对齐基线」章节。
 - **主题消费面修复（v2.0.3）**：审计 4 套内置主题与 DSH 0.1.6 的消费层契约，修掉 6 类「改了却没效果」的问题——① 对话流间距 `gap` 反向叠加（改为 `--dsh-chat-flow-gap`）② §6 语法高亮整段死代码（改用 `--shiki-token-*` 映射）③ markdown 正文不跟随主题字体（覆盖 `--dsw-font-family` / `--ds-font-family-code`）④ 代码块语言标签选错元素 ⑤ 行内文件引用胶囊漏覆盖 ⑥ 两处失效文档引用 + `--mdvr-highlight-soft` 死变量标注。`check-release.js` 新增第 12 节（5 项）防回归，并在分析前剥 CSS 注释。详见「主题铁律」第 12 条与 `docs/variables.md` §2.1 / §五。⚠️ 本次只改**资产与声明**，未动插件运行逻辑；但因为资产走 `__MDVR_PKG_ROOT__`，**当前 GUI 仍是旧主题**，需重装该包或走用户主题通道才可见（见「常见坑」）。
-- **兼容性已实测确认（2026-09-19）**：DSH 0.1.6-alpha.2 是当时最新发布版本（注意 npm `latest` 标签停在旧的 0.1.5-rc.2，`alpha` 标签才是 0.1.6-alpha.2）。Host 半经端到端 RPC 实测（`themes.builtin.list` 4 套 / `themes.user.list` 3 套 / `themeAssets.get` 分块 total=2）；Client 半经槽位 occupants 实测（`settings.section#mdvr-theme` 与 `tool.view.cordis#self` 均 `active: true`）。
+- **兼容性已复验（2026-09-26，v2.1.0）**：本机 DSH 0.1.7-rc.2，门禁第 11 项三方比对全过（14 token 逐名一致 / 双槽位在 / 深色标记在 / cordis 4.0.4 落在 ^4.0.2 内），README 双表同步。上次端到端 RPC + occupants 实测仍是 2026-09-19（DSH 0.1.6-alpha.2：`themes.builtin.list` 4 套 / `themes.user.list` 3 套 / `themeAssets.get` total=2；`settings.section#mdvr-theme` 与 `tool.view.cordis#self` 均 `active: true`）——v2.1.0 的 define 后需重跑一次端到端再确认。
 - 提交历史已重建为「每发布版本一个提交 + 顶部 docs 提交」（共 36 个）；旧历史备份在本地分支 `backup-pre-cleanup`，**勿推送**。
 - README 双语维护（`README.md` 中文 + `README.en.md` 英文镜像，顶部互挂语言徽章）：公众版只展示「安装即用」（npm registry / github:），**勿回填**动态 define、`file:` 本地开发类内容（动态 define 流程只存在于 docs/development.md）；主题预览图 = `screenshots/*.jpg`（4 张，README 画廊引用）。
 - 待决：`plugin/host.js` 的 FALLBACK_* 常量硬编码了本机目录（运行时兜底，功能正常；公开仓库可见，未定是否中性化）。

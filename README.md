@@ -16,9 +16,9 @@
 
 | 本项目版本 | 对齐的 DeepSeek Harness 版本 |
 | :---: | :---: |
-| **v2.0.3** | **0.1.6-alpha.2** |
+| **v2.1.0** | **0.1.7-rc.2** |
 
-> 上表在每次 DSH 升版复验后更新。基线声明见 `package.json` 的 `dshCompatibility`；`node scripts/check-release.js` 第 11 项会核对本表与声明是否一致，并对「声明基线 ↔ 本机 DSH 运行时契约 ↔ 4 套内置主题 CSS」做三方比对（13 个 L0 token 名单、`settings.section` / `tool.view.cordis` 槽位、`body[data-ds-dark-theme]` 深色标记）——DSH 升版导致契约漂移会直接让门禁失败。
+> 上表在每次 DSH 升版复验后更新。基线声明见 `package.json` 的 `dshCompatibility`；`node scripts/check-release.js` 第 11 项会核对本表与声明是否一致，并对「声明基线 ↔ 本机 DSH 运行时契约 ↔ 4 套内置主题 CSS」做三方比对（14 个 L0 token 名单、`settings.section` / `tool.view.cordis` 槽位、`body[data-ds-dark-theme]` 深色标记）——DSH 升版导致契约漂移会直接让门禁失败。
 
 ## 📖 项目缘起
 
