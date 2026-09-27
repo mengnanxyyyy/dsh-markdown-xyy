@@ -16,7 +16,7 @@
 //      + DSH bundling 的 cordis 是否仍落在声明的 peerDependencies 范围内
 //      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表或 cordis peer 真的不一致 → 失败）
 //  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距走产品旋钮 /
-//      产品字体 token 覆盖 / 注释文档引用有效性 —— 均为「曾静默失效」缺陷的回归防护
+//      产品字体 token 覆盖 / 注释文档引用有效性 / 文件引用胶囊锚点 —— 均为「曾静默失效」缺陷的回归防护
 //
 // 用法：node scripts/check-release.js
 // 失败返回非零退出码并打印具体原因（file:line 式证据）。
@@ -470,7 +470,7 @@ if (!baseline || !baseline.verifiedAgainst || !Array.isArray(baseline.themeToken
   }
 }
 
-// ---------- 12. 主题消费面契约（与 DSH 0.1.6 实测对齐；防 v2.0.2 修好的问题回归） ----------
+// ---------- 12. 主题消费面契约（与 DSH 0.1.7 实测对齐；防 v2.0.2 修好的问题回归） ----------
 console.log('\n12) 主题消费面契约')
 // 本节的每一项都对应一个「曾经静默失效」的真实缺陷：
 //   12.1 死选择器（DSH 无 Prism/hljs，.token.*/.hljs-* 永不命中）
@@ -478,6 +478,7 @@ console.log('\n12) 主题消费面契约')
 //   12.3 对话流间距不得用 flex gap（会与产品 margin-top 叠加，方向相反）
 //   12.4 产品字体 token 覆盖（否则 markdown 正文不跟随主题字体）
 //   12.5 主题注释里的文档引用必须真实存在（防死链）
+//   12.6 文件引用胶囊锚点（产品真实类名 .fileMention 无下划线；带下划线的 _fileMention_ 零命中，v2.1.1 死规则教训）
 {
   const dshRoot2 = findDshRoot()
 
@@ -552,6 +553,22 @@ console.log('\n12) 主题消费面契约')
     const dead = refs.filter((r) => !fs.existsSync(path.join(root, r)))
     if (dead.length) fail(`${t}: 注释引用了不存在的文档 [${dead.join(', ')}]`)
     else if (refs.length) ok(`${t} 注释文档引用 ${refs.length} 处全部有效`)
+  }
+
+  // 12.6 文件引用胶囊锚点：产品真实类名是 .fileMention（CSS Modules :local，无下划线）。
+  //      带下划线的 [class*="_fileMention_"] 在产品产物里零命中 —— v2.0.2→v2.1.1 曾是死规则。
+  //      判的是**真实代码**（剥注释后）：注释里解释这段历史时提到 _fileMention_ 不得误报。
+  for (const t of themes) {
+    const lines = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8')).split('\n')
+    const bad = []
+    const good = []
+    lines.forEach((line, i) => {
+      if (line.includes('_fileMention_')) bad.push(i + 1)
+      if (/\[class\*="fileMention"\]/.test(line)) good.push(i + 1)
+    })
+    if (bad.length) fail(`${t}: 存在死锚点 [class*="_fileMention_"]（产品类名无下划线，永不命中）: 行 ${bad.join(', ')}`)
+    else if (good.length === 0) fail(`${t}: 缺少文件引用胶囊规则 [class*="fileMention"] —— 胶囊回退产品默认链接色`)
+    else ok(`${t} 文件引用胶囊锚点有效（${good.length} 处 [class*="fileMention"]）`)
   }
 }
 

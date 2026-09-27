@@ -16,7 +16,7 @@ A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reski
 
 | This project | Aligned DeepSeek Harness version |
 | :---: | :---: |
-| **v2.1.0** | **0.1.7-rc.2** |
+| **v2.1.1** | **0.1.7-rc.2** |
 
 > The table above is refreshed after each DSH re-verification. The baseline declaration lives in `dshCompatibility` in `package.json`; item 11 of `node scripts/check-release.js` checks this table against that declaration and cross-checks the declared baseline against both the local DSH runtime contract and the four built-in theme stylesheets — the 14 L0 token names, the `settings.section` / `tool.view.cordis` slots, and the `body[data-ds-dark-theme]` dark marker. A contract drift introduced by a DSH upgrade fails the gate.
 

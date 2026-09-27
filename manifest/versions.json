@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.1.1",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-09-27",
+      "changes": [
+        "修复文件引用胶囊死锚点（[class*=\"_fileMention_\"] 带下划线在产品产物零命中，v2.0.2 起静默失效；改为不带下划线的 [class*=\"fileMention\"]，命中产品真实类名 .fileMention；门禁第 12 节新增 12.6 项防回归）"
+      ]
+    },
+    {
       "version": "2.1.0",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

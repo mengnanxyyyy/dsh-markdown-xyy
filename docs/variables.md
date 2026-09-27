@@ -50,6 +50,7 @@
 
 > **字体为什么是这两个 token**：产品的 markdown 字体 token（`--dsw-font-markdown-*`）**全部由它们派生**（如 `--dsw-font-markdown-base-font-family: var(--dsw-font-family)`），且 `var()` 在**使用处**解析 —— 覆盖这两个即可让 UI 与 markdown（容器 / h1-h6 / 表格 / 行内代码 / 代码块）彻底同源，无需逐元素改写，也不与产品显式 `font:` 简写打特异性官司。v2.0.2 之前 markdown 正文实际落在产品字体栈（`-apple-system, …`，不含主题的 Geist），文件头「UI 与 markdown 同源」的自述只对颜色成立。
 > **对话流间距为什么不能用 `gap`**：产品该列（`.EvIC1a_column`）**没有** `gap`，间距由兄弟元素的 `margin-top: var(--dsh-chat-flow-gap,16px)` 实现。flex `gap` 与外边距**叠加、不折叠**，故旧写法 `[data-chat-flow]{gap:5px}` 会把 16px 变成 21px —— 与「收紧」意图正好相反（v2.0.2 修正）。
+> **文件引用胶囊锚点为什么不带下划线**：产品真实类名是 `.fileMention`（CSS Modules `:local` 类，无前后下划线，见 `dsh-client-ui-primitives` 的 `MarkdownText.module.css`，编译后带 hash 后缀）。`_markdown_` 带下划线是因为产品 markdown 容器类名本身就长那样（`_markdown_<hash>_<n>`），两者机制不同、不可类比。v2.0.2 误写成 `[class*="_fileMention_"]` 后在产品产物里零命中、静默失效到 v2.1.1 才修（门禁 12.6 防回归）。
 
 ---
 

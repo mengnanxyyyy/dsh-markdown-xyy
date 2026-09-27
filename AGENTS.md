@@ -29,7 +29,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
     - **代码着色只能经 `--shiki-token-*` 变量**：DSH 无 Prism/Highlight.js（全产物无 `hljs`/`token` 类名），走 Shiki css-variables 主题，token 色由内联 style 落地。**`.token.*` / `.hljs-*` 选择器永不命中**——v1.10.0–v2.0.2 整段规则都是死代码，v2.0.2 已删除。`--hl-*` 保留为调色单一真源，经 `--shiki-token-*: var(--hl-*)` 映射生效。已知取舍：Shiki 无 per-token 选择器，关键字加粗无法保留。
     - **markdown 字体必须覆盖 `--dsw-font-family` / `--ds-font-family-code`**：产品的 markdown 字体 token 全部由这两个派生且 `var()` 在使用处解析；只在 `body` 设 `font-family` 没用（产品容器有 `font:` 简写、h1–h4 各有自己的 token）。另注意**没有** `--dsw-font-family-mono` 这个 token。
     - **对话流间距不能用 flex `gap`**：产品该列没有 `gap`，间距是兄弟元素 `margin-top: var(--dsh-chat-flow-gap,16px)`；`gap` 与 margin **叠加不折叠**，写 `gap:5px` 会把 16px 变成 21px（与收紧意图相反）。
-    - **文件引用胶囊是 `<button>` 不是 `<a>`**：行内文件引用用 `[class*="_fileMention_"]` 定位（`data-ref-chip` 属性仅在部分情况存在，不可依赖）。
+    - **文件引用胶囊是 `<button>` 不是 `<a>`，且类名无下划线**：行内文件引用用 `[class*="fileMention"]` 定位（产品真实类名 `.fileMention`，CSS Modules `:local`，编译后带 hash；**不要**写成 `[class*="_fileMention_"]`——带下划线的子串在产品产物零命中，v2.0.2→v2.1.1 曾是死规则，门禁 12.6 防回归）。`data-ref-chip` 属性仅在部分情况存在，不可依赖。
     - **写注释也要当代码看**：门禁分析前会剥 CSS 注释（`stripCssComments`）——注释里提到 token 名/选择器不会被误判。改门禁时别退回"按行首猜注释"的做法。
 
 ## 构建约定
@@ -101,7 +101,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## 当前状态
 
-- 当前版本 v2.1.0（DSH 0.1.7 对齐：DSH 新增 `--dsw-alias-state-idle-primary`，L0 名单 13→14，4 套内置主题浅/深同步补值 + 基线升 0.1.7-rc.2 / cordis 4.0.4 + docs 全套同步。v2.0.3 主题消费面修复：6 类「改了却没效果」的问题 + 门禁第 12 节防回归。v2.0.2 移除启动期 console 日志；v2.0.1 修复常驻/npm 通道：__MDVR_PKG_ROOT__ 包目录资产解析 + Host inject webServer + 路由注册加固；v2.0.0 首个正式版 = 持久化 + 底子主题 + `~/.dsh/web-themes-xyy` + 四套内置主题）；内置主题 4 个；路线图见 docs/capabilities.md。
+- 当前版本 v2.1.1（修复文件引用胶囊死锚点：`[class*="_fileMention_"]` 带下划线在产品产物零命中，v2.0.2 起静默失效；改为 `[class*="fileMention"]` 命中产品真实类名 `.fileMention`，门禁第 12 节新增 12.6 项防回归。v2.1.0 DSH 0.1.7 对齐：DSH 新增 `--dsw-alias-state-idle-primary`，L0 名单 13→14，4 套内置主题浅/深同步补值 + 基线升 0.1.7-rc.2 / cordis 4.0.4 + docs 全套同步。v2.0.3 主题消费面修复：6 类「改了却没效果」的问题 + 门禁第 12 节防回归。v2.0.2 移除启动期 console 日志；v2.0.1 修复常驻/npm 通道：__MDVR_PKG_ROOT__ 包目录资产解析 + Host inject webServer + 路由注册加固；v2.0.0 首个正式版 = 持久化 + 底子主题 + `~/.dsh/web-themes-xyy` + 四套内置主题）；内置主题 4 个；路线图见 docs/capabilities.md。
 - **DSH 版本对齐（v2.0.2 补充，未升版本）**：`package.json` 新增 `dshCompatibility` 基线（DSH 0.1.6-alpha.2 / cordis 4.0.2），`@deepseek-ai/cordis` peerDep 收紧为 `^4.0.2`（与 DSH 0.1.6 随附版本及官方包一致），`check-release.js` 新增第 11 项门禁，`README.md` / `README.en.md` 新增「本项目版本 / 对齐的 DSH 版本」表格（受第 11.2 项核对）。本次仅动声明与门禁，**未改任何运行逻辑**，故四处 MANIFEST 版本号保持 v2.0.2 不变、无需重建产物。详见「DSH 版本对齐基线」章节。
 - **主题消费面修复（v2.0.3）**：审计 4 套内置主题与 DSH 0.1.6 的消费层契约，修掉 6 类「改了却没效果」的问题——① 对话流间距 `gap` 反向叠加（改为 `--dsh-chat-flow-gap`）② §6 语法高亮整段死代码（改用 `--shiki-token-*` 映射）③ markdown 正文不跟随主题字体（覆盖 `--dsw-font-family` / `--ds-font-family-code`）④ 代码块语言标签选错元素 ⑤ 行内文件引用胶囊漏覆盖 ⑥ 两处失效文档引用 + `--mdvr-highlight-soft` 死变量标注。`check-release.js` 新增第 12 节（5 项）防回归，并在分析前剥 CSS 注释。详见「主题铁律」第 12 条与 `docs/variables.md` §2.1 / §五。⚠️ 本次只改**资产与声明**，未动插件运行逻辑；但因为资产走 `__MDVR_PKG_ROOT__`，**当前 GUI 仍是旧主题**，需重装该包或走用户主题通道才可见（见「常见坑」）。
 - **兼容性已复验（2026-09-26，v2.1.0）**：本机 DSH 0.1.7-rc.2，门禁第 11 项三方比对全过（14 token 逐名一致 / 双槽位在 / 深色标记在 / cordis 4.0.4 落在 ^4.0.2 内），README 双表同步。上次端到端 RPC + occupants 实测仍是 2026-09-19（DSH 0.1.6-alpha.2：`themes.builtin.list` 4 套 / `themes.user.list` 3 套 / `themeAssets.get` total=2；`settings.section#mdvr-theme` 与 `tool.view.cordis#self` 均 `active: true`）——v2.1.0 的 define 后需重跑一次端到端再确认。

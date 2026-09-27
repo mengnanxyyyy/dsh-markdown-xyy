@@ -785,17 +785,18 @@ body {
   border-bottom-color: var(--mdvr-link-hover) !important;
   text-decoration: none !important;
 }
-/* 行内文件引用胶囊（v2.0.2 补）：它是 <button> 而非 <a>，产品给它
+/* 行内文件引用胶囊（v2.0.2 补，v2.1.1 修正锚点）：它是 <button> 而非 <a>，产品给它
    --dsw-alias-link（非 .compact 上下文），与主题链接色不一致；
-   此处并入主题链接身份。类名子串机制与 [class*="_markdown_"] 同理
-   （_fileMention_ 前缀稳定，hash 后缀随构建变化）。 */
-[class*="_markdown_"] :where([class*="_fileMention_"]) {
+   此处并入主题链接身份。产品真实类名是 .fileMention（CSS Modules :local 类，
+   无前后下划线，编译后带 hash 后缀）—— 子串必须是不带下划线的 fileMention；
+   带下划线的 _fileMention_ 在产品产物里零命中（v2.1.1 前为死规则，见 docs/variables.md）。 */
+[class*="_markdown_"] :where([class*="fileMention"]) {
   color: var(--mdvr-link) !important;
   text-decoration: none !important;
   border-bottom: 1.5px solid transparent !important;
   transition: all 0.2s ease !important;
 }
-[class*="_markdown_"] :where([class*="_fileMention_"]:hover) {
+[class*="_markdown_"] :where([class*="fileMention"]:hover) {
   color: var(--mdvr-link-hover) !important;
   border-bottom-color: var(--mdvr-link-hover) !important;
   text-decoration: none !important;
