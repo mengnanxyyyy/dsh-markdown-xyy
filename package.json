@@ -64,8 +64,8 @@
     "node": ">=22"
   },
   "dshCompatibility": {
-    "verifiedAgainst": "0.1.7-rc.2",
-    "verifiedDate": "2026-09-26",
+    "verifiedAgainst": "0.2.0-rc.2",
+    "verifiedDate": "2026-10-01",
     "cordis": "4.0.4",
     "darkAttribute": "data-ds-dark-theme",
     "themeTokens": [

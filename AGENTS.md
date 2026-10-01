@@ -56,7 +56,7 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 
 ## DSH 版本对齐基线
 
-- **基线声明**：`package.json` 的 `dshCompatibility`（**独立顶层字段**）。⚠️ 不要塞进 `dsh` 字段——那是 DSH 自身的 `bundle` / `client` 登记位，被 profile boot 与 patch 机制消费，塞额外键有被误读的风险。当前基线 **DSH 0.1.7-rc.2**（复验 2026-09-26），随附 **cordis 4.0.4**。
+- **基线声明**：`package.json` 的 `dshCompatibility`（**独立顶层字段**）。⚠️ 不要塞进 `dsh` 字段——那是 DSH 自身的 `bundle` / `client` 登记位，被 profile boot 与 patch 机制消费，塞额外键有被误读的风险。当前基线 **DSH 0.2.0-rc.2**（复验 2026-10-01），随附 **cordis 4.0.4**。
 - **门禁第 11 项**（`check-release.js`）做三方比对「声明基线 ↔ 本机 DSH 运行时权威源 ↔ 4 套内置主题 CSS」：
   - `themeTokens`（14 个）↔ DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（即客户端 `Theme.listTokens` 的源）↔ 各主题 CSS 实际定义名单；
   - `slots`（`settings.section` / `tool.view.cordis`）↔ DSH 对应 `.d.ts` 契约文件；
@@ -107,5 +107,8 @@ DeepSeek Harness 上的动态 Cordis 插件（pluginId 前缀 `mdvr`）：**版�
 - **兼容性已复验（2026-09-26，v2.1.0）**：本机 DSH 0.1.7-rc.2，门禁第 11 项三方比对全过（14 token 逐名一致 / 双槽位在 / 深色标记在 / cordis 4.0.4 落在 ^4.0.2 内），README 双表同步。上次端到端 RPC + occupants 实测仍是 2026-09-19（DSH 0.1.6-alpha.2：`themes.builtin.list` 4 套 / `themes.user.list` 3 套 / `themeAssets.get` total=2；`settings.section#mdvr-theme` 与 `tool.view.cordis#self` 均 `active: true`）——v2.1.0 的 define 后需重跑一次端到端再确认。
 - 提交历史已重建为「每发布版本一个提交 + 顶部 docs 提交」（共 36 个）；旧历史备份在本地分支 `backup-pre-cleanup`，**勿推送**。
 - README 双语维护（`README.md` 中文 + `README.en.md` 英文镜像，顶部互挂语言徽章）：公众版只展示「安装即用」（npm registry / github:），**勿回填**动态 define、`file:` 本地开发类内容（动态 define 流程只存在于 docs/development.md）；主题预览图 = `screenshots/*.jpg`（4 张，README 画廊引用）。**勿写内部实现/门禁说明**（2026-09-27 用户明示）：像「基线声明见 `package.json` 的 `dshCompatibility`／`check-release.js` 第 11 项做三方比对／契约漂移会让门禁失败」这类段落属维护者细节，**只放 `docs/` 或本文件**，README 只留版本表本身（表格是门禁 11.2 的锚点，标题与表格必须保留）。
-- **DSH 0.2.0-rc.2 已到（2026-09-27）**：本机与 npm `latest` 均升到 0.2.0-rc.2（`next` 同）；门禁对它实跑一次——14 token 逐名一致 / 双槽位在 / 深色标记在 / shiki 9 个在 / cordis 仍 4.0.4（peer `^4.0.2` ✓），**契约零漂移**，只有 `dshCompatibility.verifiedAgainst`（仍写 0.1.7-rc.2）与 `verifiedDate` 过期 → 按设计降级为 warn、不拦发布。要消掉这条 warn 只需更新这两个字符串 + README 双表，无代码改动。
+- **DSH 0.2.0-rc.2 对齐完成（复验 2026-10-01）**：本机与 npm `latest`/`next` 均为 0.2.0-rc.2（npm 发布 2026-09-29，rc.1 = 09-28；⚠️ 早前误记 09-27 已改正）。`dshCompatibility.verifiedAgainst` / `verifiedDate` 与 README 双表已同步，`cordis` 仍 4.0.4。**7 个契约面全部未变**（两路独立验证：本会话拉两版 tarball 逐文件 diff + subagent 走官方 release 与同源 diff，结论一致；槽位 `.d.ts`、`dsh-package-manifest` 的 `types.d.ts`、`dsh-client-modules`、`dsh-client-ui-settings`、服务提供方包除 package.json 外**字节全等**）。官方 release notes：https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.0-rc.1
+  - ⚠️ **本版唯一与我们相关的运行时变化 = `--dsh-chat-flow-gap` 模型重构**：产品默认 fallback **16px → 6px**，并改成多档（`.EvIC1a_running` 12px / response 组 16px / 空行 16px / `.O_Ebla_body` 6px），新增 `data-chat-flow-kind=turn-process|turn-trigger` 分类。我们的 `[data-chat-flow]{--dsh-chat-flow-gap:5px!important}` 挂在**列容器**靠继承生效，而产品现在**直接**声明在 `.EvIC1a_flowItem` 变体上（直接声明恒胜继承，`!important` 只在同元素上比较）→ 那些节点可能已回到产品值、节奏混档；且 `/* 产品默认 16px */` 等注释**已过期**。**待办：GUI 实测后决定删 override / 逐档覆盖**，门禁 12.3 目前只查「用没用旋钮」查不出这类语义漂移。
+  - 其他：字号步进 12–17 → **10–22**（我们不调 `setFontSize`，无影响）；平台新增一批**非 listTokens** 的 alias token（`switch-thumb` / `turn-trigger-*` / `label-shimmer` / `menu-group-header-fill` / `bg-document-selection` 等，产品自给默认值，我们不写、门禁不比对）；插件管理器改「升级需 reinstall」引导；CLI 新增 `--profile desktop` 分支（**web 路径未动**）。
+  - ⚠️ **复验工具变了**：`cordis_inspect_query` 现在带超时 + 无活页面快速失败（`clientInspectTimeoutMs` / `gateway.hasLiveClient()`）——跑「升版后标准动作 ①」时需先开活的 web 页面，否则直接 fail 而非挂起。
 - 待决：`plugin/host.js` 的 FALLBACK_* 常量硬编码了本机目录（运行时兜底，功能正常；公开仓库可见，未定是否中性化）。
