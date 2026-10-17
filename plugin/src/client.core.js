@@ -28,12 +28,12 @@
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '2.1.3',
+  version: '2.1.4',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-10-17',
   changes: [
-    'Windows 原生 / DSH Desktop 跨平台修复：包内资产根改用 fileURLToPath（旧 URL.pathname 在 Windows 盘符 / 空格 / 中文路径下失效）、用户主题目录改由注入 DSH home + 可移植 shell 探测解析（移除 POSIX 硬编码、printf / mkdir -p，并修掉 DSH 0.2.x 里不存在的 shell 服务 run() 调用）、主题 id 拦截 Windows 保留设备名、诊断日志改 os.tmpdir()；门禁新增第 13 节（7 项跨平台契约），新增 docs/platform.md，README 补 Desktop 安装说明',
+    '修复首装用户主题误报（目录缺失按空列表返回 + RPC 抖动重试）；设置页显示真实全路径（Windows 盘符准确）；门禁 13.8 / 13.9',
   ],
 }
 
@@ -116,6 +116,8 @@ let themeService = null       // 产品 theme 服务（外观模式三档切换�
 let builtinThemes = {}        // 内置主题缓存：id → { css }（工作区 themes/*.css）
 let userThemes = {}           // 用户主题缓存：id → { css }（~/.dsh/web-themes-xyy）
 let userThemeIds = []         // 用户主题 id 列表（目录顺序）
+let userThemesLoadError = ''  // 最近一次用户主题加载失败原因（诊断用，成功即清空）
+let userThemesDir = ''        // 用户主题目录的真实绝对路径（Host 返回；'' = 未知，用平台兜底文案）
 let panelCss = ''             // 面板与设置页样式（plugin/assets/panel.css）
 let assetsPromise = null      // 资产加载 Promise（失败后重置，允许重试）
 let runSeq = 0                // 每次 apply() 递增；异步回调据此判断自己是否仍属于当前 Run（v1.3.0）
@@ -171,6 +173,20 @@ function ensureAssets() {
     })
   }
   return assetsPromise
+}
+
+// 用户主题目录的展示路径（v2.1.4）：优先用 Host 返回的真实绝对路径（Windows 盘符、
+// 空格/中文、自定义 DSH_HOME 都准确）；目录未知（尚未加载 / 读取失败）时按平台兜底 ——
+// Windows 用 %USERPROFILE% 形式，其他平台用 ~ 形式，避免 Windows 用户看到 `~/.dsh` 找不到目录。
+function userThemeDirLabel() {
+  if (userThemesDir) return userThemesDir
+  let win = false
+  try { win = /Windows/i.test(navigator.userAgent) } catch (e) { /* 非浏览器环境 */ }
+  return win ? '%USERPROFILE%\\.dsh\\web-themes-xyy' : '~/.dsh/web-themes-xyy'
+}
+function userThemeFilePath(id) {
+  const base = userThemeDirLabel()
+  return base + (base.indexOf('\\') !== -1 ? '\\' : '/') + id + '.css'
 }
 
 // CSS 语法校验：注释/字符串/花括号/圆括号闭合检查；返回错误信息或 null（通过）
@@ -241,7 +257,10 @@ async function fetchChunks(method, argFn) {
 async function loadUserThemes() {
   try {
     const listRes = await host.call('themes.user.list')
-    if (!listRes || !listRes.ok) return null
+    if (!listRes || !listRes.ok) {
+      userThemesLoadError = (listRes && listRes.reason) || 'themes.user.list 返回失败'
+      return null
+    }
     const ids = Array.isArray(listRes.themes) ? listRes.themes : []
     // 局部快照：全部加载完成后再一次性替换共享缓存（避免旧缓存残留/半更新状态）
     const next = {}
@@ -255,10 +274,25 @@ async function loadUserThemes() {
     }
     userThemes = next
     userThemeIds = loaded
+    userThemesLoadError = ''
+    userThemesDir = typeof listRes.dir === 'string' ? listRes.dir : ''
     return loaded
   } catch (e) {
+    userThemesLoadError = String((e && e.message) || e)
     return null
   }
+}
+
+// v2.1.4：首次加载 / 安装后热重载时 RPC 可能瞬时不可用（Web 刚起来、路由重注册、页面早于
+// 插件 apply 挂载）——短暂退避重试，避免把一次性抖动显示成「目录不可读」的假警告，也避免
+// 启动恢复路径因此误回默认主题。仍失败才返回 null，由调用方提示。
+async function loadUserThemesRetry() {
+  let ids = await loadUserThemes()
+  if (ids === null) {
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    ids = await loadUserThemes()
+  }
+  return ids
 }
 
 // 保存 / 新建用户主题：本地 CSS 校验（错误禁止保存）→ 事务化分块上传（uploadId，v1.3.0）→ 写回 ~/.dsh/web-themes-xyy/<id>.css
@@ -548,7 +582,7 @@ function ThemeEditor(props) {
     const result = await saveUserTheme(id, css)
     setBusy(false)
     if (result.ok) {
-      setStatus('✅ 已保存到 ~/.dsh/web-themes-xyy/' + id + '.css')
+      setStatus('✅ 已保存到 ' + userThemeFilePath(id))
       props.onSaved(id)
     } else {
       setStatus('❌ ' + (result.reason || '保存失败（目录不可写或文件已锁定）'))
@@ -674,11 +708,13 @@ function ThemeSettings() {
     const req = ++reqRef.current
     setRefreshing(true)
     setUserError('')
-    loadUserThemes().then((ids) => {
+    loadUserThemesRetry().then((ids) => {
       if (!mountedRef.current || req !== reqRef.current) return
       setRefreshing(false)
       if (ids === null) {
-        setUserError('读取用户主题失败（目录不可读或 RPC 异常），当前显示上次结果')
+        // 仅最终失败才告警；具体原因进控制台，界面保持简短（v2.1.4）
+        try { console.warn('[mdvr] user themes: ' + (userThemesLoadError || 'unknown')) } catch (e) { /* 忽略 */ }
+        setUserError('读取用户主题失败（目录不可读或 RPC 异常），当前显示上次结果；可点「刷新」重试')
       } else {
         setUserIds(ids)
       }
@@ -709,10 +745,13 @@ function ThemeSettings() {
     setEditor(null)
     const req = ++reqRef.current
     setRefreshing(true)
-    loadUserThemes().then((ids) => {
+    loadUserThemesRetry().then((ids) => {
       if (!mountedRef.current || req !== reqRef.current) return
       setRefreshing(false)
-      if (ids !== null) setUserIds(ids)
+      if (ids !== null) {
+        setUserIds(ids)
+        setUserError('') // 保存后刷新成功：清掉之前可能残留的读取失败提示（v2.1.4）
+      }
       // 正在使用中的主题修改后即时重新应用（applySelection 原子切换，失败时保留旧样式）
       if (selRef.current === 'user:' + id) applySelection(rootCtx, 'user:' + id)
     })
@@ -761,8 +800,8 @@ function ThemeSettings() {
           ),
         )
       }),
-    // 用户主题（~/.dsh/web-themes-xyy/：放 CSS 文件即新主题，点刷新生效；可编辑）
-    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（~/.dsh/web-themes-xyy/）'),
+    // 用户主题（<DSH_HOME>/web-themes-xyy：放 CSS 文件即新主题，点刷新生效；可编辑）
+    React.createElement('div', { className: 'mdvr-themes-title mdvr-themes-title-gap' }, '用户主题（' + userThemeDirLabel() + '）'),
     React.createElement('div', { className: 'mdvr-user-actions' },
       React.createElement('button', {
         className: 'mdvr-refresh-btn',
@@ -796,7 +835,7 @@ function ThemeSettings() {
           onClick: () => { if (applySelection(rootCtx, 'user:' + id)) setSel('user:' + id) },
         },
           swatchGrid(sw.light, sw.dark),
-          themeInfo(id + (selUser ? ' ✓' : ''), '用户主题：~/.dsh/web-themes-xyy/' + id + '.css'),
+          themeInfo(id + (selUser ? ' ✓' : ''), '用户主题：' + userThemeFilePath(id)),
         ),
         React.createElement('button', {
           type: 'button',
@@ -842,7 +881,7 @@ return {
         if (stored === 'system-native' || builtinThemes[stored]) {
           target = stored
         } else if (stored.indexOf('user:') === 0) {
-          const got = await loadUserThemes()
+          const got = await loadUserThemesRetry()
           if (disposed || run !== runSeq) return
           if (got === null) {
             target = DEFAULT_SELECTION // 目录读取失败：本次回默认，但不清存储（下次再试）
@@ -865,7 +904,7 @@ return {
         if (e.newValue === null || e.newValue === activeSelection) return
         if (e.newValue.indexOf('user:') === 0 && !userThemes[e.newValue.slice(5)]) {
           // 本页用户主题缓存还没加载（设置页未打开过）：先拉目录再应用；被删则 applySelection 返回 false 不动现状
-          loadUserThemes().then(() => {
+          loadUserThemesRetry().then(() => {
             if (!disposed && run === runSeq) applySelection(rootCtx, e.newValue)
           })
           return

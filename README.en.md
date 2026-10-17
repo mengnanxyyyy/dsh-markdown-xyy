@@ -16,7 +16,7 @@ A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reski
 
 | This project | Aligned DeepSeek Harness version |
 | :---: | :---: |
-| **v2.1.3** | **0.2.1-rc.1** |
+| **v2.1.4** | **0.2.1-rc.1** |
 
 ## 📖 Why this project exists
 
@@ -46,7 +46,7 @@ That is exactly what this project does: a "reading-assist" theme for Markdown in
 
 - **✔️ 4 built-in themes**, each with light / dark variants; ☀️ / 🌙 / 🖥️ appearance modes follow the system
 - **✔️ Persistent theme choice**: your selected theme is remembered (localStorage) and restored after refresh, a fresh page, or a restart — and synced across open tabs in real time
-- **✔️ Drop-in user themes**: put a CSS file into `~/.dsh/web-themes-xyy/` and it becomes a theme — no packaging, no plugin upgrades
+- **✔️ Drop-in user themes**: put a CSS file into `~/.dsh/web-themes-xyy/` (Windows: `%USERPROFILE%\.dsh\web-themes-xyy\`) and it becomes a theme — no packaging, no plugin upgrades
 - **✔️ Live theme editor**: create / edit user themes in Settings with syntax highlighting, one-click formatting, and double-side CSS validation
 - **✔️ Element-level progressive styling**: `:where()` zero-specificity overrides only touch bare Markdown elements; explicit product styles always win
 - **✔️ Immutable version ledger**: every iteration is one immutable Package; current version and full history are shown in the run card, rollback anytime
@@ -106,7 +106,7 @@ can paste it straight back into the editor and save.
 **Way 2 — hand-write / drop a file**
 
 - A theme is a three-section CSS: ① light `body {…}` ② dark `body[data-ds-dark-theme] {…}` ③ element overrides `:where()`. See the reference implementation `plugin/assets/themes/strawberry-mocha.css` (fully commented).
-- Drop-in: save it as `~/.dsh/web-themes-xyy/<your-name>.css`, then click "Refresh user themes" in Settings.
+- Drop-in: save it as `~/.dsh/web-themes-xyy/<your-name>.css` (Windows: `%USERPROFILE%\.dsh\web-themes-xyy\<your-name>.css`), then click "Refresh user themes" in Settings.
 - 90% of a re-skin is a handful of key variables (full contract in [docs/variables.md](docs/variables.md)):
   - `--dsw-alias-bg-base` / `--dsw-alias-bg-layer-1` … background & surface layers
   - `--dsw-alias-brand-primary` brand / accent color

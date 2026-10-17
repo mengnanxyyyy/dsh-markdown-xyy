@@ -16,7 +16,7 @@
 
 | 本项目版本 | 对齐的 DeepSeek Harness 版本 |
 | :---: | :---: |
-| **v2.1.3** | **0.2.1-rc.1** |
+| **v2.1.4** | **0.2.1-rc.1** |
 
 ## 📖 项目缘起
 
@@ -46,7 +46,7 @@
 
 - **✔️ 4 套内置主题**，每套浅色 / 深色双档，☀️ / 🌙 / 🖥️ 外观三档随系统切换
 - **✔️ 主题选择持久化**：选中的主题自动记住（localStorage），刷新、新开页面、重启后原样恢复，多标签页实时同步
-- **✔️ 用户主题即放即用**：往 `~/.dsh/web-themes-xyy/` 放一个 CSS 文件就是新主题，无需打包、无需升级插件
+- **✔️ 用户主题即放即用**：往 `~/.dsh/web-themes-xyy/`（Windows：`%USERPROFILE%\.dsh\web-themes-xyy\`，即 `C:\Users\<用户名>\.dsh\web-themes-xyy\`）放一个 CSS 文件就是新主题，无需打包、无需升级插件
 - **✔️ 实时主题编辑器**：设置页内新建 / 编辑用户主题，语法高亮 + 一键格式化，保存前双端 CSS 校验
 - **✔️ 元素级排版增量覆盖**：`:where()` 零优先级，只兜底裸 Markdown 元素，产品显式样式永远优先
 - **✔️ 不可变版本台账**：每个迭代 = 一个不可变 Package，run 卡片内即看当前版本与完整历史，可随时回滚
@@ -103,7 +103,7 @@ dsh plugin --profile desktop add dsh-markdown-xyy
 **方式二：手写 / 放文件**
 
 - 主题 = 三段式 CSS：① 浅色档 `body {…}` ② 深色档 `body[data-ds-dark-theme] {…}` ③ 元素定制 `:where()`。参考内置 `plugin/assets/themes/strawberry-mocha.css`（全注释的标准参考实现）；
-- 放文件即新主题：复制成 `~/.dsh/web-themes-xyy/<你的名字>.css` → 设置页「🔄 刷新用户主题」；
+- 放文件即新主题：复制成 `~/.dsh/web-themes-xyy/<你的名字>.css`（Windows：`%USERPROFILE%\.dsh\web-themes-xyy\<你的名字>.css`）→ 设置页「🔄 刷新用户主题」；
 - 90% 的换肤效果来自几个关键变量（完整契约见 [docs/variables.md](docs/variables.md)）：
   - `--dsw-alias-bg-base` / `--dsw-alias-bg-layer-1` … 背景与表面层次
   - `--dsw-alias-brand-primary` 品牌 / 强调主色

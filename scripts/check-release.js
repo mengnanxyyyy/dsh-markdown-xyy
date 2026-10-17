@@ -21,7 +21,8 @@
 //      —— 均为「曾静默失效」缺陷的回归防护
 //  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
 //      包装器注入 / shell 服务只用 resolve()+execute().result()（禁 run）/ 禁 POSIX 硬编码兜底与
-//      printf、mkdir -p 命令 / 主题 id 的 Windows 保留设备名守卫 / 诊断日志不用 /tmp
+//      printf、mkdir -p 命令 / 主题 id 的 Windows 保留设备名守卫 / 诊断日志不用 /tmp /
+//      用户主题目录缺失按空列表处理（首装不误报）/ 路径提示用真实绝对路径或 Windows %USERPROFILE% 兜底
 //      —— 防 v2.1.3 修好的 Windows 原生与 DSH Desktop 路径问题回归
 //
 // 用法：node scripts/check-release.js
@@ -699,6 +700,10 @@ console.log('\n13) 跨平台 / Desktop 兼容契约')
 //   13.5 不得使用 POSIX 专属 shell 命令（printf / mkdir -p 在 PowerShell 下失败）
 //   13.6 主题 id 必须有 Windows 保留设备名守卫（con/nul/com1… 无法作为 Windows 文件名）
 //   13.7 诊断日志不得写 /tmp（Windows 没有 /tmp）
+//   13.8 用户主题目录不存在时 themes.user.list 必须返回空列表（首装 / 还没建目录时不得误报失败，
+//        否则客户端显示「读取用户主题失败」而实际上只是 0 个主题）
+//   13.9 用户主题路径提示按真实绝对路径显示（Host 返回 dir）；未知时 Windows 必须用 %USERPROFILE%
+//        形式兜底，不能只写 ~/.dsh（Windows 用户按该提示找不到目录）
 {
   const hostSrc = fs.readFileSync(path.join(root, 'plugin', 'host.js'), 'utf8')
   const buildSrc = fs.readFileSync(path.join(root, 'scripts', 'build-installed.js'), 'utf8')
@@ -751,6 +756,38 @@ console.log('\n13) 跨平台 / Desktop 兼容契约')
     fail('主题 id 缺少 Windows 保留设备名守卫（con/nul/com1… 在 Windows 无法作为文件名；双端需一致）')
   } else {
     ok('主题 id 含 Windows 保留名守卫（Host / Client 双端）')
+  }
+
+  // 13.8 用户主题目录缺失 ≠ 读取失败：list 必须 stat 先行、缺失返回空列表
+  {
+    const start = hostSrc.indexOf("registerRpc('themes.user.list'")
+    const end = start >= 0 ? hostSrc.indexOf("registerRpc('themes.user.get'", start) : -1
+    const listBlock = start >= 0 && end > start ? hostSrc.slice(start, end) : ''
+    if (!listBlock) {
+      fail('找不到 themes.user.list 处理器（门禁锚点失效，检查 registerRpc 写法）')
+    } else if (!/fsSvc\.stat\(/.test(listBlock)) {
+      fail('themes.user.list 未先 fs.stat 判断目录是否存在 —— 首装目录还没创建时 listDir 抛 ENOENT，客户端会误报「读取用户主题失败」')
+    } else if (!/ok:\s*true,\s*themes:\s*\[\]/.test(listBlock)) {
+      fail('themes.user.list 缺少「目录缺失 → 返回空列表 {ok:true,themes:[]}」分支（首装会误报读取失败）')
+    } else {
+      ok('用户主题目录缺失按空列表处理（首装不误报读取失败）')
+    }
+  }
+
+  // 13.9 用户主题路径提示：Host 返回真实目录，Client 用真实路径 / Windows 兜底
+  {
+    const listStart = hostSrc.indexOf("registerRpc('themes.user.list'")
+    const listEnd = listStart >= 0 ? hostSrc.indexOf("registerRpc('themes.user.get'", listStart) : -1
+    const listBlock = listStart >= 0 && listEnd > listStart ? hostSrc.slice(listStart, listEnd) : ''
+    if (!/dir:\s*dirPath/.test(listBlock)) {
+      fail('themes.user.list 未返回真实目录 dir —— 设置页无法显示 Windows 全路径（只能写 ~/.dsh）')
+    } else if (!/listRes\.dir/.test(clientSrc)) {
+      fail('客户端未使用 Host 返回的用户主题真实目录（Windows 用户会看到 ~/.dsh 提示）')
+    } else if (!/USERPROFILE/.test(clientSrc)) {
+      fail('客户端缺少 Windows 路径兜底提示（应为 %USERPROFILE%\\.dsh\\web-themes-xyy）')
+    } else {
+      ok('用户主题路径按真实绝对路径显示（Windows 有 %USERPROFILE% 兜底）')
+    }
   }
 
   // 13.7 诊断日志写系统临时目录（Windows 无 /tmp）
