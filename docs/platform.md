@@ -9,9 +9,9 @@
 | 运行形态 | 状态 | 说明 |
 | --- | --- | --- |
 | Web · Linux / WSL2 / macOS | ✅ 日常验证路径 | 本机 WSL2 内 `dsh web`，全部功能可用 |
-| Web · Windows 原生 | ⚠️ v2.1.2 静态修复，待实机验证 | 修复前：内置主题列表为空、用户主题不可用 |
+| Web · Windows 原生 | ⚠️ v2.1.3 静态修复，待实机验证 | 修复前：内置主题列表为空、用户主题不可用 |
 | Desktop · macOS / Linux | ⚠️ 待实测 | 需单独装进 `desktop` profile；`/mdvr/api` 的 Electron 转发待确认 |
-| Desktop · Windows | ⚠️ v2.1.2 静态修复，待实机验证 | 同时受 Windows 路径与 Desktop profile 两条约束 |
+| Desktop · Windows | ⚠️ v2.1.3 静态修复，待实机验证 | 同时受 Windows 路径与 Desktop profile 两条约束 |
 | 动态 define 通道 | ✅ POSIX；Windows 依赖 workspaceRoot 探测 | 无 `__MDVR_PKG_ROOT__` 注入，按内容探测项目根 |
 
 ## 资源引用链路

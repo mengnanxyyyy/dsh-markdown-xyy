@@ -22,7 +22,7 @@
 //  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
 //      包装器注入 / shell 服务只用 resolve()+execute().result()（禁 run）/ 禁 POSIX 硬编码兜底与
 //      printf、mkdir -p 命令 / 主题 id 的 Windows 保留设备名守卫 / 诊断日志不用 /tmp
-//      —— 防 v2.1.2 修好的 Windows 原生与 DSH Desktop 路径问题回归
+//      —— 防 v2.1.3 修好的 Windows 原生与 DSH Desktop 路径问题回归
 //
 // 用法：node scripts/check-release.js
 // 失败返回非零退出码并打印具体原因（file:line 式证据）。
@@ -689,7 +689,7 @@ console.log('\n12) 主题消费面契约')
   }
 }
 
-// ---------- 13. 跨平台 / Desktop 兼容契约（防 v2.1.2 修好的 Windows 路径问题回归） ----------
+// ---------- 13. 跨平台 / Desktop 兼容契约（防 v2.1.3 修好的 Windows 路径问题回归） ----------
 console.log('\n13) 跨平台 / Desktop 兼容契约')
 // 本节每一项都对应一个「Windows 原生 / DSH Desktop 下必坏」的真实缺陷：
 //   13.1 URL→路径必须 fileURLToPath（URL.pathname 在 Windows 给出 /C:/…，空格/中文保留 %xx 编码）
@@ -713,7 +713,7 @@ console.log('\n13) 跨平台 / Desktop 兼容契约')
   } else if (pathnameUse.test(libSrc) || pathnameUse.test(buildSrc)) {
     fail('生成器/产物用 URL.pathname 当文件路径 —— Windows 盘符、空格、中文路径下包内资产全部读不到（应 fileURLToPath）')
   } else if (!/fileURLToPath/.test(libSrc) || !/fileURLToPath/.test(buildSrc)) {
-    fail('生成器/产物缺少 fileURLToPath（v2.1.2 跨平台契约）')
+    fail('生成器/产物缺少 fileURLToPath（v2.1.3 跨平台契约）')
   } else {
     ok('URL → 文件路径走 fileURLToPath（Windows 盘符 / 空格 / 中文安全）')
   }

@@ -38,7 +38,7 @@ const lib = `// ============================================================
 //      避免「插件先于 webServer 装载、ctx.get('webServer') 静默为空 → 路由全缺」。
 //   3) apply 包装 try/catch：启动失败把错误落到系统临时目录的 mdvr-hostboot.log 便于诊断。
 //
-// v2.1.2+ 跨平台增强（Windows 原生 / DSH Desktop / 含空格或中文的路径）：
+// v2.1.3 跨平台增强（Windows 原生 / DSH Desktop / 含空格或中文的路径）：
 //   4) URL → 文件系统路径必须用 fileURLToPath：URL.pathname 在 Windows 给出 "/C:/..."，
 //      且空格/中文等会保留 %20 / %E4%B8%AD 百分号编码 → 包内资产全部读不到。
 //   5) 注入 __MDVR_DSH_HOME__（DSH_HOME 环境变量，缺省 os.homedir()/.dsh）——

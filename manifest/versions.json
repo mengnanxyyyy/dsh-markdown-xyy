@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.1.3",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-10-17",
+      "changes": [
+        "Windows 原生 / DSH Desktop 跨平台修复：包内资产根改用 fileURLToPath（旧 URL.pathname 在 Windows 盘符 / 空格 / 中文路径下失效）、用户主题目录改由注入 DSH home + 可移植 shell 探测解析（移除 POSIX 硬编码、printf / mkdir -p，并修掉 DSH 0.2.x 里不存在的 shell 服务 run() 调用）、主题 id 拦截 Windows 保留设备名、诊断日志改 os.tmpdir()；门禁新增第 13 节（7 项跨平台契约），新增 docs/platform.md，README 补 Desktop 安装说明"
+      ]
+    },
+    {
       "version": "2.1.2",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

@@ -16,7 +16,7 @@
 
 // 用户主题目录：<DSH_HOME>/web-themes-xyy（默认 ~/.dsh/web-themes-xyy；
 // v1.18.0 由 web-themes 改名而来，避免与 DSH 官方未来可能占用 web-themes 目录名冲突）
-// 解析策略（跨平台，v2.1.2 起；Windows 原生与 DSH Desktop 同样适用）：
+// 解析策略（跨平台，v2.1.3 起；Windows 原生与 DSH Desktop 同样适用）：
 //   1) 常驻安装通道：包装器注入 __MDVR_DSH_HOME__（= DSH_HOME 环境变量，缺省 os.homedir()/.dsh）—— 最可靠
 //   2) shell 探测：echo "$HOME"（POSIX bash 与 Windows PowerShell 通用），再退 $USERPROFILE
 //      ⚠️ DSH 0.2.x 的 shell 服务只有 resolve() / execute().result()，没有 run()（旧写法曾静默失效）
@@ -216,12 +216,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '2.1.2',
+  version: '2.1.3',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-10-17',
   changes: [
-    'DSH 0.2.1-rc.1 版本对齐（cordis 4.0.5；14 token / 双槽位 / 深色标记 / 对话流间距模型均未变）+ 新增 engines.dsh 兼容声明；修复字体 token 被产品 body 直接声明压过（0.2.1 字体模型改为在 body 上组合用户字体列表），主题字体与用户字体设置恢复生效；门禁新增 11.7 / 12.7 防回归',
+    'Windows 原生 / DSH Desktop 跨平台修复：包内资产根改用 fileURLToPath（旧 URL.pathname 在 Windows 盘符 / 空格 / 中文路径下失效）、用户主题目录改由注入 DSH home + 可移植 shell 探测解析（移除 POSIX 硬编码、printf / mkdir -p，并修掉 DSH 0.2.x 里不存在的 shell 服务 run() 调用）、主题 id 拦截 Windows 保留设备名、诊断日志改 os.tmpdir()；门禁新增第 13 节（7 项跨平台契约），新增 docs/platform.md，README 补 Desktop 安装说明',
   ],
 }
 
@@ -500,7 +500,7 @@ return {
         const dirPath = await resolveUserThemesDir(ctx)
         if (dirPath === null) return { ok: false, reason: 'user themes dir unresolved' }
         // 目录不存在无需预处理：DSH fs.writeText 的原子写内部 mkdir(recursive) 自动建父目录
-        // （旧代码用 shell `mkdir -p`，在 Windows PowerShell 下不成立，v2.1.2 移除）
+        // （旧代码用 shell `mkdir -p`，在 Windows PowerShell 下不成立，v2.1.3 移除）
         // 用户主动编辑自己的主题文件 → 显式放开沙箱策略
         const policySvc = ctx.get('sandboxPolicy')
         const policy = policySvc !== undefined
