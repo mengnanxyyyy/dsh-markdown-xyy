@@ -1,6 +1,6 @@
 {
   "name": "dsh-markdown-xyy",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "版本记录 + Markdown 对话主题排版 —— DeepSeek Harness 插件（动态 define 与常驻安装双通道）",
   "keywords": [
     "deepseek-harness",
@@ -61,12 +61,13 @@
     "react": "^18.2.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "dsh": ">=0.1.6-alpha.2 <0.3.0-0"
   },
   "dshCompatibility": {
-    "verifiedAgainst": "0.2.0-rc.2",
-    "verifiedDate": "2026-10-01",
-    "cordis": "4.0.4",
+    "verifiedAgainst": "0.2.1-rc.1",
+    "verifiedDate": "2026-10-17",
+    "cordis": "4.0.5",
     "darkAttribute": "data-ds-dark-theme",
     "themeTokens": [
       "--dsw-alias-bg-base",
@@ -102,7 +103,9 @@
       "themeTokens",
       "slots",
       "darkAttribute",
-      "cordis"
+      "cordis",
+      "enginesDsh",
+      "fontComposition"
     ],
     "manualCoverage": [
       "hostServices",

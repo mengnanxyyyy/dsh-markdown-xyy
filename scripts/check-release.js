@@ -14,9 +14,11 @@
 //  11. DSH 兼容基线：package.json 的 dshCompatibility ↔ 本机 DSH 运行时契约 ↔ 内置主题 CSS 三方比对
 //      + README「版本与兼容性」表与 package.json 的版本一致性
 //      + DSH bundling 的 cordis 是否仍落在声明的 peerDependencies 范围内
-//      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表或 cordis peer 真的不一致 → 失败）
+//      + engines.dsh（DSH 0.2.1 起安装/启动强制校验）覆盖声明基线且上界不放大版本
+//      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表、engines.dsh 或 cordis peer 真的不一致 → 失败）
 //  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距走产品旋钮 /
-//      产品字体 token 覆盖 / 注释文档引用有效性 / 文件引用胶囊锚点 —— 均为「曾静默失效」缺陷的回归防护
+//      产品字体 token 覆盖与 body 组合（0.2.1 字体模型）/ 注释文档引用有效性 / 文件引用胶囊锚点
+//      —— 均为「曾静默失效」缺陷的回归防护
 //
 // 用法：node scripts/check-release.js
 // 失败返回非零退出码并打印具体原因（file:line 式证据）。
@@ -165,6 +167,66 @@ function satisfiesRange(version, range) {
   if (v[0] !== base[0]) return false
   if (v[1] !== base[1]) return v[1] > base[1]
   return v[2] >= base[2]
+}
+
+// ---------- DSH 版本范围匹配（engines.dsh 用；零依赖，语义对齐 DSH 的 semver includePrerelease: true） ----------
+// DSH 0.2.1 起在安装与 profile 启动时强制校验 engines.dsh（存在则只看它、忽略 @deepseek-ai/dsh* peer；
+// 缺失才回退 peer 检查）。这里实现门禁侧的最小解析器，只支持空白分隔的比较器集合（>= / > / <= / < / =），
+// 足够表达并核对本项目声明（>=0.1.6-alpha.2 <0.3.0-0）；解析失败返回 null，调用方必须降级为警告。
+function parseVer(v) {
+  const m = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/.exec(String(v).trim())
+  if (!m) return null
+  return { nums: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] ? m[4].split('.') : [] }
+}
+
+// semver 预发布比较：数字标识按数值、字母标识按 ASCII，数字恒低于字母；有预发布者 < 同版本正式版。
+function cmpPre(a, b) {
+  if (a.length === 0 && b.length === 0) return 0
+  if (a.length === 0) return 1
+  if (b.length === 0) return -1
+  const n = Math.max(a.length, b.length)
+  for (let i = 0; i < n; i++) {
+    const x = a[i]
+    const y = b[i]
+    if (x === undefined) return -1
+    if (y === undefined) return 1
+    const xn = /^\d+$/.test(x)
+    const yn = /^\d+$/.test(y)
+    if (xn && yn) {
+      const d = Number(x) - Number(y)
+      if (d !== 0) return d < 0 ? -1 : 1
+      continue
+    }
+    if (xn !== yn) return xn ? -1 : 1
+    if (x !== y) return x < y ? -1 : 1
+  }
+  return 0
+}
+
+function cmpVer(a, b) {
+  for (let i = 0; i < 3; i++) if (a.nums[i] !== b.nums[i]) return a.nums[i] < b.nums[i] ? -1 : 1
+  return cmpPre(a.pre, b.pre)
+}
+
+function satisfiesDshRange(version, range) {
+  const v = parseVer(version)
+  if (!v) return null
+  const parts = String(range).trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return null
+  for (const part of parts) {
+    const m = /^(>=|<=|>|<|=)?(.+)$/.exec(part)
+    if (!m) return null
+    const target = parseVer(m[2])
+    if (!target) return null
+    const c = cmpVer(v, target)
+    const op = m[1] || '='
+    if (op === '>=' && c < 0) return false
+    if (op === '>' && c <= 0) return false
+    if (op === '<=' && c > 0) return false
+    if (op === '<' && c >= 0) return false
+    if (op === '=' && c !== 0) return false
+  }
+  return true
 }
 
 // 从 README 的「版本与兼容性」表提取 [项目版本, DSH 版本]（均已去掉 v 前缀）。
@@ -382,6 +444,38 @@ if (!baseline || !baseline.verifiedAgainst || !Array.isArray(baseline.themeToken
     else ok(`${file} 版本表与 package.json 一致（v${projVer} / DSH ${dshVer}）`)
   }
 
+  // 11.7 engines.dsh（v2.1.2 起，对齐 DSH 0.2.1 的第三方插件兼容机制）
+  //      DSH 0.2.1 起在安装与 profile 启动时强制校验插件声明的 DSH 版本范围：
+  //      有 engines.dsh 则**只**看它（忽略 @deepseek-ai/dsh* peer），缺失才回退 peer 检查。
+  //      本项目未声明 DSH peer，所以 engines.dsh 是唯一能表达兼容面的字段；漏声明 = 新机制下「无声明」。
+  //      判定：范围可解析 + 覆盖声明基线 + 上界排除下一大版本的预发布（防止大版契约漂移被静默放行）。
+  {
+    const enginesDsh = (pkg.engines || {}).dsh
+    if (!enginesDsh) {
+      fail('package.json 缺少 engines.dsh —— DSH 0.2.1+ 无声明可依（本项目也没有 @deepseek-ai/dsh* peer 可回退）')
+    } else {
+      const covers = satisfiesDshRange(baseline.verifiedAgainst, enginesDsh)
+      if (covers === null) {
+        warn(`engines.dsh "${enginesDsh}" 无法用门禁极简解析器解析 —— 请人工核对`)
+      } else if (!covers) {
+        fail(`engines.dsh "${enginesDsh}" 不覆盖声明基线 ${baseline.verifiedAgainst} —— 该 DSH 版本会被判为不兼容`)
+      } else {
+        ok(`engines.dsh "${enginesDsh}" 覆盖声明基线 ${baseline.verifiedAgainst}`)
+      }
+      // 上界守卫：探测下一大版本的首个预发布（如 0.3.0-rc.1）不得被放行
+      const major = Number(String(baseline.verifiedAgainst).split('.')[0])
+      const probe = `${major + 1}.0.0-rc.1`
+      const leaks = satisfiesDshRange(probe, enginesDsh)
+      if (leaks === true) {
+        fail(`engines.dsh "${enginesDsh}" 放行了下一大版本预发布 ${probe} —— 大版契约漂移会被静默放行（上界建议 <${major + 1}.0.0-0）`)
+      } else if (leaks === null) {
+        warn(`无法验证 engines.dsh 上界（探测 ${probe}）—— 请人工核对`)
+      } else {
+        ok(`engines.dsh 上界排除下一大版本预发布（${probe} 不匹配）`)
+      }
+    }
+  }
+
   const dshRoot = findDshRoot()
   if (!dshRoot) {
     warn('未检测到本机 DSH 安装 —— 跳过运行时契约比对（可用 DSH_INSTALL_ROOT 指定安装根）')
@@ -479,6 +573,7 @@ console.log('\n12) 主题消费面契约')
 //   12.4 产品字体 token 覆盖（否则 markdown 正文不跟随主题字体）
 //   12.5 主题注释里的文档引用必须真实存在（防死链）
 //   12.6 文件引用胶囊锚点（产品真实类名 .fileMention 无下划线；带下划线的 _fileMention_ 零命中，v2.1.1 死规则教训）
+//   12.7 字体 token 的 body 组合（DSH 0.2.1 字体模型：产品改在 body 上组合用户字体 + 内置栈）
 {
   const dshRoot2 = findDshRoot()
 
@@ -569,6 +664,24 @@ console.log('\n12) 主题消费面契约')
     if (bad.length) fail(`${t}: 存在死锚点 [class*="_fileMention_"]（产品类名无下划线，永不命中）: 行 ${bad.join(', ')}`)
     else if (good.length === 0) fail(`${t}: 缺少文件引用胶囊规则 [class*="fileMention"] —— 胶囊回退产品默认链接色`)
     else ok(`${t} 文件引用胶囊锚点有效（${good.length} 处 [class*="fileMention"]）`)
+  }
+
+  // 12.7 字体 token 的 body 组合契约（v2.1.2 起对齐 DSH 0.2.1 字体模型）
+  //      产品 0.2.0 在 :root 声明 --dsw-font-family / --ds-font-family-code；0.2.1 改为在 body 上
+  //      组合「用户字体列表（--dsh-font-family-text / -code）+ 内置栈」。直接声明恒压过 :root 继承值，
+  //      故主题若仍只在 :root 覆盖，打开任意内置主题后用户字体设置与主题字体都会落回产品默认栈。
+  //      要求：两个 token 声明在首个 body 块内，且值引用对应角色变量（0.2.0 无该变量 → var() 回退主题字体）。
+  for (const t of themes) {
+    const code = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8'))
+    const light = (code.match(/(?:^|\n)body\s*\{([\s\S]*?)\n\}/) || [])[1] || ''
+    const bad = []
+    for (const [token, roleVar] of [['--dsw-font-family', '--dsh-font-family-text'], ['--ds-font-family-code', '--dsh-font-family-code']]) {
+      const m = light.match(new RegExp(token.replace(/-/g, '\\-') + '\\s*:([^;]*);'))
+      if (!m) bad.push(`${token} 不在首个 body 块（:root 会被产品 body 直接声明压过）`)
+      else if (!m[1].includes(`var(${roleVar}`)) bad.push(`${token} 未组合 ${roleVar}（用户字体设置被主题覆盖）`)
+    }
+    if (bad.length) fail(`${t}: 字体 token 组合契约不满足 —— ${bad.join('；')}`)
+    else ok(`${t} 字体 token 在 body 组合用户字体角色变量（0.2.1 字体模型）`)
   }
 }
 

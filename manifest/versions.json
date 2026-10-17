@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.1.2",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-10-17",
+      "changes": [
+        "DSH 0.2.1-rc.1 版本对齐（cordis 4.0.5；14 token / 双槽位 / 深色标记 / 对话流间距模型均未变）+ 新增 engines.dsh 兼容声明（DSH 0.2.1 起安装/启动强制校验）；修复字体 token 被产品 body 直接声明压过（0.2.1 字体模型改为在 body 上组合用户字体列表），主题字体与用户字体设置恢复生效；门禁新增 11.7 / 12.7 防回归"
+      ]
+    },
+    {
       "version": "2.1.1",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",

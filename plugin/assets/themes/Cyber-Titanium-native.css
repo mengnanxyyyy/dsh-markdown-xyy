@@ -80,15 +80,9 @@
   --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --mdvr-mono: "JetBrains Mono", SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --mdvr-math-font: "KaTeX_Math", "Latin Modern Math", "Cambria Math", STIXGeneral, "Times New Roman", serif;
-  /* 产品字体 token 覆盖（v2.0.2 修正）：
-     产品的 markdown 字体 token（--dsw-font-markdown-*）**全部由下面这两个 token 派生**
-     （如 --dsw-font-markdown-base-font-family: var(--dsw-font-family)），
-     且 var() 在「使用处」解析 —— 所以覆盖它们即可让 UI 与 markdown
-     （容器 / h1-h6 / 表格 / 行内代码 / 代码块）彻底同源，
-     无需逐元素改写，也不会与产品显式 `font:` 简写打特异性官司。
-     产品把此二者声明在 :root，故此处同样用 :root 覆盖（同特异性 + 注入更晚者胜）。 */
-  --dsw-font-family: var(--mdvr-sans);
-  --ds-font-family-code: var(--mdvr-mono);
+  /* 产品字体 token 的覆盖见下方 ① 浅色档的 body 规则（v2.1.2 起随 DSH 0.2.1 字体模型
+     从 :root 迁到 body：产品改为在 body 上组合「用户字体列表 + 内置栈」，直接声明恒压过
+     :root 继承值，故必须同层级覆盖；用户设置优先、主题字体兜底） */
 
   /* ===== 单值拆档说明（v1.11.0） =====
    * inline-code / selection / shadow 属颜色·光影类，已拆浅深两档
@@ -105,6 +99,14 @@
  *    新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
+  /* ===== 产品字体 token（v2.1.2 起对齐 DSH 0.2.1 字体模型：用户字体列表在前、主题字体兜底） =====
+     产品的 markdown 字体 token（--dsw-font-markdown-*）全部由这两个派生，且 var() 在使用处解析；
+     0.2.1 起产品把 --dsh-font-family-text / -code 组合进 body 上的 --dsw-font-family / --ds-font-family-code。
+     必须同层级覆盖（直接声明恒压过 :root 继承值）：用户设了字体则用户字体优先，否则用主题字体栈；
+     0.2.0 无这两个角色变量 → var() 回退到主题字体，向后兼容。 */
+  --dsw-font-family: var(--dsh-font-family-text, var(--mdvr-sans)), var(--mdvr-sans);
+  --ds-font-family-code: var(--dsh-font-family-code, var(--mdvr-mono)), var(--mdvr-mono);
+
   /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #F5F6F9;            /* 冷铝银白底色 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */

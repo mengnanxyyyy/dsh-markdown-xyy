@@ -33,8 +33,8 @@
 | `--dsw-specific-sidebar-fill` | 侧栏底 |
 
 - 名单固定（平台 Theme.listTokens），**不可新增**；所有主题均按此名单浅深各一组。
-- **对齐基线（v2.0.2 起）**：本名单的权威源是 DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（客户端 `Theme.listTokens` 暴露的正是它）。已复验版本 **DSH 0.2.0-rc.2**（2026-10-01；0.1.7-rc.2 → 0.2.0-rc.2 两版 tarball 逐字节比对，该数组所在 hunk **不在 diff 中**），基线声明在 `package.json` 的 `dshCompatibility`，`node scripts/check-release.js` 第 11 项会做「声明 ↔ 本机 DSH 权威表 ↔ 四套内置主题 CSS」三方比对——**DSH 增删 token 会让门禁失败，而不是静默失配**。
-- 深色档挂载依赖产品属性 `body[data-ds-dark-theme]`（同一门禁的第 11.4 项核对产品是否仍按该属性切档），**不要**改用 `prefers-color-scheme` 写主题。
+- **对齐基线（v2.0.2 起）**：本名单的权威源是 DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（客户端 `Theme.listTokens` 暴露的正是它）。已复验版本 **DSH 0.2.1-rc.1**（2026-10-17；0.2.0-rc.2 → 0.2.1-rc.1 两版 tarball 逐文件比对，该数组**逐名同序完全一致**），基线声明在 `package.json` 的 `dshCompatibility`，`node scripts/check-release.js` 第 11 项会做「声明 ↔ 本机 DSH 权威表 ↔ 四套内置主题 CSS」三方比对——**DSH 增删 token 会让门禁失败，而不是静默失配**。
+- 深色档挂载依赖产品属性 `body[data-ds-dark-theme]`（同一门禁的第 11.5 项核对产品是否仍按该属性切档），**不要**改用 `prefers-color-scheme` 写主题。
 - strawberry-mocha 浅档语义色取值：error `#C74330` / success `#237834` / warn `#965B00`；深档取 Catppuccin Mocha 对应色（`#F38BA8` / `#A6E3A1` / `#F9E2AF`）。内置主题的浅档 AA 参考值（原 template.css 建议，现归入内置主题约定）为 error `#c74330` / success `#287b38` / warn `#985d00`——两者出入见 §十「维护引用」。
 
 ### 2.1 产品 token 覆盖清单（主题写入产品的**全部**变量）——v2.0.2 核定
@@ -44,13 +44,14 @@
 | 组 | 变量 | 写在哪 | 门禁 |
 |---|---|---|---|
 | L0 平台 token（14） | `--dsw-alias-*`×13 + `--dsw-specific-sidebar-fill` | `body{}` / `body[data-ds-dark-theme]{}` | 11.1 / 11.3 |
-| 字体（2） | `--dsw-font-family` / `--ds-font-family-code` | `:root`（与产品同选择器 + 注入更晚） | 12.4 |
+| 字体（2） | `--dsw-font-family` / `--ds-font-family-code` | `body{}`（0.2.1 起产品改在 body 组合「用户字体角色变量 + 内置栈」，必须同层级覆盖） | 12.4 / 12.7 |
 | 语法高亮（9） | `--shiki-token-*` | `body{}` / `body[data-ds-dark-theme]{}` | 12.2 |
 | 对话流间距（1） | `--dsh-chat-flow-gap` | `[data-chat-flow]` 规则块 | 12.3 |
 
 > **字体为什么是这两个 token**：产品的 markdown 字体 token（`--dsw-font-markdown-*`）**全部由它们派生**（如 `--dsw-font-markdown-base-font-family: var(--dsw-font-family)`），且 `var()` 在**使用处**解析 —— 覆盖这两个即可让 UI 与 markdown（容器 / h1-h6 / 表格 / 行内代码 / 代码块）彻底同源，无需逐元素改写，也不与产品显式 `font:` 简写打特异性官司。v2.0.2 之前 markdown 正文实际落在产品字体栈（`-apple-system, …`，不含主题的 Geist），文件头「UI 与 markdown 同源」的自述只对颜色成立。
+>   ⚠️ **DSH 0.2.1 起字体模型改为 body 组合**：产品把用户字体角色变量 `--dsh-font-family-text` / `--dsh-font-family-code`（设置→外观里的字体列表，boot 脚本仅在非空时注入 body inline）拼在 `--dsw-font-family` / `--ds-font-family-code` 前面，且改在 `body{}` 声明（0.2.0 是 `:root`）。直接声明恒压过 `:root` 继承值，故 v2.1.2 起主题把这两个 token 移入 `body{}` 并写成 `var(--dsh-font-family-text, <主题字体栈>), <主题字体栈>`：用户设了字体则用户优先，否则主题字体生效；0.2.0 无该角色变量 → `var()` 回退主题字体（向后兼容）。门禁 12.7 防回归。
 > **对话流间距为什么不能用 `gap`**：产品该列（`.EvIC1a_column`）**没有** `gap`，间距由兄弟元素的 `margin-top: var(--dsh-chat-flow-gap,<默认>)` 实现。flex `gap` 与外边距**叠加、不折叠**，故旧写法 `[data-chat-flow]{gap:5px}` 会把默认值再撑大一截 —— 与「收紧」意图正好相反（v2.0.2 修正，当时默认 16px、写成 gap 变 21px）。
->   ⚠️ **DSH 0.2.0-rc.2 起该旋钮被重构**（官方 release notes「过程信息间距」）：默认 fallback **16px → 6px**，并按行状态分成多档（running 12px / response 组 16px / 空行 16px / 展开体 6px），新增 `data-chat-flow-kind=turn-process|turn-trigger` 分类；产品改为**直接**声明在 `.EvIC1a_flowItem` 变体上，而我们的 `[data-chat-flow]` 覆盖挂在列容器上靠**继承**生效——直接声明恒胜继承（`!important` 只在同元素上比较），故我们那 5px 在部分节点已不再生效、节奏可能混档。**待 GUI 实测后决定：删掉 override（让产品 6px 生效）还是逐档覆盖**；四套主题里 `/* 产品默认 16px */` 等注释在该决策落地时需一并订正（门禁 12.3 目前只查「用没用旋钮」，查不出这类语义漂移）。
+>   ⚠️ **DSH 0.2.0-rc.2 起该旋钮被重构**（官方 release notes「过程信息间距」）：默认 fallback **16px → 6px**，并按行状态分成多档（running 12px / response 组 16px / 空行 16px / 展开体 6px），新增 `data-chat-flow-kind=turn-process|turn-trigger` 分类；产品改为**直接**声明在 `.EvIC1a_flowItem` 变体上，而我们的 `[data-chat-flow]` 覆盖挂在列容器上靠**继承**生效——直接声明恒胜继承（`!important` 只在同元素上比较），故我们那 5px 在部分节点已不再生效、节奏可能混档。**待 GUI 实测后决定：删掉 override（让产品 6px 生效）还是逐档覆盖**；四套主题里 `/* 产品默认 16px */` 等注释在该决策落地时需一并订正（门禁 12.3 目前只查「用没用旋钮」，查不出这类语义漂移）。（0.2.1-rc.1 复验：该模型与 0.2.0-rc.2 完全一致、未再变化，上述待办仍在。）
 > **文件引用胶囊锚点为什么不带下划线**：产品真实类名是 `.fileMention`（CSS Modules `:local` 类，无前后下划线，见 `dsh-client-ui-primitives` 的 `MarkdownText.module.css`，编译后带 hash 后缀）。`_markdown_` 带下划线是因为产品 markdown 容器类名本身就长那样（`_markdown_<hash>_<n>`），两者机制不同、不可类比。v2.0.2 误写成 `[class*="_fileMention_"]` 后在产品产物里零命中、静默失效到 v2.1.1 才修（门禁 12.6 防回归）。
 
 ---

@@ -16,7 +16,7 @@ A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reski
 
 | This project | Aligned DeepSeek Harness version |
 | :---: | :---: |
-| **v2.1.1** | **0.2.0-rc.2** |
+| **v2.1.2** | **0.2.1-rc.1** |
 
 ## 📖 Why this project exists
 

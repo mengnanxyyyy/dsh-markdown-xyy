@@ -72,12 +72,12 @@ window.__ModuleLoader__ && window.__ModuleLoader__.load({
 // ---------- §1 配置区 ----------
 // 版本清单（版本面板与 Host 台账使用；与 plugin/host.js 的 MANIFEST 保持一致）
 const MANIFEST = {
-  version: '2.1.1',
+  version: '2.1.2',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-09-27',
+  date: '2026-10-17',
   changes: [
-    '修复文件引用胶囊死锚点（[class*="_fileMention_"] 带下划线在产品产物零命中，v2.0.2 起静默失效；改为不带下划线的 [class*="fileMention"]，命中产品真实类名 .fileMention；门禁第 12 节新增 12.6 项防回归）',
+    'DSH 0.2.1-rc.1 版本对齐（cordis 4.0.5；14 token / 双槽位 / 深色标记 / 对话流间距模型均未变）+ 新增 engines.dsh 兼容声明；修复字体 token 被产品 body 直接声明压过（0.2.1 字体模型改为在 body 上组合用户字体列表），主题字体与用户字体设置恢复生效；门禁新增 11.7 / 12.7 防回归',
   ],
 }
 
