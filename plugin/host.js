@@ -216,12 +216,12 @@ function validateCss(src) {
 }
 
 const MANIFEST = {
-  version: '2.1.4',
+  version: '2.1.5',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
   date: '2026-10-17',
   changes: [
-    '修复首装用户主题误报（目录缺失按空列表返回 + RPC 抖动重试）；设置页显示真实全路径（Windows 盘符准确）；门禁 13.8 / 13.9',
+    '与 v2.1.4 内容相同（首装用户主题误报修复 + 真实全路径显示 + 门禁 13.8/13.9）；npm registry 将 2.1.4 误置为 staged（409 Cannot publish over previously staged version，npm/cli#9889）导致该版本号不可用，改用 2.1.5 重发，功能无变化',
   ],
 }
 

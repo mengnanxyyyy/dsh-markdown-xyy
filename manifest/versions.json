@@ -3,6 +3,16 @@
   "description": "版本记录 + Markdown 对话主题排版插件",
   "entries": [
     {
+      "version": "2.1.5",
+      "packageId": "",
+      "name": "LobeUI 风格 · 主题系统",
+      "palette": "multi-theme-css",
+      "date": "2026-10-17",
+      "changes": [
+        "内容与 v2.1.4 完全一致（首装用户主题误报修复 + 设置页真实全路径显示 + 门禁 13.8/13.9），仅版本号提升：npm registry 把 2.1.4 的发布误置为 staged（CLI 打印成功且 exit 0，但 packument 不变、tarball 404，再发返回 409「Cannot publish over previously staged version」，npm stage list 为空无 stage-id 可 reject —— npm/cli#9889 已确认的 registry 侧缺陷），该版本号在 npm 永久不可用，按社区可行做法提升 patch 号重发；GitHub tag 已从 v2.1.4 改挂到 v2.1.5。"
+      ]
+    },
+    {
       "version": "2.1.4",
       "packageId": "",
       "name": "LobeUI 风格 · 主题系统",
