@@ -41,6 +41,10 @@ const MANIFEST = {
 // 'system-native' = 系统自带（原生，插件零干预）；其余为第三方主题 id
 const DEFAULT_SELECTION = 'system-native'
 
+// 用户主题文件名规则（与 Host 同规则；Host 侧还会拦截 Windows 保留设备名，这里提前给可读错误）
+const THEME_ID_CLIENT_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/
+const WINDOWS_RESERVED_NAMES_CLIENT = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i
+
 // ---------- 主题选择持久化（v1.16.0：跨刷新/新标签页/重启恢复） ----------
 // 仅持久化「选中主题」；外观模式 ☀️/🌙/🖥️ 走产品 theme.setTheme 官方接口（自带持久化），无需重复存储。
 // 存储不可用（隐私模式/沙箱）时全部读写静默跳过 → 回退会话级内存态（与旧版行为一致）。
@@ -530,8 +534,13 @@ function ThemeEditor(props) {
   }
   const onSave = async () => {
     const id = props.isNew ? name.trim() : props.id
-    if (props.isNew && !/^[a-zA-Z0-9_-]+$/.test(id)) {
-      setStatus('⚠️ 文件名仅允许字母 / 数字 / 下划线 / 连字符')
+    // 与 Host 同规则（字母/数字开头，≤64 字符；拒绝路径分隔符与 Windows 保留设备名）
+    if (props.isNew && !THEME_ID_CLIENT_RE.test(id)) {
+      setStatus('⚠️ 文件名需以字母或数字开头，仅允许字母 / 数字 / 下划线 / 连字符（≤64 字符）')
+      return
+    }
+    if (props.isNew && WINDOWS_RESERVED_NAMES_CLIENT.test(id)) {
+      setStatus('⚠️ 不能用 Windows 保留名（con / prn / aux / nul / com1–9 / lpt1–9），换一个文件名')
       return
     }
     setBusy(true)

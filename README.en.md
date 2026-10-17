@@ -70,6 +70,14 @@ Or follow the latest GitHub main (handy while a mirror hasn't synced the new npm
 dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
+**Desktop app (DSH Desktop)** — every DSH profile carries its own plugins, and the Desktop uses its own `desktop` profile. Install from the in-app **Plugins** page, or first register the bundled CLI via the app menu (**Manage dsh command → Install**), then run:
+
+```bash
+dsh plugin --profile desktop add dsh-markdown-xyy
+```
+
+Restart the Desktop app afterwards. Works on Windows, macOS and Linux.
+
 Then open **Settings → Theme Settings**: switch between "System native" and the 4 built-in themes, or create / edit user themes.
 
 ## 🎨 Custom themes (copy-paste with AI, re-skin in 3 minutes)
@@ -116,7 +124,7 @@ dsh-markdown-xyy/
 ├── package.json                 # installed-package manifest (main=lib/index.mjs, exports ./client)
 ├── cordis.patch.yml             # dsh bundle plugin row (mounted via dsh plugin add)
 ├── screenshots/                 # theme preview images (README gallery)
-├── docs/                        # architecture / themes / variables / capabilities / development
+├── docs/                        # architecture / themes / variables / capabilities / development / platform
 ├── manifest/
 │   └── versions.json            # persisted version ledger
 ├── lib/
@@ -144,6 +152,7 @@ dsh-markdown-xyy/
 | [docs/variables.md](docs/variables.md) | Variable contract: L0 tokens / L1 colors / L2 constants / L3 knobs |
 | [docs/capabilities.md](docs/capabilities.md) | Capability list and roadmap |
 | [docs/development.md](docs/development.md) | Development & release flow (one iteration = one Package) |
+| [docs/platform.md](docs/platform.md) | Cross-platform & Desktop: asset chain / support matrix / verification steps |
 
 ## Development
 

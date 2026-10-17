@@ -19,6 +19,10 @@
 //  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距走产品旋钮 /
 //      产品字体 token 覆盖与 body 组合（0.2.1 字体模型）/ 注释文档引用有效性 / 文件引用胶囊锚点
 //      —— 均为「曾静默失效」缺陷的回归防护
+//  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
+//      包装器注入 / shell 服务只用 resolve()+execute().result()（禁 run）/ 禁 POSIX 硬编码兜底与
+//      printf、mkdir -p 命令 / 主题 id 的 Windows 保留设备名守卫 / 诊断日志不用 /tmp
+//      —— 防 v2.1.2 修好的 Windows 原生与 DSH Desktop 路径问题回归
 //
 // 用法：node scripts/check-release.js
 // 失败返回非零退出码并打印具体原因（file:line 式证据）。
@@ -682,6 +686,81 @@ console.log('\n12) 主题消费面契约')
     }
     if (bad.length) fail(`${t}: 字体 token 组合契约不满足 —— ${bad.join('；')}`)
     else ok(`${t} 字体 token 在 body 组合用户字体角色变量（0.2.1 字体模型）`)
+  }
+}
+
+// ---------- 13. 跨平台 / Desktop 兼容契约（防 v2.1.2 修好的 Windows 路径问题回归） ----------
+console.log('\n13) 跨平台 / Desktop 兼容契约')
+// 本节每一项都对应一个「Windows 原生 / DSH Desktop 下必坏」的真实缺陷：
+//   13.1 URL→路径必须 fileURLToPath（URL.pathname 在 Windows 给出 /C:/…，空格/中文保留 %xx 编码）
+//   13.2 用户主题目录必须优先用注入的 __MDVR_DSH_HOME__（不能依赖 $HOME 或 workspaceRoot 的 POSIX 形态）
+//   13.3 shell 服务只能 resolve() + execute().result()（0.2.x 没有 run()，旧写法曾静默失效）
+//   13.4 不得保留本机 POSIX 硬编码兜底（换机器会指到不存在的目录）
+//   13.5 不得使用 POSIX 专属 shell 命令（printf / mkdir -p 在 PowerShell 下失败）
+//   13.6 主题 id 必须有 Windows 保留设备名守卫（con/nul/com1… 无法作为 Windows 文件名）
+//   13.7 诊断日志不得写 /tmp（Windows 没有 /tmp）
+{
+  const hostSrc = fs.readFileSync(path.join(root, 'plugin', 'host.js'), 'utf8')
+  const buildSrc = fs.readFileSync(path.join(root, 'scripts', 'build-installed.js'), 'utf8')
+  const clientSrc = fs.readFileSync(path.join(root, 'plugin', 'src', 'client.core.js'), 'utf8')
+  const libPath = path.join(root, 'lib', 'index.mjs')
+  const libSrc = fs.existsSync(libPath) ? fs.readFileSync(libPath, 'utf8') : ''
+
+  // 13.1 URL → 文件系统路径：必须 fileURLToPath，且生成器/产物都不得再用 URL.pathname
+  const pathnameUse = /new URL\([^)]*import\.meta\.url\)\s*\.pathname/
+  if (!libSrc) {
+    fail('lib/index.mjs 缺失（常驻安装产物未生成，先跑 node scripts/build-installed.js）')
+  } else if (pathnameUse.test(libSrc) || pathnameUse.test(buildSrc)) {
+    fail('生成器/产物用 URL.pathname 当文件路径 —— Windows 盘符、空格、中文路径下包内资产全部读不到（应 fileURLToPath）')
+  } else if (!/fileURLToPath/.test(libSrc) || !/fileURLToPath/.test(buildSrc)) {
+    fail('生成器/产物缺少 fileURLToPath（v2.1.2 跨平台契约）')
+  } else {
+    ok('URL → 文件路径走 fileURLToPath（Windows 盘符 / 空格 / 中文安全）')
+  }
+
+  // 13.2 用户主题目录：包装器注入 DSH home，host 侧优先使用
+  if (!/__MDVR_DSH_HOME__/.test(buildSrc)) fail('生成器未注入 __MDVR_DSH_HOME__（Windows 下用户主题目录无法定位）')
+  else if (!/__MDVR_DSH_HOME__/.test(hostSrc)) fail('host.js 未使用 __MDVR_DSH_HOME__（Windows 下用户主题目录无法定位）')
+  else ok('用户主题目录优先用注入的 DSH home（不依赖 $HOME / POSIX workspaceRoot）')
+
+  // 13.3 shell 服务调用形态（DSH 0.2.x：resolve() + execute().result()，无 run()）
+  if (/shellSvc\.run\(|shell\.run\(/.test(hostSrc)) {
+    fail('host.js 调用了 shell.run() —— DSH 0.2.x 的 shell 服务没有 run()，该探测分支会静默失效')
+  } else if (!/shellSvc\.execute\(/.test(hostSrc) || !/handle\.result\(\)/.test(hostSrc)) {
+    fail('host.js 缺少 shell 探测的 execute().result()（用户主题目录解析会失去 shell 回退）')
+  } else {
+    ok('shell 探测走 resolve() + execute().result()（无 run() 死代码）')
+  }
+
+  // 13.4 硬编码本机 POSIX 兜底
+  if (/(?:FALLBACK_USER_THEMES_DIR|FALLBACK_PROJECT_DIR)\s*=\s*'\/home\//.test(hostSrc)) {
+    fail('host.js 仍硬编码本机 POSIX 路径兜底（换机器 / Windows 会指到不存在的目录）')
+  } else {
+    ok('无硬编码 /home/<user> 兜底')
+  }
+
+  // 13.5 POSIX 专属 shell 命令（printf / mkdir -p）
+  if (/command:\s*'printf\s|command:\s*'mkdir\s+-p/.test(hostSrc)) {
+    fail('host.js 使用 POSIX 专属 shell 命令（printf / mkdir -p 在 Windows PowerShell 下失败）')
+  } else {
+    ok('无 POSIX 专属 shell 命令（目录创建交给 fs.writeText 的原子写）')
+  }
+
+  // 13.6 Windows 保留设备名守卫（Host / Client 双端一致）
+  if (!/WINDOWS_RESERVED_NAMES/.test(hostSrc) || !/WINDOWS_RESERVED_NAMES_CLIENT/.test(clientSrc)) {
+    fail('主题 id 缺少 Windows 保留设备名守卫（con/nul/com1… 在 Windows 无法作为文件名；双端需一致）')
+  } else {
+    ok('主题 id 含 Windows 保留名守卫（Host / Client 双端）')
+  }
+
+  // 13.7 诊断日志写系统临时目录（Windows 无 /tmp）
+  const tmpLiteral = /'\/tmp\/mdvr-hostboot\.log'/
+  if (tmpLiteral.test(buildSrc) || tmpLiteral.test(libSrc)) {
+    fail('诊断日志仍写 /tmp/mdvr-hostboot.log（Windows 无 /tmp，日志静默丢失）')
+  } else if (!/tmpdir\(\)/.test(buildSrc) || !/tmpdir\(\)/.test(libSrc)) {
+    warn('生成器/产物未用 os.tmpdir() 写诊断日志')
+  } else {
+    ok('诊断日志写 os.tmpdir()（Windows 可用）')
   }
 }
 

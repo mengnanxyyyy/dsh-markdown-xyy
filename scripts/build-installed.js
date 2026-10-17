@@ -36,13 +36,26 @@ const lib = `// ============================================================
 //      动态 define 通道无此标识，typeof 短路走原探测链。
 //   2) inject: ['webServer'] —— 声明硬依赖，等 webServer 就绪且变化时自动重新激活，
 //      避免「插件先于 webServer 装载、ctx.get('webServer') 静默为空 → 路由全缺」。
-//   3) apply 包装 try/catch：启动失败把错误落到 /tmp/mdvr-hostboot.log 便于诊断。
+//   3) apply 包装 try/catch：启动失败把错误落到系统临时目录的 mdvr-hostboot.log 便于诊断。
+//
+// v2.1.2+ 跨平台增强（Windows 原生 / DSH Desktop / 含空格或中文的路径）：
+//   4) URL → 文件系统路径必须用 fileURLToPath：URL.pathname 在 Windows 给出 "/C:/..."，
+//      且空格/中文等会保留 %20 / %E4%B8%AD 百分号编码 → 包内资产全部读不到。
+//   5) 注入 __MDVR_DSH_HOME__（DSH_HOME 环境变量，缺省 os.homedir()/.dsh）——
+//      host.js 的用户主题目录不再依赖 "$HOME" shell 探测或 workspaceRoot 的 POSIX 形态。
+//   6) 诊断日志写 os.tmpdir()（Windows 没有 /tmp）。
 // ============================================================
 
 import { writeFileSync } from 'node:fs'
+import { homedir, tmpdir } from 'node:os'
+import { join, resolve as resolvePath } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const plugin = (function () {
-  const __MDVR_PKG_ROOT__ = new URL('..', import.meta.url).pathname
+  const __MDVR_PKG_ROOT__ = resolvePath(fileURLToPath(new URL('..', import.meta.url)))
+  const __MDVR_HOME__ = homedir()
+  const __MDVR_DSH_HOME__ = String(process.env.DSH_HOME || '').trim() || join(__MDVR_HOME__, '.dsh')
+  const __MDVR_TMP__ = tmpdir()
 ${hostBody}
 })()
 
@@ -53,7 +66,7 @@ export const apply = function (ctx) {
     return plugin.apply(ctx)
   } catch (err) {
     try {
-      writeFileSync('/tmp/mdvr-hostboot.log', '[mdvr] host apply failed at ' + new Date().toISOString() + '\\n' + (err && err.stack ? err.stack : String(err)) + '\\n', 'utf8')
+      writeFileSync(join(tmpdir(), 'mdvr-hostboot.log'), '[mdvr] host apply failed at ' + new Date().toISOString() + '\\n' + (err && err.stack ? err.stack : String(err)) + '\\n', 'utf8')
     } catch (e) { /* 忽略：写日志失败不掩盖原错误 */ }
     throw err
   }

@@ -70,6 +70,14 @@ dsh plugin --profile web add dsh-markdown-xyy
 dsh plugin --profile web add github:mengnanxyyyy/dsh-markdown-xyy
 ```
 
+**桌面版（DSH Desktop）**：桌面版与 Web 版插件各自独立安装（Desktop 使用独立的 `desktop` profile）。可在桌面应用内的 **插件（Plugins）** 页面安装；或先在应用菜单里 **管理 dsh 命令 → 安装**，再用它执行：
+
+```bash
+dsh plugin --profile desktop add dsh-markdown-xyy
+```
+
+装完重启桌面应用生效，Windows 与 macOS / Linux 均适用。
+
 加载后进入 **设置 → 主题设置**：切换「系统自带」或 4 套内置主题，新建 / 编辑用户主题。
 
 ## 🎨 自定义主题（让 AI 复制粘贴，3 分钟换肤）
@@ -113,7 +121,7 @@ dsh-markdown-xyy/
 ├── package.json                 # 常驻安装包清单（main=lib/index.mjs，exports ./client）
 ├── cordis.patch.yml             # dsh bundle 插件行（dsh plugin add 后挂载）
 ├── screenshots/                 # 主题预览图（README 画廊）
-├── docs/                        # architecture / themes / variables / capabilities / development
+├── docs/                        # architecture / themes / variables / capabilities / development / platform
 ├── manifest/
 │   └── versions.json            # 版本台账持久镜像
 ├── lib/
@@ -141,6 +149,7 @@ dsh-markdown-xyy/
 | [docs/variables.md](docs/variables.md) | 变量契约：L0 平台 token / L1 身份色 / L2 常量 / L3 旋钮 |
 | [docs/capabilities.md](docs/capabilities.md) | 能力清单与路线图 |
 | [docs/development.md](docs/development.md) | 开发与发布流程（一次迭代 = 一个 Package） |
+| [docs/platform.md](docs/platform.md) | 跨平台与 Desktop 兼容：资源引用链路 / 支持矩阵 / 验证清单 |
 
 ## 开发
 

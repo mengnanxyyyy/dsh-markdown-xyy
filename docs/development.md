@@ -9,7 +9,7 @@
 | 1 | 确定版本号（semver：新功能 / 修复） | 版本号 |
 | 2 | 同步修改 `plugin/host.js` 与 `plugin/src/client.core.js` 内的 `MANIFEST`（version/name/palette/date/changes，双份一致），然后 `node scripts/build-client.js` 生成 `plugin/client.js`（⚠️ client.js 是构建产物，禁止手改） | 双份一致的 MANIFEST + 产物 |
 | 3 | `manifest/versions.json` 顶部插入新条目（`packageId` 先留空） | 台账新条目 |
-| 4 | `node scripts/check-release.js` 跑发布门禁（MANIFEST 一致性 / JS 语法 / 资产完整性 / CSS 结构 / 主题浅深挂载 / panel fallback） | 门禁通过 |
+| 4 | `node scripts/check-release.js` 跑发布门禁（MANIFEST 一致性 / JS 语法 / 资产完整性 / CSS 结构 / 主题浅深挂载 / panel fallback / DSH 兼容基线 / **跨平台与 Desktop 契约（第 13 节，见 `docs/platform.md`）**） | 门禁通过 |
 | 5 | minify 双半：`node scripts/minify.js plugin/host.js /tmp/host.min.js`、`node scripts/minify.js plugin/client.js /tmp/client.min.js`，然后 `node --check` 两个产物 | 可传输的精简双半 |
 | 6 | `cordis_define`（`kind: existing` + 原 pluginId，**host + client 双半一次传完**）→ 拿到新 `packageId` → `cordis_inspect_self` 核对双半完整 | 新 Package |
 | 7 | `cordis_run`（`mode: update`）激活；可能需用户审批；失败读诊断修复后重试，或 `mode: run` 回滚到 `currentPackageId` | 激活成功 |
@@ -39,3 +39,4 @@
 - 传输：单条消息约 26KB 转义字节上限，`plugin/host.js` + `plugin/client.js` 全文放不下，**必须用 minify 产物传输**；define 后 `cordis_inspect_self` 核对 `code.host` / `code.client` 均完整。
 - 进程重启后插件丢失：用当前 `plugin/host.js` + `plugin/client.js`（minify 后）重新 define；台账历史在 `manifest/versions.json`。
 - packageId 按进程分配、随重启重置，新进程可能拿到与旧条目相同的 id；`versions.json` 如实回填即可（check-release 对重复一律降级为警告）。
+- **跨平台改动**：改 `plugin/host.js` / `scripts/build-installed.js` 里的路径解析、shell 调用或资源定位后，必须跑门禁第 13 节；Windows 原生与 DSH Desktop 的实机验证按 `docs/platform.md` 的清单执行（WSL2 只能覆盖 POSIX 分支）。
