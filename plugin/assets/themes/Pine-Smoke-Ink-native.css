@@ -7,7 +7,7 @@
  *       （v1.13.4；原生列表符号 + 全变量化，排版/形状常量抽 L2/L3，
  *       结构/变量名单/选择器架构 100% 对齐 strawberry-mocha）。
  * 挂载机制：浅色 body / 深色 body[data-ds-dark-theme]（与产品一致）。
- * 作用域（v1.10.0 三层体系）：0 全站=body 字体/基色（--mdvr-sans + L0 token
+ * 作用域（v1.10.0 三层体系）：0 全站=body 基色（L0 token
  *   变量共享，UI 与 markdown 同源） / 1 元素规则全部 [class*="_markdown_"]
  *   markdown 限定（设置面板等 UI 不再被波及） / 2 selection·滚动条·焦点环
  *   保持全局签名（见 §13，勿收口）。
@@ -78,13 +78,10 @@
   --mdvr-focus-offset: 3px;
   --mdvr-supsub-size: 0.76em;
 
-  /* ===== 字体栈（L1 单值，不分浅深） ===== */
-  --mdvr-sans: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --mdvr-mono: "JetBrains Mono", SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --mdvr-math-font: "KaTeX_Math", "Latin Modern Math", "Cambria Math", STIXGeneral, "Times New Roman", serif;
-  /* 产品字体 token 的覆盖见下方 ① 浅色档的 body 规则（v2.1.2 起随 DSH 0.2.1 字体模型
-     从 :root 迁到 body：产品改为在 body 上组合「用户字体列表 + 内置栈」，直接声明恒压过
-     :root 继承值，故必须同层级覆盖；用户设置优先、主题字体兜底） */
+  /* ===== 字体：v2.2.0 起主题不再定义、也不再覆盖任何字体 =====
+     * 产品 --dsw-font-family / --ds-font-family-code 与用户字体设置原样生效；
+     * 旧版 --mdvr-sans / --mdvr-mono / --mdvr-math-font 已全部删除，
+     * 勿再加回（check-release.js 第 12 节防回归）。 */
 
   /* ===== 单值拆档说明（v1.11.0） =====
    * inline-code / selection / shadow 属颜色·光影类，已拆浅深两档
@@ -100,14 +97,6 @@
  *    v1.13.4 已把 border-l1/l2 提到 2.09/2.59:1（居 2:1 之上的犟档）；新配色分界色先过对比再发布，勿直接加深共用 token。
  * ---------------------------------------------------------- */
 body {
-  /* ===== 产品字体 token（v2.1.2 起对齐 DSH 0.2.1 字体模型：用户字体列表在前、主题字体兜底） =====
-     产品的 markdown 字体 token（--dsw-font-markdown-*）全部由这两个派生，且 var() 在使用处解析；
-     0.2.1 起产品把 --dsh-font-family-text / -code 组合进 body 上的 --dsw-font-family / --ds-font-family-code。
-     必须同层级覆盖（直接声明恒压过 :root 继承值）：用户设了字体则用户字体优先，否则用主题字体栈；
-     0.2.0 无这两个角色变量 → var() 回退到主题字体，向后兼容。 */
-  --dsw-font-family: var(--dsh-font-family-text, var(--mdvr-sans)), var(--mdvr-sans);
-  --ds-font-family-code: var(--dsh-font-family-code, var(--mdvr-mono)), var(--mdvr-mono);
-
   /* ===== 14 个全局 token（平台固定名单，v2.1.0 起 DSH 新增 idle） ===== */
   --dsw-alias-bg-base: #FAF7F2;            /* 燕麦古宣米白底色 */
   --dsw-alias-bg-layer-1: #FFFFFF;         /* 卡片抬升面 */
@@ -300,11 +289,10 @@ body[data-ds-dark-theme] {
 
 /* ------------------------------------------------------------
  * 0. 全站通用（第 0 层，仅此层作用于全站——走变量共享）
- *    body 字体栈/基色：UI 与 markdown 共用同一变量（--mdvr-sans、
- *    --dsw-alias-label-primary）；markdown 装饰类不再全站泄漏
+ *    body 基色（--dsw-alias-label-primary）；字体交给产品，主题不覆盖；
+ *    markdown 装饰类不再全站泄漏
  * ---------------------------------------------------------- */
 body {
-  font-family: var(--mdvr-sans);
   color: var(--dsw-alias-label-primary);
 }
 
@@ -378,7 +366,8 @@ body {
 }
 
 /* ------------------------------------------------------------
- * 4. 上下标 / 行内公式：等宽粗体 + 零行高膨胀（数学排版签名；v1.10.0 起仅 markdown）
+ * 4. 上下标 / 行内公式：粗体 + 零行高膨胀（数学排版签名；v1.10.0 起仅 markdown。
+ *    v2.2.0 起不再换字体：上下标与公式随产品字体 / KaTeX 自带字体）
  * ---------------------------------------------------------- */
 [class*="_markdown_"] :where(sup, sub) {
   font-size: var(--mdvr-supsub-size) !important;
@@ -387,15 +376,13 @@ body {
   position: relative;
   color: var(--mdvr-subsup) !important;
   font-weight: 700 !important;
-  font-family: var(--mdvr-mono) !important;
   padding: 0 0.1em;
 }
 [class*="_markdown_"] :where(sup) { top: -0.45em; }
 [class*="_markdown_"] :where(sub) { bottom: -0.25em; }
 
-/* 数学变量 / 内联公式：math 字体 + 主题色（仅配色，不做显示块重排） */
+/* 数学变量 / 内联公式：仅主题色，不做显示块重排、不换字体 */
 [class*="_markdown_"] :where(var) {
-  font-family: var(--mdvr-math-font);
   font-style: italic;
   color: var(--mdvr-subsup) !important;
   font-weight: 700;
@@ -403,7 +390,6 @@ body {
 }
 [class*="_markdown_"] :where(.katex, .MathJax, .math-inline, span.math, mjx-container) {
   color: var(--mdvr-subsup) !important;
-  font-family: var(--mdvr-math-font);
 }
 
 /* ------------------------------------------------------------
@@ -459,7 +445,6 @@ body {
 [class*="_markdown_"] :where(.md-code-block [data-code-block-banner] > :first-child) {
   color: var(--mdvr-accent) !important;
   font-weight: 700 !important;
-  font-family: var(--mdvr-mono) !important;
   font-size: 0.75em !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
@@ -471,7 +456,6 @@ body {
   padding: 0 8px !important;
   height: 18px !important;
   font-size: 0.75em !important;
-  font-family: var(--mdvr-sans) !important;
   color: var(--dsw-alias-label-secondary) !important;
   background: transparent !important;
   border: none !important;
@@ -496,7 +480,6 @@ body {
   padding: var(--mdvr-pad-pre) !important;
   box-shadow: none !important;
   overflow-x: auto !important;
-  font-family: var(--mdvr-mono) !important;
   font-size: var(--mdvr-code-size) !important;
   line-height: var(--mdvr-lineheight-code) !important;
   font-variant-ligatures: normal;
@@ -545,7 +528,6 @@ body {
  *    必须压过才能回到纯流式行内克隆
  * ---------------------------------------------------------- */
 [class*="_markdown_"] :where(code:not(pre code), samp) {
-  font-family: var(--mdvr-mono);
   font-size: var(--mdvr-code-size) !important;
   /* 纯流式行内克隆：绝对不产生任何上下跳动 */
   display: inline !important;
@@ -567,7 +549,6 @@ body {
 
 /* 键盘键帽：low-key 胶囊（v1.10.0 起仅 markdown，UI 快捷键提示不再被换肤） */
 [class*="_markdown_"] :where(kbd) {
-  font-family: var(--mdvr-mono);
   font-size: 0.82em !important;
   display: inline !important;
   box-decoration-break: clone !important;
@@ -668,23 +649,21 @@ body {
 [class*="_markdown_"] :where(ul > li > ul > li > ul > li)::marker {
   color: var(--mdvr-bullet-l3) !important;
 }
-/* 有序符号分层着色（原生 decimal，等宽数字）
+/* 有序符号分层着色（原生 decimal 数字；v2.2.0 起不指定字体）
  * 作用域收敛 v2：仅 markdown 对话内容生效（哨兵说明同上）
  * 溢出控制：① 数字 0.82em 无加粗收窄 ② 顶层 ol 缩进统一为
- * --mdvr-list-pad（1.6em，见段末）——等宽 "10."≈23.6px 放得下，三位数擦边可接受 */
+ * --mdvr-list-pad（1.6em，见段末）。字体交还产品后 "10." 宽度随字体栈变化，
+ * 三位数仍可能擦边（v2.2.0 起不再用等宽字体控宽） */
 [class*="_markdown_"] :where(ol > li)::marker {
   color: var(--mdvr-bullet-l1) !important;
-  font-family: var(--mdvr-mono) !important;
   font-size: 0.82em !important;
 }
 [class*="_markdown_"] :where(ol > li > ol > li)::marker {
   color: var(--mdvr-bullet-l2) !important;
-  font-family: var(--mdvr-mono) !important;
   font-size: 0.82em !important;
 }
 [class*="_markdown_"] :where(ol > li > ol > li > ol > li)::marker {
   color: var(--mdvr-bullet-l3) !important;
-  font-family: var(--mdvr-mono) !important;
   font-size: 0.82em !important;
 }
 /* 顶层列表缩进统一：产品兜底 18px 与任务列表 0.8em 互相错位（12.8/18/38.4px），

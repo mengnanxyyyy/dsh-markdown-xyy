@@ -1,19 +1,20 @@
 /* ============================================================
  * plugin/assets/panel.css — 插件自有 UI 样式（版本卡片 / 主题设置页 / 主题编辑器）
  * 由 Host themeAssets.get RPC 读取；var(--mdvr-*) 必须带默认回退值
+ * 字体（v2.2.0 起）：面板不定义字体，等宽处消费产品的 --ds-font-family-code（带回退）
  * ============================================================ */
 
 .mdvr-card { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); font-size: 13px; line-height: 1.6; }
 .mdvr-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mdvr-title { font-weight: 650; font-size: 13px; }
-.mdvr-badge { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--mdvr-accent, #5856d6); color: #ffffff; }
+.mdvr-badge { font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--mdvr-accent, #5856d6); color: #ffffff; }
 .mdvr-meta { color: var(--dsw-alias-label-secondary); font-size: 12px; opacity: 0.9; }
 .mdvr-changes { margin: 2px 0 0; padding-left: 18px; color: var(--dsw-alias-label-secondary); }
 .mdvr-changes li { margin: 2px 0; }
 .mdvr-hist { border-top: 1px dashed var(--mdvr-accent-fainter, #cdccf3); padding-top: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
 .mdvr-hist-title { font-size: 11px; color: var(--dsw-alias-label-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
 .mdvr-hist-item { display: flex; gap: 8px; align-items: baseline; font-size: 12px; }
-.mdvr-tag { font-family: var(--mdvr-mono, ui-monospace, Menlo, Consolas, monospace); font-size: 10px; flex: none; }
+.mdvr-tag { font-family: var(--ds-font-family-code, ui-monospace, Menlo, Consolas, monospace); font-size: 10px; flex: none; }
 .mdvr-themes { display: flex; flex-direction: column; gap: 8px; }
 .mdvr-themes-title { font-size: 12px; color: var(--dsw-alias-label-secondary); }
 .mdvr-themes-title-gap { margin-top: 6px; }
@@ -54,7 +55,7 @@
    软换行（pre-wrap / textarea soft wrap）的断行算法本质上不一致（CJK/长 token 会累积错位）→
    一律不软换行：white-space: pre + textarea wrap="off"，长行横向滚动，换行只由 \n 决定 → 物理对齐。
    textarea 需 -webkit-text-fill-color 彻底透明（仅 color: transparent 在 WebKit 下残留文字→叠字）。 */
-.mdvr-editor-pre, .mdvr-editor-ta { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 12px/1.6 var(--mdvr-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); white-space: pre; tab-size: 2; overflow: auto; border: 0; text-align: left; letter-spacing: normal; word-spacing: normal; }
+.mdvr-editor-pre, .mdvr-editor-ta { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 12px/1.6 var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); white-space: pre; tab-size: 2; overflow: auto; border: 0; text-align: left; letter-spacing: normal; word-spacing: normal; }
 .mdvr-editor-ta { background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--dsw-alias-label-primary); resize: none; outline: none; z-index: 1; }
 .mdvr-editor-pre { z-index: 0; pointer-events: none; }
 .mdvr-editor-pre .hl-com { color: var(--dsw-alias-label-secondary); font-style: italic; }

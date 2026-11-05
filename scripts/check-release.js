@@ -17,7 +17,7 @@
 //      + engines.dsh（DSH 0.2.1 起安装/启动强制校验）覆盖声明基线且上界不放大版本
 //      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表、engines.dsh 或 cordis peer 真的不一致 → 失败）
 //  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距走产品旋钮 /
-//      产品字体 token 覆盖与 body 组合（0.2.1 字体模型）/ 注释文档引用有效性 / 文件引用胶囊锚点
+//      字体不覆盖契约（v2.2.0 起主题不定义/不覆盖任何字体）/ 注释文档引用有效性 / 文件引用胶囊锚点
 //      —— 均为「曾静默失效」缺陷的回归防护
 //  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
 //      包装器注入 / shell 服务只用 resolve()+execute().result()（禁 run）/ 禁 POSIX 硬编码兜底与
@@ -575,10 +575,12 @@ console.log('\n12) 主题消费面契约')
 //   12.1 死选择器（DSH 无 Prism/hljs，.token.*/.hljs-* 永不命中）
 //   12.2 Shiki 变量映射完整性（唯一能接管代码着色的入口）
 //   12.3 对话流间距不得用 flex gap（会与产品 margin-top 叠加，方向相反）
-//   12.4 产品字体 token 覆盖（否则 markdown 正文不跟随主题字体）
+//   12.4 字体不覆盖契约（v2.2.0 起主题不定义、不覆盖任何字体 —— 字体全部交给产品与用户设置）
+//        ⚠️ 这一项是**反向**契约：旧的 12.4「必须覆盖 --dsw-font-family / --ds-font-family-code」
+//           与 12.7「必须在 body 组合角色变量」在 v2.2.0 随字体覆盖一起删除，编号不复用（见下方 12.7 占位）
 //   12.5 主题注释里的文档引用必须真实存在（防死链）
 //   12.6 文件引用胶囊锚点（产品真实类名 .fileMention 无下划线；带下划线的 _fileMention_ 零命中，v2.1.1 死规则教训）
-//   12.7 字体 token 的 body 组合（DSH 0.2.1 字体模型：产品改在 body 上组合用户字体 + 内置栈）
+//   12.7 [已废弃 v2.2.0] 字体 token 的 body 组合 —— 前提（主题覆盖字体）已不存在，编号保留不复用
 {
   const dshRoot2 = findDshRoot()
 
@@ -636,13 +638,29 @@ console.log('\n12) 主题消费面契约')
     }
   }
 
-  // 12.4 产品字体 token 覆盖（markdown 的 font: 简写全部由这两个 token 派生）
-  const fontTokens = ['--dsw-font-family', '--ds-font-family-code']
+  // 12.4 字体不覆盖契约（v2.2.0 起主题完全不碰字体）
+  //      为什么反过来查：产品的字体 token 与用户字体设置都由产品在 body 上声明，
+  //      主题只要写 font-family（元素级也算）就会盖住用户在设置里选的字体；而主题一旦覆盖
+  //      --dsw-font-family / --ds-font-family-code，就得跟着产品字体模型的每次变化改
+  //      （v2.1.2 就是被 DSH 0.2.1 的字体模型改动逼着补的一次）。故 v2.2.0 全量删除，禁止再引入：
+  //        · font-family 声明（含 !important、元素级、::marker）
+  //        · --mdvr-sans / --mdvr-mono / --mdvr-math-font 定义或引用
+  //        · 产品字体 token --dsw-font-family / --ds-font-family-code 声明
+  //        · font: 简写里带字体栈（var(...) 或带引号的字体名）
+  const forbiddenFont = [
+    [/font-family\s*:/, 'font-family 声明'],
+    [/--mdvr-(?:sans|mono|math-font)\b/, '--mdvr-* 字体变量'],
+    [/--dsw-font-family\s*:|--ds-font-family-code\s*:/, '产品字体 token 声明'],
+    [/^\s*font\s*:[^;]*(?:var\(|"|')/, 'font: 简写里带字体栈'],
+  ]
   for (const t of themes) {
     const code = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8'))
-    const missing = fontTokens.filter((n) => !new RegExp(n.replace(/-/g, '\\-') + '\\s*:').test(code))
-    if (missing.length) fail(`${t}: 未覆盖产品字体 token [${missing.join(', ')}] —— markdown 正文字体不跟随主题`)
-    else ok(`${t} 覆盖产品字体 token ${fontTokens.join(' / ')}`)
+    const hits = []
+    code.split('\n').forEach((line, i) => {
+      for (const [re, label] of forbiddenFont) if (re.test(line)) hits.push(`行 ${i + 1} ${label}`)
+    })
+    if (hits.length) fail(`${t}: 主题禁止覆盖字体（字体交给产品与用户设置）—— ${hits.join('；')}`)
+    else ok(`${t} 不覆盖任何字体（font-family / --mdvr-* 字体变量 / 产品字体 token 均无）`)
   }
 
   // 12.5 主题注释里引用的 docs/*.md 必须存在
@@ -671,23 +689,10 @@ console.log('\n12) 主题消费面契约')
     else ok(`${t} 文件引用胶囊锚点有效（${good.length} 处 [class*="fileMention"]）`)
   }
 
-  // 12.7 字体 token 的 body 组合契约（v2.1.2 起对齐 DSH 0.2.1 字体模型）
-  //      产品 0.2.0 在 :root 声明 --dsw-font-family / --ds-font-family-code；0.2.1 改为在 body 上
-  //      组合「用户字体列表（--dsh-font-family-text / -code）+ 内置栈」。直接声明恒压过 :root 继承值，
-  //      故主题若仍只在 :root 覆盖，打开任意内置主题后用户字体设置与主题字体都会落回产品默认栈。
-  //      要求：两个 token 声明在首个 body 块内，且值引用对应角色变量（0.2.0 无该变量 → var() 回退主题字体）。
-  for (const t of themes) {
-    const code = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8'))
-    const light = (code.match(/(?:^|\n)body\s*\{([\s\S]*?)\n\}/) || [])[1] || ''
-    const bad = []
-    for (const [token, roleVar] of [['--dsw-font-family', '--dsh-font-family-text'], ['--ds-font-family-code', '--dsh-font-family-code']]) {
-      const m = light.match(new RegExp(token.replace(/-/g, '\\-') + '\\s*:([^;]*);'))
-      if (!m) bad.push(`${token} 不在首个 body 块（:root 会被产品 body 直接声明压过）`)
-      else if (!m[1].includes(`var(${roleVar}`)) bad.push(`${token} 未组合 ${roleVar}（用户字体设置被主题覆盖）`)
-    }
-    if (bad.length) fail(`${t}: 字体 token 组合契约不满足 —— ${bad.join('；')}`)
-    else ok(`${t} 字体 token 在 body 组合用户字体角色变量（0.2.1 字体模型）`)
-  }
+  // 12.7 [已废弃 v2.2.0] 字体 token 的 body 组合契约
+  //      v2.1.2 曾要求：两个产品字体 token 必须声明在首个 body 块内，且值拼上用户字体角色变量
+  //      （--dsh-font-family-text / -code），否则 DSH 0.2.1 的 body 级直接声明会压过主题的 :root 覆盖。
+  //      v2.2.0 起主题不再覆盖字体 → 该前提消失，契约作废；编号保留、不复用（12.4 已改为反向契约）。
 }
 
 // ---------- 13. 跨平台 / Desktop 兼容契约（防 v2.1.3 修好的 Windows 路径问题回归） ----------
