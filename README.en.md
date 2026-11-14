@@ -10,23 +10,17 @@
 [![中文](https://img.shields.io/badge/中文-README-blue.svg)](README.md)
 [![LINUX DO](https://shorturl.at/ggSqS)](https://linux.do)
 
-A Cordis plugin for [DeepSeekRuntime](https://github.com/deepseek-ai). It reskins the Markdown in conversations with pure CSS, without touching the product’s baseline theme — **themes only own the colors and the Markdown element styling** (headings, code blocks, tables, quotes, links, highlights, sub/superscript, math) and deliberately **leave fonts and chat-flow spacing alone**: fonts follow DSH and whatever you pick in Settings → Appearance, while message spacing keeps the product’s native rhythm. Every built-in theme ships a light and a dark variant that follow the system appearance.
+A theme plugin for DeepSeekRuntime: it recolors and re-lays-out the Markdown in your conversations, so long chats are easier to read.
+
+With the native styling, a wall of text looks flat — headings, quotes, key points and code all lean on default typography, and the faster you scan, the easier it is to miss what matters. That is exactly what this plugin fixes: key points get color, headings and quotes stand apart at a glance, code blocks and tables stop blending into the prose, and you can find the essentials in a long conversation quickly. Light and dark variants follow the system appearance, and the product’s default theme is never touched.
+
+Themes only handle colors and the Markdown element styling; fonts and message spacing stay with DSH (pick your font in Settings → Appearance).
 
 ## Versions & compatibility
 
 | This project | Aligned DeepSeek Harness version |
 | :---: | :---: |
 | **v2.2.1** | **0.2.2-rc.1** |
-
-## 📖 Why this project exists
-
-The reason is simple: **the native conversation styling is not built for reading long walls of text.**
-
-When a lot of conversation text piles up, everything looks "flat" — headings, quotes, key points and code all lean on default typography, and the faster you scan, the easier it is to miss what matters. Since I deal with large amounts of conversation text every day, **coloring the key information and layering the hierarchy** became essential: being able to spot the essentials at a glance makes even the longest conversations readable.
-
-That is exactly what this project does: a "reading-assist" theme for Markdown in conversations — emphasized highlights, clear typography, light/dark variants, and never touching the product's default theme.
-
-> This project was built end-to-end with AI: core development by my partner **deepseek-v4-flash**, with the four themes' palettes refined with help from my international friend **Gemini**.
 
 ## Theme previews
 
