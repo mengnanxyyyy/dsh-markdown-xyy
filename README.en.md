@@ -10,11 +10,11 @@
 [![中文](https://img.shields.io/badge/中文-README-blue.svg)](README.md)
 [![LINUX DO](https://shorturl.at/ggSqS)](https://linux.do)
 
-A theme plugin for DeepSeekRuntime: it recolors and re-lays-out the Markdown in your conversations, so long chats are easier to read.
+Theming your DeepSeek Harness conversations changes one thing first: **you read faster**. A long chat can be scanned for what matters — headings, quotes, key points and code each sit where your eye expects them.
 
-With the native styling, a wall of text looks flat — headings, quotes, key points and code all lean on default typography, and the faster you scan, the easier it is to miss what matters. That is exactly what this plugin fixes: key points get color, headings and quotes stand apart at a glance, code blocks and tables stop blending into the prose, and you can find the essentials in a long conversation quickly. Light and dark variants follow the system appearance, and the product’s default theme is never touched.
+The reason is simple: with the native styling, a wall of text looks flat — everything leans on default typography, and the denser the text, the easier it is to lose the thread. This plugin pulls the layers apart: key points get color, headings and quotes stand apart at a glance, code blocks and tables stop blending into the prose. Light and dark variants follow the system appearance, and the product’s default theme is never touched.
 
-Themes only handle colors and the Markdown element styling; fonts and message spacing stay with DSH (pick your font in Settings → Appearance).
+Themes only handle colors and the Markdown element styling; fonts and message spacing stay with DeepSeek Harness (pick your font in Settings → Appearance).
 
 ## Versions & compatibility
 
