@@ -808,20 +808,17 @@ body {
 }
 
 /* ============================================================
- * 14. 对话流节点间距（工具调用块之间的主间距源）
- *     ⚠️ 产品该列的间距**不是** flex gap，而是兄弟元素外边距（DSH 0.1.6 实测）：
- *       .EvIC1a_column{display:flex}                                       ← 无 gap
- *       .EvIC1a_column > :not([hidden]) ~ :not([hidden]) { margin-top: var(--dsh-chat-flow-gap,16px) }
- *       .EvIC1a_flowItem[data-turn-process-answer]       { --dsh-chat-flow-gap:8px }
- *     flex gap 与外边距**叠加、不折叠**，故旧写法 [data-chat-flow]{gap:5px}
- *     实际把 16px 变成 21px —— 与「收紧」意图相反。v2.0.2 改为覆盖产品旋钮。
- *     （原注释引用的 .Md3f7G_column 是旧构建哈希类名，已过时，勿再用。）
- *     影响范围：对话流全部节点（消息 / 工具调用卡 / 状态条等）之间距
+ * 14. 对话流节点间距 —— 自 v2.2.1 起**不再覆盖**，完全交还产品模型
+ *     ⚠️ 产品该列的间距**不是** flex gap，而是兄弟元素外边距（实测）：
+ *       .EvIC1a_column{display:flex}                                    ← 无 gap
+ *       .EvIC1a_column > :not([hidden]) ~ :not([hidden]) { margin-top: var(--dsh-chat-flow-gap, 4px) }
+ *     flex gap 与外边距**叠加、不折叠**，故绝不能写 [data-chat-flow]{gap:…}（v2.0.2 教训，方向相反）。
+ *     历史：v2.0.2–v2.2.0 这里用 [data-chat-flow] 覆盖 --dsh-chat-flow-gap:5px 把产品 16px 收紧。
+ *     DSH 0.2.2-rc.1 起产品自带**五档模型**（基线 4px / response 12px / turn-process 16px /
+ *     steering 起始 calc(44px + 字体增量) / running→pending-steering 0px），且直接声明恒胜继承；
+ *     我们的单档继承覆盖只剩「基线 5px 比产品 4px 更松」的副作用，原本对准的
+ *     [data-turn-process-answer]（紧凑答案节点）也在 0.2.2 被产品整体删除、无等价新属性。
+ *     ⇒ 覆盖既打不中目标、又要跟着产品每次调档追，v2.2.1 起整段删除，间距交还产品。
+ *     门禁 12.3 已改为反向契约：主题内出现 --dsh-chat-flow-gap 声明或 data-turn-process-answer 即失败。
+ *     影响范围：对话流全部节点（消息 / 工具调用卡 / 状态条等）之间距 —— 现由产品统一决定。
  * ============================================================ */
-[data-chat-flow] {
-  --dsh-chat-flow-gap: 5px !important;   /* 产品默认 16px */
-}
-/* 产品给「本回合过程」节点单独设了 8px；这里一并对齐到同一节奏 */
-[data-chat-flow] [data-turn-process-answer] {
-  --dsh-chat-flow-gap: 5px !important;
-}

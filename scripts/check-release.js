@@ -15,8 +15,12 @@
 //      + README「版本与兼容性」表与 package.json 的版本一致性
 //      + DSH bundling 的 cordis 是否仍落在声明的 peerDependencies 范围内
 //      + engines.dsh（DSH 0.2.1 起安装/启动强制校验）覆盖声明基线且上界不放大版本
+//      + 客户端隐式基座模块表仍含 react（dsh.client.external 留空的前提，11.8）
+//      + 动态沙箱 ctx.get 免声明 / tool.view.cordis 只收 key:"self" 规则形状（11.9）
+//      + host 服务 .d.ts 方法形状（fs.writeText 5 参 / shell 无 run / webServer WebRoute，11.10，warn 级）
 //      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表、engines.dsh 或 cordis peer 真的不一致 → 失败）
-//  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距走产品旋钮 /
+//  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距不覆盖产品旋钮
+//      （v2.2.1 起反向契约：让位产品五档模型，且禁引用已删除的 data-turn-process-answer）/
 //      字体不覆盖契约（v2.2.0 起主题不定义/不覆盖任何字体）/ 注释文档引用有效性 / 文件引用胶囊锚点
 //      —— 均为「曾静默失效」缺陷的回归防护
 //  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
@@ -564,8 +568,86 @@ if (!baseline || !baseline.verifiedAgainst || !Array.isArray(baseline.themeToken
       }
     }
 
-    // 说明：hostServices / clientServices 的签名无法从文件静态判定，
-    // 列为 manualCoverage —— 靠人工经 cordis_inspect 复验，本门禁不假装覆盖。
+    // 11.8 客户端隐式基座模块表必须仍含 react（fail）
+    //      这是 package.json 里 dsh.client.external 留空「正确」的唯一前提：基座之外的模块请求
+    //      必须走 external 声明，缺声明时客户端半 require('react') 会直接抛「未命中模块表」。
+    //      产物里没有 PLATFORM_MODULES 这个标识符，锚点是 staticModules 的种子函数
+    //      （function XX(){return{react:…,"react/jsx-runtime":…}}）。解析不出 → warn，不假装通过。
+    {
+      const assetsDir = path.join(dshRoot, 'node_modules', '@deepseek-ai', 'dsh-web-frontend', 'dist', 'assets')
+      let src = null
+      try {
+        const entries = fs.readdirSync(assetsDir).filter((f) => /^index-.*\.js$/.test(f))
+        let best = null
+        for (const f of entries) {
+          const size = fs.statSync(path.join(assetsDir, f)).size
+          if (!best || size > best.size) best = { f, size }
+        }
+        if (best) src = fs.readFileSync(path.join(assetsDir, best.f), 'utf8')
+      } catch (e) { /* 下面统一降级 */ }
+      if (!src) {
+        warn('无法读取 dsh-web-frontend 入口 chunk —— 跳过 11.8（客户端基座模块表）')
+      } else if (/react:[A-Za-z0-9_$]+\s*,\s*"react\/jsx-runtime":/.test(src)) {
+        ok('客户端基座模块表仍含 react + react/jsx-runtime（dsh.client.external 留空仍正确）')
+      } else if (/"react-dom":/.test(src)) {
+        fail('客户端基座模块表已不含 react —— dsh.client.external 留空失效，客户端半 require("react") 会拿不到模块')
+      } else {
+        warn('无法在入口 chunk 中定位客户端基座模块表 —— 内部结构可能已变，请人工核对 react 仍在基座')
+      }
+    }
+
+    // 11.9 动态插件沙箱规则：ctx.get(name) 免声明 / ctx.<svc> 需 inject（fail）
+    //      本项目**全量**使用 ctx.get(...)，`dsh.client.inject: []` 的正确性完全建立在这条规则上。
+    //      规则若翻转（例如 ctx.get 也要声明），插件不会编译失败，而是**静默拿不到服务** —— 必须门禁守住。
+    //      另核对 tool.view.cordis 仍只接受 key:"self"（我们的注册依赖这个唯一值）。
+    {
+      const clientRunner = path.join(dshRoot, 'node_modules', '@deepseek-ai', 'dsh-cordis-client-runner', 'lib', 'client.js')
+      const hostGuard = path.join(dshRoot, 'node_modules', '@deepseek-ai', 'dsh-cordis-host-runner', 'lib', 'types', 'guard.js')
+      const anchors = [
+        [clientRunner, 'Object.keys(ctx.fiber.inject)', '客户端 Guard 读取 fiber.inject 声明'],
+        [clientRunner, 'ctx.get(name)', '客户端 Guard 的 ctx.get 免声明路径'],
+        [clientRunner, 'only accepts key', 'tool.view.cordis 只接受 key:"self"'],
+        [hostGuard, 'readService(name, false)', 'Host Guard 的 ctx.get 免声明路径'],
+      ]
+      for (const [file, needle, label] of anchors) {
+        if (!fs.existsSync(file)) {
+          warn(`Guard 产物缺失，无法核对（${label}）：${path.basename(file)}`)
+        } else if (fs.readFileSync(file, 'utf8').includes(needle)) {
+          ok(`动态沙箱规则在: ${label}`)
+        } else {
+          fail(`动态沙箱规则疑似变更（缺 "${needle}"）—— ${label}；本项目全量 ctx.get，规则翻转会静默拿不到服务`)
+        }
+      }
+    }
+
+    // 11.10 host 服务方法形状（.d.ts 静态判定，warn 级）
+    //      ⚠️ 修正旧口径：方法名与参数个数**可以**从 .d.ts 静态判定，判不了的只是
+    //      「运行时实现是否与 .d.ts 一致」—— 那部分仍靠 cordis_inspect_query 人工复验（见 manualCoverage）。
+    //      这里提前拦掉声明漂移，不与人工复验冲突，也不假装已经覆盖运行时。
+    {
+      const checks = [
+        ['dsh-fs', path.join('lib', 'types', 'index.d.ts'), /abstract writeText\(target: FsTarget, content: string, expected\?:/, 'fs.writeText 5 参签名'],
+        ['dsh-shell', path.join('lib', 'types', 'index.d.ts'), /abstract resolve\(/, 'shell.resolve(request)'],
+        ['dsh-shell', path.join('lib', 'types', 'index.d.ts'), /abstract execute\(/, 'shell.execute(spec)'],
+        ['dsh-host-webserver', path.join('lib', 'types', 'index.d.ts'), /interface WebRoute\b/, 'webServer WebRoute 形状'],
+      ]
+      for (const [pkgName, rel, re, label] of checks) {
+        const p = path.join(dshRoot, 'node_modules', '@deepseek-ai', pkgName, rel)
+        if (!fs.existsSync(p)) { warn(`未找到 ${pkgName}/${rel} —— 跳过核对（${label}）`); continue }
+        if (re.test(fs.readFileSync(p, 'utf8'))) ok(`host 服务形状在: ${label}`)
+        else warn(`host 服务形状疑似变化（${label}）—— 请人工核对 ${pkgName}/${rel}`)
+      }
+      // shell 服务仍不得有 run()（v2.1.3 修掉的死分支，本项目只用 resolve() + execute().result()）
+      const shellTypes = path.join(dshRoot, 'node_modules', '@deepseek-ai', 'dsh-shell', 'lib', 'types', 'index.d.ts')
+      if (fs.existsSync(shellTypes)) {
+        if (/\brun\s*\(/.test(fs.readFileSync(shellTypes, 'utf8'))) warn('dsh-shell 的 .d.ts 出现 run( —— 请人工核对（本项目只用 resolve() + execute().result()）')
+        else ok('dsh-shell 仍无 run() 成员（只用 resolve() + execute().result()）')
+      }
+    }
+
+    // 说明：hostServices / clientServices 的**运行时实现**是否与 .d.ts 一致无法静态判定，
+    // 列为 manualCoverage —— 靠 cordis_inspect_query（Host/Client 的 Service.listService）人工复验；
+    // 11.10 只静态核对 .d.ts 形状，不假装覆盖运行时。
   }
 }
 
@@ -624,17 +706,28 @@ console.log('\n12) 主题消费面契约')
     }
   }
 
-  // 12.3 [data-chat-flow] 不得用 gap（产品该列间距是 margin-top，gap 会叠加而非替代）
+  // 12.3 对话流间距：主题**不得**覆盖 --dsh-chat-flow-gap（v2.2.1 起整体让位产品五档模型）
+  //      历史：v2.0.2–v2.2.0 覆盖 5px 把产品间距收紧。DSH 0.2.2-rc.1 起产品自带五档
+  //      （基线 4px / response 12px / turn-process 16px / steering 起始 calc(44px + 字体增量) /
+  //      running→pending-steering 0px），且直接声明恒胜继承 —— 单档继承覆盖只剩
+  //      「基线 5px 比产品 4px 更松」的副作用，故改为**反向**契约。
+  //      同时禁止引用 0.2.2 已删除的 [data-turn-process-answer]（原「紧凑答案」节点，无等价新属性）。
+  //      flex gap 的禁令保留：产品该列间距是兄弟元素 margin-top，gap 会叠加而非替代。
+  //      ⚠️ 分析前剥注释：这段历史写在主题注释里，不得误报为声明/锚点。
   for (const t of themes) {
     const code = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8'))
-    const block = code.match(/\[data-chat-flow\]\s*\{[^}]*\}/)
-    const usesKnob = /--dsh-chat-flow-gap\s*:/.test(code)
-    if (block && /(^|\s)gap\s*:/.test(block[0])) {
-      fail(`${t}: [data-chat-flow] 用了 flex gap —— 会与产品 margin-top 叠加（间距变大），应覆盖 --dsh-chat-flow-gap`)
-    } else if (!usesKnob) {
-      fail(`${t}: 未覆盖 --dsh-chat-flow-gap —— 对话流间距收紧不生效`)
+    const block = code.match(/\[data-chat-flow\][^{]*\{[^}]*\}/)
+    const flexGap = block ? /(^|\s)gap\s*:/.test(block[0]) : false
+    const knobDecl = /--dsh-chat-flow-gap\s*:/.test(code)
+    const deadAttr = /data-turn-process-answer/.test(code)
+    if (flexGap) {
+      fail(`${t}: [data-chat-flow] 用了 flex gap —— 会与产品 margin-top 叠加（间距变大），绝不能写`)
+    } else if (knobDecl) {
+      fail(`${t}: 覆盖了 --dsh-chat-flow-gap —— 0.2.2 起应让位产品五档间距模型（门禁 12.3 反向契约）`)
+    } else if (deadAttr) {
+      fail(`${t}: 引用了 DSH 0.2.2 已删除的 data-turn-process-answer（死锚点，无等价新属性）`)
     } else {
-      ok(`${t} 对话流间距走产品旋钮 --dsh-chat-flow-gap`)
+      ok(`${t} 对话流间距交还产品五档模型（不覆盖旋钮、无死锚点）`)
     }
   }
 

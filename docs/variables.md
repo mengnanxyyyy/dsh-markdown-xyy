@@ -33,24 +33,23 @@
 | `--dsw-specific-sidebar-fill` | 侧栏底 |
 
 - 名单固定（平台 Theme.listTokens），**不可新增**；所有主题均按此名单浅深各一组。
-- **对齐基线（v2.0.2 起）**：本名单的权威源是 DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（客户端 `Theme.listTokens` 暴露的正是它）。已复验版本 **DSH 0.2.1-rc.1**（2026-10-17；0.2.0-rc.2 → 0.2.1-rc.1 两版 tarball 逐文件比对，该数组**逐名同序完全一致**），基线声明在 `package.json` 的 `dshCompatibility`，`node scripts/check-release.js` 第 11 项会做「声明 ↔ 本机 DSH 权威表 ↔ 四套内置主题 CSS」三方比对——**DSH 增删 token 会让门禁失败，而不是静默失配**。
+- **对齐基线（v2.0.2 起）**：本名单的权威源是 DSH `dsh-client-ui-theme` 产物里的冻结数组 `BUILTIN_INSPECT_TOKENS`（客户端 `Theme.listTokens` 暴露的正是它）。已复验版本 **DSH 0.2.2-rc.1**（2026-11-14；0.2.1-rc.1 → 0.2.2-rc.1 两版安装树逐文件比对，`BUILTIN_INSPECT_TOKENS` 数组**源文本逐字节相同**、14 名同序），基线声明在 `package.json` 的 `dshCompatibility`，`node scripts/check-release.js` 第 11 项会做「声明 ↔ 本机 DSH 权威表 ↔ 四套内置主题 CSS」三方比对——**DSH 增删 token 会让门禁失败，而不是静默失配**。
 - 深色档挂载依赖产品属性 `body[data-ds-dark-theme]`（同一门禁的第 11.5 项核对产品是否仍按该属性切档），**不要**改用 `prefers-color-scheme` 写主题。
 - strawberry-mocha 浅档语义色取值：error `#C74330` / success `#237834` / warn `#965B00`；深档取 Catppuccin Mocha 对应色（`#F38BA8` / `#A6E3A1` / `#F9E2AF`）。内置主题的浅档 AA 参考值（原 template.css 建议，现归入内置主题约定）为 error `#c74330` / success `#287b38` / warn `#985d00`——两者出入见 §十「维护引用」。
 
-### 2.1 产品 token 覆盖清单（主题写入产品的**全部**变量）——v2.0.2 核定
+### 2.1 产品 token 覆盖清单（主题写入产品的**全部**变量）——v2.2.1 核定
 
-四套内置主题对产品的写入面就这**三组**，除此之外不碰任何产品变量（门禁逐项防护）。**字体（v2.2.0 起）不在写入面内**——主题不定义、不覆盖任何字体，全部交还产品与用户的字体设置（见下方说明）：
+四套内置主题对产品的写入面就这**两组**，除此之外不碰任何产品变量（门禁逐项防护）。**字体（v2.2.0 起）不在写入面内**——主题不定义、不覆盖任何字体，全部交还产品与用户的字体设置（见下方说明）；**对话流间距（v2.2.1 起）也不在写入面内**——DSH 0.2.2 起产品自带自洽的五档间距模型，主题整体让位（见下方说明）：
 
 | 组 | 变量 | 写在哪 | 门禁 |
 |---|---|---|---|
 | L0 平台 token（14） | `--dsw-alias-*`×13 + `--dsw-specific-sidebar-fill` | `body{}` / `body[data-ds-dark-theme]{}` | 11.1 / 11.3 |
 | 语法高亮（9） | `--shiki-token-*` | `body{}` / `body[data-ds-dark-theme]{}` | 12.2 |
-| 对话流间距（1） | `--dsh-chat-flow-gap` | `[data-chat-flow]` 规则块 | 12.3 |
 
 > **为什么不再覆盖字体（v2.2.0，用户明示「字体用 DSH 的」）**：旧做法（v2.0.2–v2.1.5）是覆盖 `--dsw-font-family` / `--ds-font-family-code`，让 UI 与 markdown 跟随主题的 Geist / JetBrains Mono。问题在于这是主题系统里**唯一依赖产品内部字体模型**的面：DSH 0.2.1 把这两个 token 从 `:root` 改到 `body{}` 组合用户字体角色变量（`--dsh-font-family-text` / `-code`），直接声明恒压过 `:root` 继承值，于是主题被迫在 v2.1.2 把字体搬进 `body{}` 再拼角色变量——**产品每动一次字体模型，主题就得跟着动一次**，而主题本身并不需要这份控制权（主题内置字体栈在本机一个都没装，渲染结果与产品默认栈相同）。故 v2.2.0 全量删除：主题内**没有** `font-family` 声明、没有 `--mdvr-sans/-mono/-math-font`、不声明两个产品字体 token，代码块 / 行内代码 / 表格 / 上下标 / 数学公式一律跟随产品的字体栈与用户在设置→外观里选的字体。代价（已接受）：主题不能再自定字体族（配色/排版/形状仍全归主题）。门禁 12.4 是**反向契约**：出现任一 `font-family:`、`--mdvr-*` 字体变量、产品字体 token 声明、带字体栈的 `font:` 简写即失败。
 > **对话流间距为什么不能用 `gap`**：产品该列（`.EvIC1a_column`）**没有** `gap`，间距由兄弟元素的 `margin-top: var(--dsh-chat-flow-gap,<默认>)` 实现。flex `gap` 与外边距**叠加、不折叠**，故旧写法 `[data-chat-flow]{gap:5px}` 会把默认值再撑大一截 —— 与「收紧」意图正好相反（v2.0.2 修正，当时默认 16px、写成 gap 变 21px）。
->   ⚠️ **DSH 0.2.0-rc.2 起该旋钮被重构**（官方 release notes「过程信息间距」）：默认 fallback **16px → 6px**，并按行状态分成多档（running 12px / response 组 16px / 空行 16px / 展开体 6px），新增 `data-chat-flow-kind=turn-process|turn-trigger` 分类；产品改为**直接**声明在 `.EvIC1a_flowItem` 变体上，而我们的 `[data-chat-flow]` 覆盖挂在列容器上靠**继承**生效——直接声明恒胜继承（`!important` 只在同元素上比较），故我们那 5px 在部分节点已不再生效、节奏可能混档。**待 GUI 实测后决定：删掉 override（让产品 6px 生效）还是逐档覆盖**；四套主题里 `/* 产品默认 16px */` 等注释在该决策落地时需一并订正（门禁 12.3 目前只查「用没用旋钮」，查不出这类语义漂移）。（0.2.1-rc.1 复验：该模型与 0.2.0-rc.2 完全一致、未再变化，上述待办仍在。）
-> **文件引用胶囊锚点为什么不带下划线**：产品真实类名是 `.fileMention`（CSS Modules `:local` 类，无前后下划线，见 `dsh-client-ui-primitives` 的 `MarkdownText.module.css`，编译后带 hash 后缀）。`_markdown_` 带下划线是因为产品 markdown 容器类名本身就长那样（`_markdown_<hash>_<n>`），两者机制不同、不可类比。v2.0.2 误写成 `[class*="_fileMention_"]` 后在产品产物里零命中、静默失效到 v2.1.1 才修（门禁 12.6 防回归）。
+>   ⚠️ **间距旋钮的档位模型一直在动，v2.2.1 起主题不再覆盖**：DSH 0.2.0-rc.2 先把 fallback 16px → 6px 并拆档；DSH 0.2.2-rc.1 再改为**五档** —— 基线 **4px** / `response` 组 12px / `turn-process` 16px / steering 起始 `calc(44px + var(--dsh-content-font-delta))` / `running→[data-pending-steering]` 0px，同时**删除** `[data-turn-process-answer]` 节点（原「紧凑答案」档，无等价新属性）、新增 `data-chat-flow-kind=turn-tail`。产品始终把间距**直接**声明在流节点上（直接声明恒胜继承），我们挂在列容器上的 5px 单档覆盖只剩「基线 5px 比产品 4px 更松」的副作用 ⇒ **v2.2.1 整体删除**该覆盖与死属性规则，间距完全交还产品。门禁 12.3 随之改为**反向契约**：主题内出现 `--dsh-chat-flow-gap` 声明、或引用 `data-turn-process-answer`，即失败（flex `gap` 的禁令继续保留）。
+> **文件引用胶囊锚点为什么不带下划线**：产品真实类名是 `.fileMention`（CSS Modules `:local` 类，无前后下划线，见 `dsh-client-ui-primitives` 的 `MarkdownText.module.css`，编译后带 hash 后缀）。`_markdown_` 带下划线是因为产品 markdown 容器类名本身就长那样（`_markdown_<hash>_<n>`），两者机制不同、不可类比。v2.0.2 曾写成 `[class*="_fileMention_"]`，v2.1.1 统一改为不带下划线的 `[class*="fileMention"]`（门禁 12.6 防回归）。⚠️ 事实订正（2026-11-14 复验）：DSH 0.2.1-rc.1 / 0.2.2-rc.1 两棵安装树的编译类名是 `_fileMention_<hash>_<n>`（**含**前后下划线），所以 `[class*="_fileMention_"]` 其实**会**命中——旧记录「零命中」在这两版上无法复现。结论不变：继续用 `[class*="fileMention"]`（带/不带下划线两种形态都能命中，产品换 Compiler 命名策略也不至于全灭），门禁 12.6 保留为「别写死带下划线形态」的风格守卫。
 
 ---
 
