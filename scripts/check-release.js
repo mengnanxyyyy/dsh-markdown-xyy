@@ -21,7 +21,8 @@
 //      （本机未装 DSH / 基线版本过期 / DSH 内部结构变化 → 警告；名单、槽位、版本表、engines.dsh 或 cordis peer 真的不一致 → 失败）
 //  12. 主题消费面契约：死选择器（.token/.hljs）/ Shiki 变量映射完整性 / 对话流间距不覆盖产品旋钮
 //      （v2.2.1 起反向契约：让位产品五档模型，且禁引用已删除的 data-turn-process-answer）/
-//      字体不覆盖契约（v2.2.0 起主题不定义/不覆盖任何字体）/ 注释文档引用有效性 / 文件引用胶囊锚点
+//      字体不覆盖契约（v2.2.0 起主题不定义/不覆盖任何字体）/ 注释文档引用有效性 / 文件引用胶囊锚点 /
+//      代码块不换行锚点（.md-code-block，v2.2.2 起）
 //      —— 均为「曾静默失效」缺陷的回归防护
 //  13. 跨平台 / Desktop 兼容契约：URL→文件路径必须 fileURLToPath（禁 URL.pathname）/ DSH home 由
 //      包装器注入 / shell 服务只用 resolve()+execute().result()（禁 run）/ 禁 POSIX 硬编码兜底与
@@ -780,6 +781,41 @@ console.log('\n12) 主题消费面契约')
     if (bad.length) fail(`${t}: 存在死锚点 [class*="_fileMention_"]（产品类名无下划线，永不命中）: 行 ${bad.join(', ')}`)
     else if (good.length === 0) fail(`${t}: 缺少文件引用胶囊规则 [class*="fileMention"] —— 胶囊回退产品默认链接色`)
     else ok(`${t} 文件引用胶囊锚点有效（${good.length} 处 [class*="fileMention"]）`)
+  }
+
+  // 12.8 代码块「不自动换行」锚点（v2.2.2 起）
+  //      产品代码块自带 white-space:pre-wrap + word-break:break-all（0.2.1 → 0.2.2 逐字节未变），
+  //      主题必须用产品的稳定全局类名 .md-code-block 把换行压回 pre —— 只挂在
+  //      [class*="_markdown_"] pre code 上时，文件预览/工具卡片等非 markdown 容器里的代码块会回落到产品换行。
+  //      判两层：① 该锚点下有「以 pre 为目标」的规则；② 有「以 code/span 为目标」的规则。两层都要 white-space:pre !important。
+  //      ⚠️ 取目标前必须先剥掉属性选择器与 .md-code-block 字面量 ——
+  //         'data-code-block-banner'、'.md-code-block' 里都含 'code'，直接对整条选择器测 /code/ 会误判。
+  for (const t of themes) {
+    const css = stripCssComments(fs.readFileSync(themeSrc(t), 'utf8'))
+    const rules = (css.match(/\.md-code-block[^{]*\{[^}]*\}/g) || []).map((r) => {
+      const k = r.indexOf('{')
+      const sel = r.slice(0, k)
+      const cleaned = sel.replace(/\[[^\]]*\]/g, ' ').replace(/\.md-code-block/g, ' ')
+      return {
+        pre: /\bpre\b/.test(cleaned),
+        code: /\b(code|span)\b/.test(cleaned),
+        // ⚠️ 必须连写 white-space: pre !important：只测 /!important/ 会被同规则里别的声明蒙混过关（2026-11-15 实测踩到）
+        strong: /white-space:\s*pre\s*!important/.test(r.slice(k)),
+      }
+    })
+    const okPre = rules.some((x) => x.strong && x.pre && !x.code)
+    const okCode = rules.some((x) => x.strong && x.code)
+    // 视图层：文件只读（[data-read]）/ diff（[data-diff]）两套视图不在 _markdown_ 容器里、也不带 md-code-block
+    const viewOk = /(\[data-read\]|\[data-diff\])[^{]*:where\(pre\)\s*\{[^}]*white-space:\s*pre\s*!important/.test(css)
+    if (!okPre) {
+      fail(`${t}: .md-code-block 的 pre 缺少 white-space:pre !important —— 代码块会按产品默认（pre-wrap + break-all）自动换行`)
+    } else if (!okCode) {
+      fail(`${t}: .md-code-block 的 code/span 缺少 white-space:pre !important —— 行内 token 仍会换行`)
+    } else if (!viewOk) {
+      fail(`${t}: 缺少 [data-read]/[data-diff] 视图的 white-space:pre !important —— 文件只读/diff 视图的代码块仍会换行`)
+    } else {
+      ok(`${t} 代码块不换行锚点在（md-code-block 两层 + data-read/data-diff 视图 + 行号态变量）`)
+    }
   }
 
   // 12.7 [已废弃 v2.2.0] 字体 token 的 body 组合契约

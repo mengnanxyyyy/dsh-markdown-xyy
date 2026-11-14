@@ -219,11 +219,10 @@ const MANIFEST = {
   version: '2.2.1',
   name: 'LobeUI 风格 · 主题系统',
   palette: 'multi-theme-css',
-  date: '2026-11-14',
+  date: '2026-11-15',
   changes: [
-    'DSH 0.2.2-rc.1 版本对齐（cordis 4.0.5→4.1.0；14 个 L0 token 逐字节同、双槽位契约在、深色标记在、字体模型零漂移，host/client 代码无需改）',
-    '对话流间距交还产品五档模型：删除 4 套主题里 [data-chat-flow] 的 --dsh-chat-flow-gap:5px 覆盖，以及 DSH 0.2.2 已删除节点 [data-turn-process-answer] 的死规则；门禁 12.3 改为反向契约（覆盖旋钮或引用死属性即失败）',
-    '门禁新增 11.8（客户端基座模块表仍含 react）/ 11.9（动态沙箱 ctx.get 免声明与 tool.view.cordis 只收 key:"self"）/ 11.10（host 服务 .d.ts 形状，warn 级）',
+    '对齐 DSH 0.2.2-rc.1（cordis 4.1.0）：14 个 L0 token 逐字节同、双槽位契约在、深色标记在、字体模型零漂移，host/client 代码无需改；对话流间距交还产品五档模型（删除 [data-chat-flow] 的 5px 覆盖与 DSH 0.2.2 已删除节点的死规则），门禁 12.3 改反向契约、新增 11.8/11.9/11.10',
+    '2026-11-15 同版本修订（不升版本号，保持与对齐的 DSH 版本一致）：修复代码块自动换行 —— 产品代码块默认 white-space:pre-wrap + word-break:break-all，另两套视图（文件只读 [data-read]、diff [data-diff]）还对行元素直接声明 pre-wrap；用三处稳定锚点兜底（.md-code-block 的 pre 与 code 两层、[data-read]/[data-diff] 视图、行号态 --dsl-code-block-line-white-space:pre），门禁新增 12.8；顺带修工具栏两处失配（语言标签颜色落到产品语言 span、按钮规则不再碰几何，避免两个 24×24 图标按钮平分空隙/被压扁；语言标签排版从 heading 下移到语言 span，避免标题 span 被大写缩小）。同版本另按锚点审计修 5 类失效：表格字号落到 th/td（挂 table 继承恒输）+ 补 max-width 解掉产品 max-content 截断、嵌套引用三条提权到 (0,2,0)、行内代码字号提到 (0,3,0) 压过产品 (0,1,2)/(0,2,2) 的 !important、删除零命中的 sub/var/kbd 三条死规则',
   ],
 }
 

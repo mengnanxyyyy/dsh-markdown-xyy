@@ -382,15 +382,11 @@ body {
   padding: 0 0.1em;
 }
 [class*="_markdown_"] :where(sup) { top: -0.45em; }
-[class*="_markdown_"] :where(sub) { bottom: -0.25em; }
+/* ⚠️ v2.2.1：`:where(sub)` 已删除 —— 产品 markdown 渲染器不产出 <sub>（case 表只有 sup；
+ * 原始 HTML 以文本返回），该规则在 0.2.2 产物里零命中。 */
 
 /* 数学变量 / 内联公式：仅主题色，不做显示块重排、不换字体 */
-[class*="_markdown_"] :where(var) {
-  font-style: italic;
-  color: var(--mdvr-subsup) !important;
-  font-weight: 700;
-  padding: 0 0.15em;
-}
+/* ⚠️ v2.2.1：`:where(var)` 已删除 —— 产品不产出 <var>（KaTeX 走 .katex 类），零命中。 */
 [class*="_markdown_"] :where(.katex, .MathJax, .math-inline, span.math, mjx-container) {
   color: var(--mdvr-subsup) !important;
 }
@@ -441,33 +437,32 @@ body {
   padding: 0 !important;
   margin: 0 !important;
 }
-/* 语言标识：等宽大写小字号，锁定左侧
-   ⚠️ 语言标签实际是 div.infostring，banner 子树内**不存在 span**，
-   旧选择器 `… > div:first-child span` 永不命中（DSH 0.1.6 实测）。
-   改用产品稳定属性锚点 data-code-block-banner，取它的第一个子元素。 */
-[class*="_markdown_"] :where(.md-code-block [data-code-block-banner] > :first-child) {
+/* 语言标识：等宽大写小字号，强调色（v2.2.2 修正两层锚点）
+   ⚠️ 结构两次变化：0.1.6 是 div.infostring；0.2.x 起变成
+   div[data-code-block-banner] > heading 包裹层 > span（语言）/ span（标题）,
+   而且产品给**语言 span 本身**直接声明 color:label-tertiary —— 只给包裹层上色恒输（继承 < 直接声明）。
+   故：排版（字重/字号/字距/大写）挂在包裹层靠继承生效；颜色必须落到语言 span。 */
+/* 语言标签：排版与颜色都必须落在**语言 span 本身** ——
+ * 挂在 heading 包裹层上会继承给同层的第二个 span（文档标题 _title_），把标题也大写缩小（v2.2.1 修）。 */
+[class*="_markdown_"] :where(.md-code-block [data-code-block-banner] > :first-child > span:first-child) {
   color: var(--mdvr-accent) !important;
   font-weight: 700 !important;
   font-size: 0.75em !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
-  margin-right: auto !important;
 }
-/* 复制按钮：迷你圆润胶囊，锁定右侧 */
+/* 工具栏按钮（v2.2.2 重写）：0.2.2 起动作区有**两个** 24×24 图标按钮
+   （换行开关 + 复制），布局由产品 _actions_（flex + gap 4px）和 _header_（space-between）负责。
+   旧规则给每个 button 加 margin-left:auto、并把高度压到 18px —— 两个按钮会平分空隙、
+   图标被 18px 高度挤压。故：**不碰几何**（宽高/内距/外边距/display 全部交还产品），
+   只做配色与圆角，文字型按钮（非 card 形态）也仍适用。 */
 [class*="_markdown_"] :where(.md-code-block button) {
-  margin-left: auto !important;
-  padding: 0 8px !important;
-  height: 18px !important;
-  font-size: 0.75em !important;
   color: var(--dsw-alias-label-secondary) !important;
   background: transparent !important;
   border: none !important;
-  border-radius: 20px !important;
+  border-radius: var(--mdvr-radius-chip, 4.5px) !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 [class*="_markdown_"] :where(.md-code-block button:hover) {
   color: var(--mdvr-accent) !important;
@@ -509,6 +504,45 @@ body {
   font-weight: normal !important;
   white-space: pre !important;
 }
+/* 代码块「不自动换行 + 横向滚动」的宽锚点兜底（v2.2.2）
+ * 产品把聊天代码块渲染成 div.md-code-block > div[data-code-block-content] > pre.shiki > code > span.line，
+ * 且产品自带（0.2.1 → 0.2.2 逐字节未变）：._block_<hash> :where(pre){ white-space:pre-wrap; word-break:break-all }
+ * ⇒ 代码块**默认换行**。上面那条 [class*="_markdown_"] pre code 只在「markdown 容器内的 code」上生效，
+ * 文件预览面板 / 工具调用卡片 / 分屏等不在 _markdown_ 容器里的代码块打不中，就回落到产品换行。
+ * 这里改用产品稳定的全局类名 .md-code-block 作锚点（非哈希，产品 JSX 里字面写死），
+ * 把换行与断词统一压回 pre，并保留横向滚动。 */
+.md-code-block :where(pre) {
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  overflow-x: auto !important;
+}
+.md-code-block :where(pre) :where(code, code > span) {
+  white-space: pre !important;
+  word-break: normal !important;
+}
+/* 同一问题的另外两个视图（v2.2.2 补齐）：文件只读视图带 [data-read]、diff 视图带 [data-diff]，
+ * 产品在这两套视图里对**行元素**直接声明 `white-space: pre-wrap`（[data-code-wrap=true] 时），
+ * 它们既不在 `_markdown_` 容器内、也不带 `md-code-block` 类，所以上面的兜底打不中。
+ * 锚点只用产品属性（data-read / data-diff / data-code-wrap）+ 元素名，零哈希。
+ * ⚠️ 产品给了行号态一个变量钩子 —— 直接把它设成 pre，比逐层 !important 更稳。 */
+:where([data-read], [data-diff]) :where(pre) {
+  white-space: pre !important;
+  overflow-x: auto !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+:where([data-read], [data-diff]) :where(pre) :where(code, code > span, code > span *) {
+  white-space: pre !important;
+  word-break: normal !important;
+}
+/* 行号态：产品用 var(--dsl-code-block-line-white-space, pre-wrap) 直接声明在行元素上，
+ * 用产品自己的变量把默认值改回 pre（零特异性，不打架；[data-code-wrap=false] 时产品会覆盖成 pre，等价）。 */
+:where(.md-code-block, [data-read], [data-diff]) {
+  --dsl-code-block-line-white-space: pre;
+}
+
+
 
 /* ------------------------------------------------------------
  * 6. 代码语法高亮（v2.0.2 更正说明）
@@ -530,7 +564,10 @@ body {
  *    !important：产品 :not(pre)>code 显式规则（inline-flex 等），
  *    必须压过才能回到纯流式行内克隆
  * ---------------------------------------------------------- */
-[class*="_markdown_"] :where(code:not(pre code), samp) {
+/* 行内代码：产品 `._markdown_ :not(pre)>code{font-size:.875em!important}`(0,1,2)
+ * 与 compact 变体 (0,2,2) 也在 !important 层面竞争 —— 双方都 !important 时比特异性，
+ * 故把锚点重复三次提到 (0,3,0)（零哈希、不改变命中范围）。 */
+[class*="_markdown_"][class*="_markdown_"][class*="_markdown_"] :where(code:not(pre code), samp) {
   font-size: var(--mdvr-code-size) !important;
   /* 纯流式行内克隆：绝对不产生任何上下跳动 */
   display: inline !important;
@@ -551,22 +588,7 @@ body {
 }
 
 /* 键盘键帽：low-key 胶囊（v1.10.0 起仅 markdown，UI 快捷键提示不再被换肤） */
-[class*="_markdown_"] :where(kbd) {
-  font-size: 0.82em !important;
-  display: inline !important;
-  box-decoration-break: clone !important;
-  -webkit-box-decoration-break: clone !important;
-  padding: 0.12em 0.4em !important;
-  margin: 0 0.15em !important;
-  vertical-align: baseline !important;
-  line-height: inherit !important;
-  background: var(--dsw-alias-bg-layer-2);
-  color: var(--dsw-alias-label-primary);
-  border: var(--mdvr-border-code) solid var(--dsw-alias-border-l2);
-  border-bottom: 2px solid var(--mdvr-accent-faint);
-  border-radius: var(--mdvr-radius-chip);
-  box-shadow: var(--mdvr-shadow-kbd);
-}
+/* ⚠️ v2.2.1：`:where(kbd)` 已删除 —— 产品不给 markdown 产出 <kbd>，零命中。 */
 
 /* ------------------------------------------------------------
  * 8. 表格：现代卡片式（Linear / Notion 极简风；v1.10.0 起仅 markdown）
@@ -574,6 +596,7 @@ body {
 [class*="_markdown_"] :where(table) {
   display: table !important;
   width: 100% !important;
+  max-width: 100% !important;   /* 产品 ._tableScroll_ table{max-width:max-content} 会把满宽截断（v2.2.1 补） */
   border-collapse: separate !important;
   border-spacing: 0 !important;
   margin: 1.1em 0 !important;
@@ -581,13 +604,15 @@ body {
   border: var(--mdvr-border-code) solid var(--dsw-alias-border-l1) !important;
   background: var(--dsw-alias-bg-layer-1) !important;
   overflow: hidden !important;
-  font-size: var(--mdvr-table-size) !important;
 }
+/* 表格字号（v2.2.1 修正）：产品 `._tableScroll_ th/td{font:var(--dsw-font-markdown-table*)}`
+ * 在**单元格自身**用 font 简写直接声明，挂在 <table> 上的 font-size 继承恒输 —— 故落到 th/td。 */
 [class*="_markdown_"] :where(th, td) {
   padding: var(--mdvr-pad-cell) !important;
   vertical-align: middle !important;
   text-align: left !important;
   border-bottom: 1px solid var(--dsw-alias-border-l1) !important;
+  font-size: var(--mdvr-table-size) !important;
 }
 [class*="_markdown_"] :where(th) {
   background: var(--mdvr-table-head-bg) !important;
@@ -743,10 +768,12 @@ body {
 }
 [class*="_markdown_"] :where(blockquote p:first-child) { margin-top: 0 !important; }
 [class*="_markdown_"] :where(blockquote p:last-child) { margin-bottom: 0 !important; }
-[class*="_markdown_"] :where(blockquote blockquote) {
-  margin: 0.5em 0;
-  border-left-color: var(--mdvr-h3);
-  background: var(--mdvr-accent-soft);
+/* 嵌套引用：产品 `blockquote{margin:16px 0 0;border-left:2px solid …}`(0,1,1) 用简写直接声明，
+ * 而 background 又输给本主题外层 `blockquote{background:…!important}` ⇒ 三条全部提权到 (0,2,0)。 */
+[class*="_markdown_"][class*="_markdown_"] :where(blockquote blockquote) {
+  margin: 0.5em 0 !important;
+  border-left-color: var(--mdvr-h3) !important;
+  background: var(--mdvr-accent-soft) !important;
 }
 
 /* ------------------------------------------------------------
