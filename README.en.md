@@ -10,7 +10,7 @@
 [![中文](https://img.shields.io/badge/中文-README-blue.svg)](README.md)
 [![LINUX DO](https://shorturl.at/ggSqS)](https://linux.do)
 
-A Cordis plugin for [DeepSeek Harness](https://github.com/deepseek-ai). It reskins the Markdown rendering in conversations with pure CSS — headings, code blocks, tables, quotes, links, highlights — without touching the product's baseline theme. Every theme ships a light and a dark variant that follow the system appearance.
+A Cordis plugin for [DeepSeekRuntime](https://github.com/deepseek-ai). It reskins the Markdown in conversations with pure CSS, without touching the product’s baseline theme — **themes only own the colors and the Markdown element styling** (headings, code blocks, tables, quotes, links, highlights, sub/superscript, math) and deliberately **leave fonts and chat-flow spacing alone**: fonts follow DSH and whatever you pick in Settings → Appearance, while message spacing keeps the product’s native rhythm. Every built-in theme ships a light and a dark variant that follow the system appearance.
 
 ## Versions & compatibility
 

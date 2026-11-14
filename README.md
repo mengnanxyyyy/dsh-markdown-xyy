@@ -10,7 +10,7 @@
 [![English](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
 [![LINUX DO](https://shorturl.at/ggSqS)](https://linux.do)
 
-运行在 [DeepSeek Harness](https://github.com/deepseek-ai) 上的 Cordis 插件：不动产品基线主题，用纯 CSS 给对话里的 Markdown 排版与配色换肤——标题、代码块、表格、引用、链接、高亮，浅色深色各一套，跟随系统自动切换。
+运行在 [DeepSeekRuntime](https://github.com/deepseek-ai) 上的 Cordis 插件：不动产品基线主题，用纯 CSS 给对话里的 Markdown 换一套「阅读辅助」皮肤 —— **主题只负责配色与 Markdown 元素的排版层次**（标题、代码块、表格、引用、链接、高亮、上下标、公式），**字体与对话流间距不抢**：字体跟随 DSH 与你在「设置→外观」里的选择，消息间距沿用产品原生节奏。4 套内置主题浅色/深色各一套，跟随系统自动切换。
 
 ## 版本与兼容性
 
